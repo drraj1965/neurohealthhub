@@ -70,9 +70,17 @@ const FirebaseTest: React.FC = () => {
 
   // Helper function to fetch all collections and subcollections
   const fetchCollections = async () => {
-    if (!user && !import.meta.env.DEV) {
+    // Get current authentication state to confirm user is logged in
+    const currentUser = getAuth().currentUser;
+    
+    if (!currentUser && !import.meta.env.DEV) {
       setError("You must be logged in to access Firebase data. Please log in first.");
+      console.log("No authenticated user found. Auth state:", getAuth().currentUser);
       return;
+    }
+    
+    if (currentUser) {
+      console.log("Authenticated user found:", currentUser.uid, currentUser.email);
     }
     
     setLoading(true);
@@ -156,9 +164,17 @@ const FirebaseTest: React.FC = () => {
 
   // Fetch documents for a specific collection
   const fetchDocuments = async (collectionPath: string) => {
-    if (!user && !import.meta.env.DEV) {
+    // Get current authentication state to confirm user is logged in
+    const currentUser = getAuth().currentUser;
+    
+    if (!currentUser && !import.meta.env.DEV) {
       setError("You must be logged in to access Firebase data. Please log in first.");
+      console.log("No authenticated user found. Auth state:", getAuth().currentUser);
       return;
+    }
+    
+    if (currentUser) {
+      console.log("Authenticated user for document fetch:", currentUser.uid, currentUser.email);
     }
     
     setLoading(true);

@@ -429,8 +429,32 @@ export async function getAllDoctors() {
       return mockDoctors;
     }
     
-    const doctorsRef = collection(db, "doctors");
-    const doctorDocs = await getDocs(doctorsRef);
+    // Verify authentication first
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      console.warn("Attempting to get doctors without authenticated user");
+      throw new Error("Authentication required: User must be logged in to access doctors");
+    }
+    
+    console.log("Authenticated user fetching doctors:", currentUser.uid, currentUser.email);
+    
+    // Try both paths
+    let doctorDocs;
+    try {
+      // Standard path first
+      const doctorsRef = collection(db, "doctors");
+      console.log("Attempting to get doctors from standard path");
+      doctorDocs = await getDocs(doctorsRef);
+      console.log(`Retrieved ${doctorDocs.size} doctors from standard path`);
+    } catch (error: any) {
+      console.log("Error accessing standard doctors path:", error.message);
+      
+      // Try named database path
+      const namedDoctorsRef = collection(db, "neurohealthhub/doctors");
+      console.log("Attempting to get doctors from neurohealthhub/doctors path");
+      doctorDocs = await getDocs(namedDoctorsRef);
+      console.log(`Retrieved ${doctorDocs.size} doctors from neurohealthhub/doctors path`);
+    }
     
     return doctorDocs.docs.map(doc => ({
       id: doc.id,
