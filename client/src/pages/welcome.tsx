@@ -1,6 +1,7 @@
-import React from 'react';
-import { Link } from 'wouter';
+import React, { useEffect } from 'react';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/auth-context';
 
 const Welcome: React.FC = () => {
   return (

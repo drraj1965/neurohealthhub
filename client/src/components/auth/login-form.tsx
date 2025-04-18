@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,15 +17,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { loginUser } from "@/lib/firebase";
 import { loginSchema, type LoginData } from "@shared/schema";
+import { useAuth } from "@/context/auth-context";
 
-// Simplified login form without auth context dependency
 const LoginForm: React.FC = () => {
+  const { login, user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      console.log("User already logged in, redirecting to dashboard");
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
 
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
@@ -39,17 +47,18 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (data: LoginData) => {
     setIsLoading(true);
     try {
-      // Simulate successful login for demo purposes
       console.log("Login attempt with:", data.email);
       
-      // Simulating a successful login
+      // Use auth context login function
+      await login(data.email, data.password);
+      
       toast({
         title: "Login successful",
         description: "Welcome back to NeuroHealthHub!",
       });
       
-      // Redirect to home page
-      setLocation("/");
+      // Redirect to dashboard
+      setLocation("/dashboard");
     } catch (error) {
       console.error(error);
       toast({

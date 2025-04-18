@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,14 +18,23 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { registrationSchema, type RegistrationData } from "@shared/schema";
+import { useAuth } from "@/context/auth-context";
 
-// Simplified registration form without auth context dependency
 const RegisterForm: React.FC = () => {
+  const { register, user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      console.log("User already logged in, redirecting to dashboard");
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
 
   const form = useForm<RegistrationData>({
     resolver: zodResolver(registrationSchema),
@@ -43,17 +52,18 @@ const RegisterForm: React.FC = () => {
   const onSubmit = async (data: RegistrationData) => {
     setIsLoading(true);
     try {
-      // Simulate successful registration for demo purposes
       console.log("Registration attempt with:", data.email);
       
-      // Show success toast
+      // Use auth context register function
+      await register(data);
+      
       toast({
         title: "Registration successful",
         description: "Welcome to NeuroHealthHub!",
       });
       
-      // Redirect to home page
-      setLocation("/");
+      // Redirect to dashboard
+      setLocation("/dashboard");
     } catch (error) {
       console.error(error);
       toast({

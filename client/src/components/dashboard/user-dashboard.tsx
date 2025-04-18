@@ -9,21 +9,59 @@ import {
   BookOpen, 
   Video, 
   Play, 
-  ArrowRight 
+  ArrowRight,
+  LogOut,
+  User,
+  Fingerprint
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import CardWithIcon from "@/components/ui/card-with-icon";
 import { useAuth } from "@/context/auth-context";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const UserDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h2 className="text-2xl font-bold text-neutral-800 mb-6">
-        Welcome, {user?.firstName}
-      </h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={`https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=6366f1&color=fff`} />
+            <AvatarFallback>{user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h2 className="text-2xl font-bold text-neutral-800">
+              Welcome home, {user?.firstName} {user?.lastName}
+            </h2>
+            <div className="flex items-center gap-2 mt-1">
+              <Fingerprint className="h-4 w-4 text-neutral-500" />
+              <span className="text-sm text-neutral-500">UID: {user?.uid}</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <User className="h-4 w-4 text-neutral-500" />
+              <span className="text-sm text-neutral-500">@{user?.username}</span>
+              {user?.isAdmin && (
+                <Badge variant="secondary" className="ml-2">Admin</Badge>
+              )}
+            </div>
+          </div>
+        </div>
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Latest Updates Card */}
