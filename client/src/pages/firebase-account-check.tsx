@@ -34,6 +34,67 @@ const FirebaseAccountCheckPage: React.FC = () => {
   const [password, setPassword] = useState("Doctor@123");
   const [firstName, setFirstName] = useState("Doctor");
   const [lastName, setLastName] = useState("Nerves");
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  // Test Firebase connection
+  const testFirebaseConnection = async () => {
+    try {
+      // First check basic internet connectivity
+      if (!navigator.onLine) {
+        setIsOnline(false);
+        return false;
+      }
+      
+      // Then test actual Firebase Firestore connectivity
+      const db = getFirestore();
+      const testDocRef = doc(db, "connection_test", "test_doc");
+      
+      // Try to read a document to test connection
+      await getDoc(testDocRef);
+      
+      console.log("Firebase connection test succeeded - connection is active");
+      setIsOnline(true);
+      setError(null);
+      return true;
+    } catch (error: any) {
+      console.error("Firebase connection test failed:", error);
+      setIsOnline(false);
+      setError(`Firebase connection test failed: ${error.message}`);
+      return false;
+    }
+  };
+
+  // Monitor network status
+  useEffect(() => {
+    const handleOnline = async () => {
+      // When we get an online event, verify Firebase connection
+      const connected = await testFirebaseConnection();
+      if (connected) {
+        setError(null);
+      }
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      setError("Your device appears to be offline. Please check your network connection.");
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Initial check
+    if (!navigator.onLine) {
+      setError("Your device appears to be offline. Please check your network connection.");
+    } else {
+      // Test Firebase connection on load
+      testFirebaseConnection();
+    }
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
   
   const checkAccount = async () => {
     setIsLoading(true);
@@ -170,7 +231,52 @@ const FirebaseAccountCheckPage: React.FC = () => {
       <div className="container mx-auto py-10">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-primary mb-2">Firebase Account Check</h1>
-          <p className="text-muted-foreground mb-8">Check and create Firebase accounts</p>
+          <p className="text-muted-foreground mb-4">Check and create Firebase accounts</p>
+          
+          <div className={`mb-6 flex items-center ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`w-3 h-3 rounded-full mr-2 ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className="text-sm font-medium">
+              {isOnline ? 'Online - Connected to Firebase' : 'Offline - Firebase operations will fail'}
+            </span>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="ml-auto"
+              onClick={async () => {
+                const wasOnline = isOnline;
+                
+                // Test actual Firebase connection
+                try {
+                  setIsLoading(true);
+                  const connected = await testFirebaseConnection();
+                  
+                  if (connected && !wasOnline) {
+                    toast({
+                      title: "Connection restored",
+                      description: "Your Firebase connection is now active. Database operations should work now.",
+                    });
+                  } else if (connected) {
+                    toast({
+                      title: "Connection active",
+                      description: "Your Firebase connection is working properly.",
+                    });
+                  } else {
+                    // Error already set by testFirebaseConnection
+                  }
+                } catch (error: any) {
+                  console.error("Connection test error:", error);
+                  setError(`Connection test failed: ${error.message}`);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+            >
+              {isLoading ? 
+                <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Testing...</>
+                : 'Test Firebase Connection'}
+              
+            </Button>
+          </div>
           
           <Card className="mb-8">
             <CardHeader>
@@ -213,7 +319,7 @@ const FirebaseAccountCheckPage: React.FC = () => {
               <Button 
                 className="w-full mt-4" 
                 onClick={checkAccount}
-                disabled={isLoading}
+                disabled={isLoading || !navigator.onLine}
               >
                 {isLoading ? (
                   <>
@@ -298,7 +404,7 @@ const FirebaseAccountCheckPage: React.FC = () => {
               <Button 
                 className="w-full mt-4" 
                 onClick={createSuperAdminAccount}
-                disabled={isLoading}
+                disabled={isLoading || !isOnline}
               >
                 {isLoading ? (
                   <>
@@ -326,15 +432,26 @@ const FirebaseAccountCheckPage: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Alert className="mb-4 bg-amber-50 border-amber-200">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <AlertTitle className="text-amber-700">Important!</AlertTitle>
-                <AlertDescription className="text-amber-600">
-                  Use this option if you already have an account in Firebase Authentication but 
-                  your Firestore document is missing. This will create a doctor record
-                  with admin privileges in Firestore using the current authentication.
-                </AlertDescription>
-              </Alert>
+              {isOnline ? (
+                <Alert className="mb-4 bg-amber-50 border-amber-200">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertTitle className="text-amber-700">Important!</AlertTitle>
+                  <AlertDescription className="text-amber-600">
+                    Use this option if you already have an account in Firebase Authentication but 
+                    your Firestore document is missing. This will create a doctor record
+                    with admin privileges in Firestore using the current authentication.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Network Error</AlertTitle>
+                  <AlertDescription>
+                    You appear to be offline. Firebase Firestore requires an internet connection. 
+                    Please check your network connection and try again.
+                  </AlertDescription>
+                </Alert>
+              )}
               
               <Button 
                 className="w-full mt-4" 
@@ -382,7 +499,7 @@ const FirebaseAccountCheckPage: React.FC = () => {
                     setIsLoading(false);
                   }
                 }}
-                disabled={isLoading}
+                disabled={isLoading || !isOnline}
               >
                 {isLoading ? (
                   <>
