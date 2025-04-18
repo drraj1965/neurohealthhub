@@ -29,6 +29,11 @@ const USE_MOCK_DATA = true;
 
 if (import.meta.env.DEV && USE_MOCK_DATA) {
   console.log("🔄 Using local mock data for development");
+  
+  // Add console message to help developers understand what's happening
+  console.warn("⚠️ DEVELOPMENT MODE: Using local mock data instead of Firebase.");
+  console.warn("To use actual Firebase data, you must update security rules in your Firebase console.");
+  console.warn("See README_FIREBASE_SETUP.md for detailed instructions.");
 }
 
 // Add sample doctor data in development mode - this will run only in development
@@ -184,6 +189,23 @@ export async function logoutUser() {
 // User data functions
 export async function getUserData(userId: string) {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock user data");
+      
+      // Check if it's a mock user
+      const mockUser = mockUsers.find(user => user.id === userId);
+      if (mockUser) return mockUser;
+      
+      // Check if it's a mock doctor
+      const mockDoctor = mockDoctors.find(doctor => doctor.id === userId);
+      if (mockDoctor) return mockDoctor;
+      
+      // For demo purposes, return the first mock user if userId doesn't match
+      if (userId) return mockUsers[0];
+      
+      return null;
+    }
+    
     const userDoc = await getDoc(doc(db, "users", userId));
     const doctorDoc = await getDoc(doc(db, "doctors", userId));
     
@@ -196,6 +218,22 @@ export async function getUserData(userId: string) {
     return null;
   } catch (error) {
     console.error("Get user data error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock user data after error");
+      
+      // Check mock data for the user
+      const mockUser = mockUsers.find(user => user.id === userId);
+      if (mockUser) return mockUser;
+      
+      // Check if it's a mock doctor
+      const mockDoctor = mockDoctors.find(doctor => doctor.id === userId);
+      if (mockDoctor) return mockDoctor;
+      
+      // For demo purposes, return the first mock user
+      if (userId) return mockUsers[0];
+    }
+    
     throw error;
   }
 }
@@ -243,8 +281,75 @@ const mockDoctors = [
   }
 ];
 
-const mockQuestions: any[] = [];
-const mockUsers: any[] = [];
+// Mock users data
+const mockUsers = [
+  {
+    id: "mock-user-1",
+    email: "johndoe@example.com",
+    firstName: "John",
+    lastName: "Doe",
+    mobile: "+971501111111",
+    isAdmin: false,
+    username: "johndoe",
+    createdAt: new Date()
+  },
+  {
+    id: "mock-user-2",
+    email: "janesmith@example.com",
+    firstName: "Jane",
+    lastName: "Smith",
+    mobile: "+971502222222",
+    isAdmin: false,
+    username: "janesmith",
+    createdAt: new Date()
+  }
+];
+
+// Mock questions data
+const mockQuestions = [
+  {
+    id: "mock-question-1",
+    title: "Headache treatments",
+    content: "What are the most effective treatments for chronic migraines?",
+    userId: "mock-user-1",
+    doctorId: "dev-doctornerves-123",
+    questionType: "general",
+    createdAt: new Date(Date.now() - 3600000), // 1 hour ago
+    updatedAt: new Date(Date.now() - 3600000),
+    isPublic: true,
+    answers: []
+  },
+  {
+    id: "mock-question-2",
+    title: "Brain fog symptoms",
+    content: "I've been experiencing brain fog for several weeks. Is this a symptom of a neurological condition?",
+    userId: "mock-user-2",
+    doctorId: "dev-drponnu-456",
+    questionType: "diagnosis",
+    createdAt: new Date(Date.now() - 7200000), // 2 hours ago
+    updatedAt: new Date(Date.now() - 7200000),
+    isPublic: false,
+    answers: [
+      {
+        content: "Brain fog can have many causes, ranging from stress to more serious conditions. I'd need more information to provide proper guidance.",
+        doctorId: "dev-drponnu-456",
+        createdAt: new Date(Date.now() - 3600000) // 1 hour ago
+      }
+    ]
+  },
+  {
+    id: "mock-question-3",
+    title: "Neurological effects of COVID-19",
+    content: "What are the latest findings on the long-term neurological effects of COVID-19?",
+    userId: "mock-user-1",
+    doctorId: "dev-drzain-789",
+    questionType: "research",
+    createdAt: new Date(Date.now() - 86400000), // 1 day ago
+    updatedAt: new Date(Date.now() - 86400000),
+    isPublic: true,
+    answers: []
+  }
+];
 
 // Doctor functions
 export async function getAllDoctors() {
@@ -283,6 +388,30 @@ export async function submitQuestion(questionData: {
   attachments?: string[];
 }) {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock data for submitting question");
+      
+      // Generate a mock question ID
+      const mockQuestionId = `mock-question-${Date.now()}`;
+      
+      // Create a new mock question
+      const newQuestion = {
+        id: mockQuestionId,
+        ...questionData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isPublic: false,
+        answers: []
+      };
+      
+      // Add it to our mock questions array
+      mockQuestions.push(newQuestion);
+      
+      console.log("🔄 Added mock question:", newQuestion);
+      
+      return mockQuestionId;
+    }
+    
     // Add question to user's subcollection
     const userQuestionRef = await addDoc(collection(db, "users", questionData.userId, "my_questions"), {
       ...questionData,
@@ -303,6 +432,29 @@ export async function submitQuestion(questionData: {
     return userQuestionRef.id;
   } catch (error) {
     console.error("Submit question error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock for submitting question after error");
+      
+      // Generate a mock question ID
+      const mockQuestionId = `mock-question-${Date.now()}`;
+      
+      // Create a new mock question
+      const newQuestion = {
+        id: mockQuestionId,
+        ...questionData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isPublic: false,
+        answers: []
+      };
+      
+      // Add it to our mock questions array
+      mockQuestions.push(newQuestion);
+      
+      return mockQuestionId;
+    }
+    
     throw error;
   }
 }
@@ -310,6 +462,11 @@ export async function submitQuestion(questionData: {
 // Get questions for a user
 export async function getUserQuestions(userId: string) {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock user questions data");
+      return mockQuestions.filter(q => q.userId === userId);
+    }
+    
     const questionsRef = collection(db, "users", userId, "my_questions");
     const q = query(questionsRef, orderBy("createdAt", "desc"));
     const questionDocs = await getDocs(q);
@@ -320,6 +477,12 @@ export async function getUserQuestions(userId: string) {
     }));
   } catch (error) {
     console.error("Get user questions error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock user questions data after error");
+      return mockQuestions.filter(q => q.userId === userId);
+    }
+    
     throw error;
   }
 }
@@ -327,6 +490,17 @@ export async function getUserQuestions(userId: string) {
 // Get today's questions for a user
 export async function getTodaysUserQuestions(userId: string) {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock today's questions data");
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      return mockQuestions.filter(q => 
+        q.userId === userId && 
+        q.createdAt instanceof Date && 
+        q.createdAt >= startOfDay
+      );
+    }
+    
     const questionsRef = collection(db, "users", userId, "my_questions");
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -345,6 +519,18 @@ export async function getTodaysUserQuestions(userId: string) {
     }));
   } catch (error) {
     console.error("Get today's user questions error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock today's questions data after error");
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      return mockQuestions.filter(q => 
+        q.userId === userId && 
+        q.createdAt instanceof Date && 
+        q.createdAt >= startOfDay
+      );
+    }
+    
     throw error;
   }
 }
@@ -352,6 +538,11 @@ export async function getTodaysUserQuestions(userId: string) {
 // Get questions for a doctor
 export async function getDoctorQuestions(doctorId: string) {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock doctor questions data");
+      return mockQuestions.filter(q => q.doctorId === doctorId);
+    }
+    
     const questionsRef = collection(db, "doctors", doctorId, "user_questions");
     const q = query(questionsRef, orderBy("createdAt", "desc"));
     const questionDocs = await getDocs(q);
@@ -362,6 +553,12 @@ export async function getDoctorQuestions(doctorId: string) {
     }));
   } catch (error) {
     console.error("Get doctor questions error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock doctor questions data after error");
+      return mockQuestions.filter(q => q.doctorId === doctorId);
+    }
+    
     throw error;
   }
 }
@@ -375,6 +572,37 @@ export async function submitAnswer(answer: {
   attachments?: string[];
 }) {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock data for submitting answer");
+      
+      // Find the question in our mock data
+      const questionIndex = mockQuestions.findIndex(q => q.id === answer.questionId);
+      
+      if (questionIndex === -1) {
+        console.error("Question not found in mock data:", answer.questionId);
+        throw new Error("Question not found");
+      }
+      
+      // Add the answer to the question
+      const newAnswer = {
+        ...answer,
+        createdAt: new Date()
+      };
+      
+      // Update the question with the new answer
+      if (!mockQuestions[questionIndex].answers) {
+        mockQuestions[questionIndex].answers = [];
+      }
+      
+      mockQuestions[questionIndex].answers.push(newAnswer);
+      mockQuestions[questionIndex].updatedAt = new Date();
+      
+      console.log("🔄 Added mock answer:", newAnswer);
+      console.log("🔄 Updated question:", mockQuestions[questionIndex]);
+      
+      return true;
+    }
+    
     // Add the answer to the question document
     const questionRef = doc(db, "users", answer.userId || "", "my_questions", answer.questionId);
     const questionDoc = await getDoc(questionRef);
@@ -417,6 +645,52 @@ export async function submitAnswer(answer: {
     return true;
   } catch (error) {
     console.error("Submit answer error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock for submitting answer after error");
+      
+      // Try to find the question in our mock data
+      const questionIndex = mockQuestions.findIndex(q => q.id === answer.questionId);
+      
+      if (questionIndex === -1) {
+        console.error("Question not found in mock data:", answer.questionId);
+        // For development, let's just add to the first question if not found
+        if (mockQuestions.length > 0) {
+          if (!mockQuestions[0].answers) {
+            mockQuestions[0].answers = [];
+          }
+          
+          const newAnswer = {
+            ...answer,
+            createdAt: new Date()
+          };
+          
+          mockQuestions[0].answers.push(newAnswer);
+          mockQuestions[0].updatedAt = new Date();
+          console.log("🔄 Added mock answer to first question instead:", newAnswer);
+          return true;
+        }
+        
+        throw new Error("No questions found in mock data");
+      }
+      
+      // Add the answer to the question
+      const newAnswer = {
+        ...answer,
+        createdAt: new Date()
+      };
+      
+      // Update the question with the new answer
+      if (!mockQuestions[questionIndex].answers) {
+        mockQuestions[questionIndex].answers = [];
+      }
+      
+      mockQuestions[questionIndex].answers.push(newAnswer);
+      mockQuestions[questionIndex].updatedAt = new Date();
+      
+      return true;
+    }
+    
     throw error;
   }
 }
@@ -424,6 +698,20 @@ export async function submitAnswer(answer: {
 // File upload function
 export async function uploadFile(file: File, path: string) {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock file upload");
+      
+      // Create a mock URL for the file that looks realistic but is clearly a mock
+      const mockFileExtension = file.name.split('.').pop();
+      const mockFileName = `mock-upload-${Date.now()}.${mockFileExtension}`;
+      const mockDownloadURL = `https://firebasestorage.googleapis.com/mock/neurohealthhub/uploads/${mockFileName}`;
+      
+      console.log(`🔄 Mock uploaded file: ${file.name} (${file.size} bytes) to ${path}`);
+      console.log(`🔄 Mock download URL: ${mockDownloadURL}`);
+      
+      return mockDownloadURL;
+    }
+    
     const storageRef = ref(storage, path);
     const uploadResult = await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(uploadResult.ref);
@@ -431,6 +719,18 @@ export async function uploadFile(file: File, path: string) {
     return downloadURL;
   } catch (error) {
     console.error("File upload error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock file upload after error");
+      
+      // Create a mock URL for the file that looks realistic but is clearly a mock
+      const mockFileExtension = file.name.split('.').pop();
+      const mockFileName = `mock-upload-${Date.now()}.${mockFileExtension}`;
+      const mockDownloadURL = `https://firebasestorage.googleapis.com/mock/neurohealthhub/uploads/${mockFileName}`;
+      
+      return mockDownloadURL;
+    }
+    
     throw error;
   }
 }
