@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser, fetchSignInMethodsForEmail } from "firebase/auth";
+import { doc, setDoc, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { User, Shield, UserPlus, Loader2, UserCheck, AlertTriangle, RefreshCw } from "lucide-react";
+import { User, Shield, UserPlus, Loader2, UserCheck, AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/context/auth-context";
 import { useLocation } from "wouter";
 
@@ -37,6 +38,7 @@ const SuperAdminPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [userType, setUserType] = useState<string>("user");
+  const [forceCreate, setForceCreate] = useState<boolean>(false);
   const { user, isAdmin } = useAuth();
   const [_, setLocation] = useLocation();
 
@@ -88,26 +90,118 @@ const SuperAdminPage: React.FC = () => {
     return true;
   };
   
-  // Check if user already exists with given email
-  const checkUserExists = async (email: string): Promise<boolean> => {
+  // Check if user already exists with given email and optionally delete documents
+  const checkUserExists = async (email: string, deleteIfExists: boolean = false): Promise<boolean> => {
     try {
+      let documentExists = false;
+      let documentToDelete = null;
+      let collectionName = "";
+
       // Check in users collection
       const usersRef = collection(db, "users");
       const userQuery = query(usersRef, where("email", "==", email));
       const userSnapshot = await getDocs(userQuery);
       
       if (!userSnapshot.empty) {
-        return true;
+        documentExists = true;
+        documentToDelete = userSnapshot.docs[0];
+        collectionName = "users";
       }
       
       // Check in doctors collection
-      const doctorsRef = collection(db, "doctors");
-      const doctorQuery = query(doctorsRef, where("email", "==", email));
-      const doctorSnapshot = await getDocs(doctorQuery);
+      if (!documentExists) {
+        const doctorsRef = collection(db, "doctors");
+        const doctorQuery = query(doctorsRef, where("email", "==", email));
+        const doctorSnapshot = await getDocs(doctorQuery);
+        
+        if (!doctorSnapshot.empty) {
+          documentExists = true;
+          documentToDelete = doctorSnapshot.docs[0];
+          collectionName = "doctors";
+        }
+      }
+
+      // Also check in neurohealthhub collection
+      if (!documentExists) {
+        const neuroRef = collection(db, "neurohealthhub");
+        const neuroQuery = query(neuroRef, where("email", "==", email));
+        const neuroSnapshot = await getDocs(neuroQuery);
+        
+        if (!neuroSnapshot.empty) {
+          documentExists = true;
+          documentToDelete = neuroSnapshot.docs[0];
+          collectionName = "neurohealthhub";
+        }
+      }
       
-      return !doctorSnapshot.empty;
+      // Delete the document if requested
+      if (deleteIfExists && documentExists && documentToDelete) {
+        await deleteDoc(doc(db, collectionName, documentToDelete.id));
+        console.log(`Deleted existing document for ${email} from ${collectionName} collection`);
+        return false; // Return false since we've deleted it
+      }
+      
+      return documentExists;
     } catch (error) {
       console.error("Error checking existing user:", error);
+      return false;
+    }
+  };
+  
+  // Helper function to check if a user exists in Firebase Auth by email
+  const checkFirebaseUserExists = async (email: string): Promise<boolean> => {
+    try {
+      const auth = getAuth();
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      return methods.length > 0;
+    } catch (error) {
+      console.error("Error checking Firebase user:", error);
+      return false;
+    }
+  };
+  
+  // Helper function to delete user from Firebase Auth (if they exist)
+  const deleteFirebaseUser = async (email: string): Promise<boolean> => {
+    try {
+      const auth = getAuth();
+      
+      // Current user can't delete themselves
+      if (user?.email === email) {
+        console.warn("Can't delete the currently logged in user");
+        return false;
+      }
+      
+      // Try to sign in as this user to get their credential
+      try {
+        // Save current signed in user
+        const currentUser = auth.currentUser;
+        
+        // Sign in with the email we want to delete
+        await signInWithEmailAndPassword(auth, email, formData.password);
+        
+        // If successful, we can delete this user
+        if (auth.currentUser) {
+          await deleteUser(auth.currentUser);
+          console.log(`Deleted Firebase user with email: ${email}`);
+          
+          // Sign back in as the original user
+          if (currentUser) {
+            // We need to use your actual authentication mechanism here
+            // This is just a placeholder since we can't know how your user authenticates
+            // You may need to adjust this based on your app's actual auth flow
+            await auth.updateCurrentUser(currentUser);
+          }
+          
+          return true;
+        }
+      } catch (error) {
+        console.warn(`Could not sign in as ${email} to delete: ${error}`);
+        // This is expected if the user doesn't exist or password is incorrect
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error deleting Firebase user:", error);
       return false;
     }
   };
@@ -121,16 +215,52 @@ const SuperAdminPage: React.FC = () => {
     
     try {
       // First check if user already exists in Firestore
-      const userExists = await checkUserExists(formData.email);
-      if (userExists) {
-        setError("A user with this email already exists in the database");
+      const userExistsInFirestore = await checkUserExists(formData.email, forceCreate);
+      const userExistsInAuth = await checkFirebaseUserExists(formData.email);
+      
+      if (userExistsInFirestore && !forceCreate) {
+        setError("A user with this email already exists in the database. Check 'Force create' to replace.");
         setLoading(false);
         return;
       }
       
+      // If force create is enabled and user exists in Firebase Auth, try to delete them
+      if (forceCreate && userExistsInAuth) {
+        try {
+          // Note: this might fail if we can't authenticate as the user
+          await deleteFirebaseUser(formData.email);
+        } catch (error) {
+          console.warn("Could not delete existing Firebase user:", error);
+          // Continue anyway, we'll try to create a new one
+        }
+      }
+      
       // Create the user in Firebase Authentication
       const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      let userCredential;
+      
+      try {
+        userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      } catch (authError: any) {
+        // If there's an error about the user already existing, and we want to force create,
+        // we can try to sign in with the provided credentials and proceed
+        if (authError.code === 'auth/email-already-in-use' && forceCreate) {
+          try {
+            console.log("User already exists in Firebase Auth, attempting to sign in");
+            userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+          } catch (signInError) {
+            console.error("Failed to sign in as existing user:", signInError);
+            throw new Error("Could not sign in as existing user. The password may be incorrect.");
+          }
+        } else {
+          throw authError;
+        }
+      }
+      
+      if (!userCredential) {
+        throw new Error("Failed to get user credentials");
+      }
+      
       const uid = userCredential.user.uid;
       
       // Force token refresh
@@ -151,7 +281,8 @@ const SuperAdminPage: React.FC = () => {
       });
       
       // Show success message
-      setSuccess(`${userType === "doctor" ? "Doctor" : "User"} account created successfully!`);
+      const actionType = forceCreate ? "recreated" : "created";
+      setSuccess(`${userType === "doctor" ? "Doctor" : "User"} account ${actionType} successfully!`);
       
       // Reset form
       setFormData({
@@ -162,9 +293,13 @@ const SuperAdminPage: React.FC = () => {
         mobile: "",
         isAdmin: false,
       });
+      setForceCreate(false);
       
       // Sign out the created user (since we're creating as super admin)
-      auth.signOut();
+      // But first ensure we're not signed in as ourselves
+      if (auth.currentUser?.email !== user?.email) {
+        auth.signOut();
+      }
       
     } catch (error: any) {
       console.error("Error creating user:", error);
@@ -298,6 +433,21 @@ const SuperAdminPage: React.FC = () => {
                       placeholder="Mobile number"
                     />
                   </div>
+                  
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox 
+                      id="forceCreate" 
+                      checked={forceCreate}
+                      onCheckedChange={(checked) => setForceCreate(checked as boolean)}
+                    />
+                    <Label
+                      htmlFor="forceCreate"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center"
+                    >
+                      <Trash2 className="mr-1 h-3.5 w-3.5 text-destructive" />
+                      Force create (deletes existing records)
+                    </Label>
+                  </div>
                 </CardContent>
                 <CardFooter>
                   <Button 
@@ -403,6 +553,21 @@ const SuperAdminPage: React.FC = () => {
                       onChange={handleInputChange}
                       placeholder="Mobile number"
                     />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox 
+                      id="forceCreateDoc" 
+                      checked={forceCreate}
+                      onCheckedChange={(checked) => setForceCreate(checked as boolean)}
+                    />
+                    <Label
+                      htmlFor="forceCreateDoc"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center"
+                    >
+                      <Trash2 className="mr-1 h-3.5 w-3.5 text-destructive" />
+                      Force create (deletes existing records)
+                    </Label>
                   </div>
                 </CardContent>
                 <CardFooter>
