@@ -44,6 +44,8 @@ enableIndexedDbPersistence(db).catch((err) => {
 
 // Set to false to use actual Firebase database
 const USE_MOCK_DATA = false;
+// Set to false to prevent auto-initialization of sample data
+const AUTO_INITIALIZE_SAMPLE_DATA = false;
 
 if (import.meta.env.DEV && USE_MOCK_DATA) {
   console.log("🔄 Using local mock data for development");
@@ -55,6 +57,7 @@ if (import.meta.env.DEV && USE_MOCK_DATA) {
 }
 
 // Add sample doctor data in development mode - this will run only in development
+// and only if AUTO_INITIALIZE_SAMPLE_DATA is true
 async function initializeSampleData() {
   if (import.meta.env.DEV) {
     try {
@@ -166,11 +169,16 @@ async function initializeSampleData() {
   }
 }
 
-// Call the function to initialize sample data
-initializeSampleData()
-  .catch(err => {
-    console.error("Failed to initialize sample data:", err);
-  });
+// Call the function to initialize sample data only if AUTO_INITIALIZE_SAMPLE_DATA is true
+if (AUTO_INITIALIZE_SAMPLE_DATA) {
+  console.log("Auto-initializing sample data is enabled");
+  initializeSampleData()
+    .catch(err => {
+      console.error("Failed to initialize sample data:", err);
+    });
+} else {
+  console.log("Auto-initializing sample data is disabled - using only real database data");
+}
 
 // Authentication functions
 export async function registerUser(email: string, password: string, firstName: string, lastName: string, mobile?: string) {
