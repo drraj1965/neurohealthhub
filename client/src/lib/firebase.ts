@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, connectAuthEmulator } from "firebase/auth";
 import { 
   getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, query, where, orderBy,
-  connectFirestoreEmulator
+  connectFirestoreEmulator, enableIndexedDbPersistence, Timestamp, serverTimestamp
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL, connectStorageEmulator } from "firebase/storage";
 
@@ -23,6 +23,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// Enable offline persistence - this allows the app to work offline
+// and sync when back online
+enableIndexedDbPersistence(db).catch((err) => {
+  console.error("Firebase persistence error:", err.code);
+  if (err.code === 'failed-precondition') {
+    // Multiple tabs open, persistence can only be enabled in one tab at a time
+    console.warn("Firestore persistence unavailable: Multiple tabs open");
+  } else if (err.code === 'unimplemented') {
+    // The current browser does not support persistence
+    console.warn("Firestore persistence unavailable: Browser unsupported");
+  }
+});
 
 // Set to false to use actual Firebase database
 const USE_MOCK_DATA = false;
