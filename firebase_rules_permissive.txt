@@ -1,0 +1,24 @@
+// WARNING: These rules are for DEVELOPMENT only
+// They allow full read/write access to your database
+// DO NOT use in production!
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      // Allow full access in development environment
+      allow read, write: if true;
+    }
+  }
+}
+
+// Storage rules
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      // Allow full access in development environment 
+      allow read, write: if true;
+    }
+  }
+}

@@ -1,0 +1,61 @@
+# Setting up Firebase Emulators for Development
+
+Using Firebase emulators lets you develop and test your app without making changes to your production Firebase project.
+
+## Installation steps:
+
+1. Install the Firebase CLI:
+```bash
+npm install -g firebase-tools
+```
+
+2. Log in to Firebase:
+```bash
+firebase login
+```
+
+3. Initialize Firebase in your project directory:
+```bash
+firebase init
+```
+   - Select "Firestore" and "Storage" options
+   - Choose your project
+   - Accept the default emulator ports or set custom ones
+
+4. Start the emulators:
+```bash
+firebase emulators:start
+```
+
+## Modifying your code to use emulators:
+
+Update your firebase.ts file to connect to the emulators in development mode:
+
+```typescript
+import { connectFirestoreEmulator } from "firebase/firestore";
+import { connectStorageEmulator } from "firebase/storage";
+import { connectAuthEmulator } from "firebase/auth";
+
+// Initialize Firebase app as normal
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Connect to emulators in development mode
+if (import.meta.env.DEV) {
+  // The port numbers should match what you set during firebase init
+  connectFirestoreEmulator(db, "localhost", 8080);
+  connectStorageEmulator(storage, "localhost", 9199);
+  connectAuthEmulator(auth, "http://localhost:9099");
+  
+  console.log("Using Firebase emulators in development mode");
+}
+```
+
+## Benefits:
+1. You can develop without affecting your production data
+2. No need to change security rules on your production project
+3. Faster development and testing
+4. You can export/import data as needed
+5. You can reset the database easily during development
