@@ -4,6 +4,21 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
 
 const Welcome: React.FC = () => {
+  const { user, isAdmin, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (user && !isLoading) {
+      console.log("User already logged in, redirecting to dashboard");
+      if (isAdmin) {
+        setLocation("/admin");
+      } else {
+        setLocation("/dashboard");
+      }
+    }
+  }, [user, isAdmin, isLoading, setLocation]);
+  
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-white shadow-sm">

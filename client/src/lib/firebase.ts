@@ -21,6 +21,75 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// Add sample doctor data in development mode - this will run only in development
+async function initializeSampleData() {
+  if (import.meta.env.DEV) {
+    try {
+      // Check if doctor data exists
+      const doctorsCollection = collection(db, "doctors");
+      const doctorsQuery = await getDocs(doctorsCollection);
+      
+      if (doctorsQuery.empty) {
+        console.log("DEV: No doctors found, adding sample doctor data");
+        
+        // Add some sample doctors
+        const doctors = [
+          {
+            firstName: "Dr.",
+            lastName: "Rajshekher",
+            email: "doctornerves@gmail.com",
+            mobile: "+971501802970",
+            specialization: "Neurology",
+            experience: "15 years",
+            bio: "Specialist in neurological disorders with focus on brain and spinal cord injuries.",
+            isAdmin: true,
+            username: "doctornerves"
+          },
+          {
+            firstName: "Dr.",
+            lastName: "Ponnu",
+            email: "drponnu@neurohealth.com",
+            mobile: "+971501234567",
+            specialization: "Neurosurgery",
+            experience: "12 years",
+            bio: "Experienced neurosurgeon specializing in complex brain surgeries.",
+            isAdmin: true,
+            username: "drponnu"
+          },
+          {
+            firstName: "Dr.",
+            lastName: "Zain",
+            email: "drzain@neurohealth.com",
+            mobile: "+971507654321",
+            specialization: "Psychiatry",
+            experience: "8 years",
+            bio: "Psychiatrist focusing on neurological disorders affecting mental health.",
+            isAdmin: true,
+            username: "drzain"
+          }
+        ];
+        
+        for (const doctor of doctors) {
+          const docRef = doc(db, "doctors", `dev-${doctor.username}-${Math.floor(Math.random() * 1000)}`);
+          await setDoc(docRef, {
+            ...doctor,
+            createdAt: new Date()
+          });
+        }
+        
+        console.log("DEV: Sample doctor data added successfully");
+      } else {
+        console.log("DEV: Sample doctors already exist, skipping initialization");
+      }
+    } catch (error) {
+      console.error("DEV: Error initializing sample data:", error);
+    }
+  }
+}
+
+// Call the function to initialize sample data
+initializeSampleData();
+
 // Authentication functions
 export async function registerUser(email: string, password: string, firstName: string, lastName: string, mobile?: string) {
   try {

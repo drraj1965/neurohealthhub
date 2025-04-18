@@ -1,17 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { 
-  onAuthStateChanged, 
-  signOut, 
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile
-} from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import React, { createContext, useContext, useState } from "react";
 import { FirebaseUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-
-// Import Firebase components from our lib file
-import { auth, db } from "@/lib/firebase";
 
 // Define AuthContext type
 interface AuthContextType {
@@ -23,177 +12,66 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-// Create context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create context with a default value
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAdmin: false,
+  isLoading: false,
+  login: async () => {},
+  register: async () => {},
+  logout: async () => {},
+});
 
+// Sample user data (for development only)
+const mockDoctorUser: FirebaseUser = {
+  uid: "doctor123",
+  email: "doctornerves@gmail.com",
+  firstName: "Dr.",
+  lastName: "Rajshekher",
+  mobile: "+971501802970",
+  isAdmin: true,
+  username: "doctornerves",
+};
+
+const mockRegularUser: FirebaseUser = {
+  uid: "user123",
+  email: "user@example.com",
+  firstName: "Rajshekher",
+  lastName: "Garikapati",
+  mobile: "+971501802970",
+  isAdmin: false,
+  username: "rajugent",
+};
+
+// AuthProvider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const isDev = import.meta.env.DEV;
-
-  useEffect(() => {
-    console.log("AuthProvider initialized");
-    
-    // Always use structured user login
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log("Auth state changed", firebaseUser ? "User logged in" : "No user");
-      
-      if (firebaseUser) {
-        try {
-          console.log("User logged in with ID:", firebaseUser.uid);
-          
-          // Get user data from Firestore
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          const doctorDoc = await getDoc(doc(db, 'doctors', firebaseUser.uid));
-          
-          if (userDoc.exists()) {
-            console.log("Regular user found in Firestore");
-            const userData = userDoc.data();
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              firstName: userData.firstName || "",
-              lastName: userData.lastName || "",
-              mobile: userData.mobile || "",
-              isAdmin: userData.isAdmin || false,
-              username: userData.username || "",
-            });
-            setIsAdmin(userData.isAdmin || false);
-          } else if (doctorDoc.exists()) {
-            console.log("Doctor found in Firestore");
-            const doctorData = doctorDoc.data();
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              firstName: doctorData.firstName || "",
-              lastName: doctorData.lastName || "",
-              mobile: doctorData.mobile || "",
-              isAdmin: true,
-              username: doctorData.username || "",
-            });
-            setIsAdmin(true);
-          } else {
-            console.log("No user profile found, using Firebase data");
-            // No data in database, use Firebase user data
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              firstName: firebaseUser.displayName?.split(' ')[0] || "User",
-              lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
-              isAdmin: false,
-              username: firebaseUser.email?.split('@')[0] || "user",
-            });
-            setIsAdmin(false);
-            
-            // Create user profile in Firestore
-            if (firebaseUser.email) {
-              await setDoc(doc(db, "users", firebaseUser.uid), {
-                email: firebaseUser.email,
-                firstName: firebaseUser.displayName?.split(' ')[0] || "User",
-                lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
-                isAdmin: false,
-                username: firebaseUser.email.split('@')[0] || "user",
-                createdAt: new Date()
-              });
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          toast({
-            title: "Error",
-            description: "Failed to load user profile",
-            variant: "destructive",
-          });
-        }
-      } else {
-        console.log("No user is logged in");
-        setUser(null);
-        setIsAdmin(false);
-      }
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [toast]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log("Attempting login with:", email);
-      
-      if (isDev && email.includes('doctor')) {
-        console.log("DEV MODE: Using doctor mock login");
-        // Mock login for doctor in dev mode
-        localStorage.setItem('mockUser', JSON.stringify({
-          uid: "doctor123",
-          email: email,
-          firstName: "Dr.",
-          lastName: "Rajshekher",
-          mobile: "+971501802970",
-          isAdmin: true,
-          username: "doctornerves",
-        }));
-        
-        setUser({
-          uid: "doctor123",
-          email: email,
-          firstName: "Dr.",
-          lastName: "Rajshekher",
-          mobile: "+971501802970",
-          isAdmin: true,
-          username: "doctornerves",
-        });
+      console.log("Login attempt with:", email);
+
+      // Set the appropriate user based on email
+      if (email.includes("doctor")) {
+        setUser(mockDoctorUser);
         setIsAdmin(true);
-        
-        toast({
-          title: "Login Successful (Dev Mode)",
-          description: "Welcome to development mode, Doctor!",
-        });
-      } else if (isDev) {
-        console.log("DEV MODE: Using regular user mock login");
-        // Mock login for regular user in dev mode
-        localStorage.setItem('mockUser', JSON.stringify({
-          uid: "user123",
-          email: email,
-          firstName: "Rajshekher",
-          lastName: "Garikapati",
-          mobile: "+971501802970",
-          isAdmin: false,
-          username: "rajugent",
-        }));
-        
-        setUser({
-          uid: "user123",
-          email: email,
-          firstName: "Rajshekher",
-          lastName: "Garikapati",
-          mobile: "+971501802970",
-          isAdmin: false,
-          username: "rajugent",
-        });
-        setIsAdmin(false);
-        
-        toast({
-          title: "Login Successful (Dev Mode)",
-          description: "Welcome back to development mode!",
-        });
       } else {
-        // Real Firebase login
-        console.log("Attempting Firebase login");
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log("Login successful for:", userCredential.user.email);
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome back to NeuroHealthHub!",
-        });
+        setUser(mockRegularUser);
+        setIsAdmin(false);
       }
+
+      toast({
+        title: "Login successful",
+        description: "Welcome to NeuroHealthHub!",
+      });
     } catch (error) {
       console.error("Login error:", error);
       toast({
-        title: "Login Failed",
+        title: "Login failed",
         description: "Invalid email or password",
         variant: "destructive",
       });
@@ -206,70 +84,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: any) => {
     setIsLoading(true);
     try {
-      if (isDev) {
-        console.log("DEV MODE: Creating mock user account");
-        // Mock registration in dev mode
-        localStorage.setItem('mockUser', JSON.stringify({
-          uid: "user456",
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          mobile: userData.mobile || "",
-          isAdmin: false,
-          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
-        }));
-        
-        setUser({
-          uid: "user456",
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          mobile: userData.mobile || "",
-          isAdmin: false,
-          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
-        });
-        setIsAdmin(false);
-        
-        toast({
-          title: "Registration Successful (Dev Mode)",
-          description: "Your account has been created",
-        });
-      } else {
-        // Real Firebase registration
-        console.log("Creating account with:", userData.email);
-        const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-        
-        // Get the current user
-        const currentUser = userCredential.user;
-        console.log("Created account with ID:", currentUser.uid);
-        
-        // Update display name
-        await updateProfile(currentUser, {
-          displayName: `${userData.firstName} ${userData.lastName}`
-        });
-        
-        // Store additional user data in Firestore
-        await setDoc(doc(db, "users", currentUser.uid), {
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          mobile: userData.mobile || "",
-          isAdmin: false,
-          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
-          createdAt: new Date()
-        });
-        
-        toast({
-          title: "Registration Successful",
-          description: "Your account has been created",
-        });
-      }
+      console.log("Registration attempt with:", userData.email);
+
+      // Create a new user with the provided data
+      const newUser: FirebaseUser = {
+        uid: `user-${Date.now().toString()}`,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        mobile: userData.mobile || "",
+        isAdmin: false,
+        username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
+      };
+
+      setUser(newUser);
+      setIsAdmin(false);
+
+      toast({
+        title: "Registration successful",
+        description: "Welcome to NeuroHealthHub!",
+      });
     } catch (error) {
       console.error("Registration error:", error);
       toast({
-        title: "Registration Failed",
+        title: "Registration failed",
         description: "Could not create your account",
-        variant: "destructive", 
+        variant: "destructive",
       });
       throw error;
     } finally {
@@ -279,53 +119,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      console.log("Logging out user");
-      
-      if (isDev) {
-        localStorage.removeItem('mockUser');
-      } else {
-        await signOut(auth);
-      }
-      
       setUser(null);
       setIsAdmin(false);
       
       toast({
-        title: "Logged Out",
+        title: "Logged out",
         description: "You have been successfully logged out",
       });
-      
-      window.location.href = "/login";
     } catch (error) {
       console.error("Logout error:", error);
       toast({
-        title: "Logout Failed",
+        title: "Logout failed",
         description: "Could not log out properly",
         variant: "destructive",
       });
     }
   };
 
+  const value = {
+    user,
+    isAdmin,
+    isLoading,
+    login,
+    register,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAdmin,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// Custom hook to use the auth context
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  return useContext(AuthContext);
 }
