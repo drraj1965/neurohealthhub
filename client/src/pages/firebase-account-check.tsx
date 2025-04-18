@@ -56,9 +56,9 @@ const FirebaseAccountCheckPage: React.FC = () => {
       }
       
       // Also show current authentication state
-      if (auth.currentUser) {
+      if (auth.currentUser && auth.currentUser.email) {
         setResults(prev => [...prev, `🔑 Currently authenticated as: ${auth.currentUser.email}`]);
-        setResults(prev => [...prev, `UID: ${auth.currentUser.uid}`]);
+        setResults(prev => [...prev, `UID: ${auth.currentUser.uid || 'No UID available'}`]);
       } else {
         setResults(prev => [...prev, `🔒 Not currently authenticated with Firebase`]);
       }
