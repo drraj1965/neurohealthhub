@@ -48,19 +48,69 @@ enableIndexedDbPersistence(db).catch((err) => {
 // Add network state monitoring
 let firestoreIsOnline = false;
 
+// Track network state
+let isOnline = navigator.onLine;
+
 // Function to handle online and offline state
 function monitorNetworkState() {
+  console.log('Network monitor initialized, current online status:', isOnline);
+  
+  // Testing Firebase connectivity directly - more reliable than navigator.onLine
+  const testConnectivity = async () => {
+    try {
+      // Try to make a test request to Firestore to check actual connectivity
+      const testRef = collection(db, 'connectivity_test');
+      await getDocs(query(testRef)).catch(() => {
+        // Suppress errors as this is just a test
+      });
+      
+      console.log('Firebase connection test succeeded - connection is active');
+      isOnline = true;
+      
+      // If we were previously in "offline mode", refresh the page to restore connectivity
+      if (!navigator.onLine) {
+        console.log('Detected connectivity but navigator.onLine is false - refreshing auth state');
+        // Force auth state refresh
+        if (auth.currentUser) {
+          try {
+            await auth.currentUser.getIdToken(true);
+            console.log('Auth token refreshed after connectivity restored');
+          } catch (e) {
+            console.error('Failed to refresh token after connectivity restored:', e);
+          }
+        }
+      }
+    } catch (error) {
+      if (error.code === 'unavailable' || error.code === 'failed-precondition') {
+        console.warn('Firebase connection test failed - network appears to be offline');
+        isOnline = false;
+      } else {
+        console.error('Firebase connection test error (not network related):', error);
+        isOnline = true; // Assume online for other types of errors
+      }
+    }
+  };
+  
+  // Test connectivity immediately
+  testConnectivity();
+  
   // Set online handlers
   window.addEventListener('online', () => {
     console.log('Network connection restored - reconnecting to Firebase');
-    // You could force a refresh here or enable specific UI elements
+    isOnline = true;
+    
+    // Test actual connectivity to Firebase
+    testConnectivity();
   });
 
   // Set offline handlers
   window.addEventListener('offline', () => {
     console.warn('Network connection lost - Firebase will use cached data');
-    // You could disable certain features or show an offline notification
+    isOnline = false;
   });
+  
+  // Periodically check connectivity (every 30 seconds)
+  setInterval(testConnectivity, 30000);
 }
 
 // Start network monitoring
