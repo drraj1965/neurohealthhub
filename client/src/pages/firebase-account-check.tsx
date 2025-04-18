@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { getAuth, signOut, fetchSignInMethodsForEmail, createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getFirestore } from "firebase/firestore";
+import { doc, setDoc, getDoc, getFirestore } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,9 +48,16 @@ const FirebaseAccountCheckPage: React.FC = () => {
       // Check if the email exists in Firebase Authentication
       const signInMethods = await fetchSignInMethodsForEmail(auth, emailToCheck);
       
-      if (signInMethods.length > 0) {
+      // Also check if the currently logged in user has this email
+      const currentUserHasSameEmail = auth.currentUser && auth.currentUser.email === emailToCheck;
+      
+      if (signInMethods.length > 0 || currentUserHasSameEmail) {
         setResults(prev => [...prev, `✅ Email ${emailToCheck} exists in Firebase Authentication`]);
-        setResults(prev => [...prev, `Sign-in methods: ${signInMethods.join(", ")}`]);
+        if (signInMethods.length > 0) {
+          setResults(prev => [...prev, `Sign-in methods: ${signInMethods.join(", ")}`]);
+        } else if (currentUserHasSameEmail) {
+          setResults(prev => [...prev, `Note: This account was detected through current user session, not through API check`]);
+        }
       } else {
         setResults(prev => [...prev, `❌ Email ${emailToCheck} does NOT exist in Firebase Authentication`]);
       }
@@ -59,6 +66,36 @@ const FirebaseAccountCheckPage: React.FC = () => {
       if (auth.currentUser && auth.currentUser.email) {
         setResults(prev => [...prev, `🔑 Currently authenticated as: ${auth.currentUser.email}`]);
         setResults(prev => [...prev, `UID: ${auth.currentUser.uid || 'No UID available'}`]);
+        
+        // Check if user exists in Firestore database
+        try {
+          const userDocRef = doc(db, "doctors", auth.currentUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            setResults(prev => [...prev, `✅ User exists in Firestore database (doctors collection)`]);
+            setResults(prev => [...prev, `Firestore data: ${JSON.stringify({
+              email: userDoc.data().email,
+              firstName: userDoc.data().firstName,
+              lastName: userDoc.data().lastName,
+              isAdmin: userDoc.data().isAdmin
+            })}`]);
+          } else {
+            setResults(prev => [...prev, `❌ User does NOT exist in Firestore database (doctors collection)`]);
+            
+            // Also check users collection as fallback
+            const regularUserDocRef = doc(db, "users", auth.currentUser.uid);
+            const regularUserDoc = await getDoc(regularUserDocRef);
+            
+            if (regularUserDoc.exists()) {
+              setResults(prev => [...prev, `✅ User exists in Firestore database (users collection)`]);
+            } else {
+              setResults(prev => [...prev, `⚠️ User exists in Authentication but not in Firestore database`]);
+            }
+          }
+        } catch (err: any) {
+          setResults(prev => [...prev, `Error checking Firestore: ${err.message}`]);
+        }
       } else {
         setResults(prev => [...prev, `🔒 Not currently authenticated with Firebase`]);
       }
@@ -204,7 +241,7 @@ const FirebaseAccountCheckPage: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <UserPlus className="mr-2 h-5 w-5" />
@@ -272,6 +309,90 @@ const FirebaseAccountCheckPage: React.FC = () => {
                   <>
                     <UserPlus className="mr-2 h-4 w-4" />
                     Create Super Admin Account
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Shield className="mr-2 h-5 w-5" />
+                Fix Firestore Document for Existing Account
+              </CardTitle>
+              <CardDescription>
+                Create or update Firestore record for an existing Firebase Authentication account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert className="mb-4 bg-amber-50 border-amber-200">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <AlertTitle className="text-amber-700">Important!</AlertTitle>
+                <AlertDescription className="text-amber-600">
+                  Use this option if you already have an account in Firebase Authentication but 
+                  your Firestore document is missing. This will create a doctor record
+                  with admin privileges in Firestore using the current authentication.
+                </AlertDescription>
+              </Alert>
+              
+              <Button 
+                className="w-full mt-4" 
+                variant="outline"
+                onClick={async () => {
+                  setIsLoading(true);
+                  setError(null);
+                  setSuccess(null);
+                  
+                  try {
+                    const auth = getAuth();
+                    const db = getFirestore();
+                    
+                    if (!auth.currentUser) {
+                      setError("You must be logged in to fix Firestore document");
+                      setIsLoading(false);
+                      return;
+                    }
+                    
+                    // Check if user document already exists in Firestore
+                    const userDocRef = doc(db, "doctors", auth.currentUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    
+                    // Create new document in Firestore if it doesn't exist
+                    await setDoc(doc(db, "doctors", auth.currentUser.uid), {
+                      email: auth.currentUser.email || emailToCheck,
+                      firstName: firstName,
+                      lastName: lastName,
+                      mobile: "",
+                      isAdmin: true,
+                      username: `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
+                      createdAt: new Date()
+                    }, { merge: true });
+                    
+                    if (userDoc.exists()) {
+                      setSuccess(`Successfully updated Firestore document for ${auth.currentUser.email || emailToCheck}`);
+                    } else {
+                      setSuccess(`Successfully created new Firestore document for ${auth.currentUser.email || emailToCheck}`);
+                    }
+                    
+                  } catch (error: any) {
+                    console.error("Error fixing Firestore document:", error);
+                    setError(`Error fixing Firestore document: ${error.message}`);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Fixing...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Fix Firestore Document for Current User
                   </>
                 )}
               </Button>
