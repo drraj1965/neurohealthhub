@@ -71,40 +71,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (firebaseUser) {
         try {
+          // Validate the current user has a valid token
+          const idToken = await firebaseUser.getIdToken(true);
           console.log("User logged in with ID:", firebaseUser.uid);
+          console.log("Auth token refreshed"); // We don't log the actual token for security
           
-          // Get user data from Firestore
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          const doctorDoc = await getDoc(doc(db, 'doctors', firebaseUser.uid));
+          // Try to find user data in various locations
+          let userData = null;
+          let userType = null;
           
-          if (userDoc.exists()) {
-            console.log("Regular user found in Firestore");
-            const userData = userDoc.data();
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              firstName: userData.firstName || "",
-              lastName: userData.lastName || "",
-              mobile: userData.mobile || "",
-              isAdmin: userData.isAdmin || false,
-              username: userData.username || "",
-            });
-            setIsAdmin(userData.isAdmin || false);
-          } else if (doctorDoc.exists()) {
-            console.log("Doctor found in Firestore");
-            const doctorData = doctorDoc.data();
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              firstName: doctorData.firstName || "",
-              lastName: doctorData.lastName || "",
-              mobile: doctorData.mobile || "",
-              isAdmin: true,
-              username: doctorData.username || "",
-            });
-            setIsAdmin(true);
+          // Step 1: Try standard collections first
+          try {
+            // Check users collection
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+            if (userDoc.exists()) {
+              console.log("Regular user found in standard Firestore path");
+              userData = userDoc.data();
+              userType = 'user';
+            }
+          } catch (error) {
+            console.log("Error fetching from users collection:", error);
+          }
+          
+          // Step 2: Try doctors collection if user not found
+          if (!userData) {
+            try {
+              const doctorDoc = await getDoc(doc(db, 'doctors', firebaseUser.uid));
+              if (doctorDoc.exists()) {
+                console.log("Doctor found in standard Firestore path");
+                userData = doctorDoc.data();
+                userType = 'doctor';
+              }
+            } catch (error) {
+              console.log("Error fetching from doctors collection:", error);
+            }
+          }
+          
+          // Step 3: Try top-level neurohealthhub collection
+          if (!userData) {
+            try {
+              const neuroDoc = await getDoc(doc(db, 'neurohealthhub', firebaseUser.uid));
+              if (neuroDoc.exists()) {
+                console.log("User found in neurohealthhub collection");
+                userData = neuroDoc.data();
+                
+                // Determine if it's a doctor or regular user
+                if (userData.isAdmin === true || userData.specialization) {
+                  userType = 'doctor';
+                } else {
+                  userType = 'user';
+                }
+              }
+            } catch (error) {
+              console.log("Error fetching from neurohealthhub collection:", error);
+            }
+          }
+          
+          // Set user data if found in any collection
+          if (userData) {
+            if (userType === 'doctor') {
+              console.log("Setting doctor profile");
+              setUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || userData.email || "",
+                firstName: userData.firstName || "",
+                lastName: userData.lastName || "",
+                mobile: userData.mobile || "",
+                isAdmin: true,
+                username: userData.username || "",
+              });
+              setIsAdmin(true);
+            } else {
+              console.log("Setting regular user profile");
+              setUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || userData.email || "",
+                firstName: userData.firstName || "",
+                lastName: userData.lastName || "",
+                mobile: userData.mobile || "",
+                isAdmin: userData.isAdmin || false,
+                username: userData.username || "",
+              });
+              setIsAdmin(userData.isAdmin || false);
+            }
           } else {
-            console.log("No user profile found, using Firebase data");
+            console.log("No user profile found in Firestore, using Firebase data");
             // No data in database, use Firebase user data
             setUser({
               uid: firebaseUser.uid,
@@ -118,15 +169,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             // Create user profile in Firestore
             if (firebaseUser.email) {
-              await setDoc(doc(db, "users", firebaseUser.uid), {
-                email: firebaseUser.email,
-                firstName: firebaseUser.displayName?.split(' ')[0] || "User",
-                lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
-                isAdmin: false,
-                username: firebaseUser.email.split('@')[0] || "user",
-                createdAt: new Date()
-              });
-              console.log("Created new user profile in Firestore");
+              try {
+                // Try to create in standard users collection
+                await setDoc(doc(db, "users", firebaseUser.uid), {
+                  email: firebaseUser.email,
+                  firstName: firebaseUser.displayName?.split(' ')[0] || "User",
+                  lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
+                  isAdmin: false,
+                  username: firebaseUser.email.split('@')[0] || "user",
+                  createdAt: new Date()
+                });
+                console.log("Created new user profile in Firestore users collection");
+              } catch (error) {
+                console.error("Error creating user profile in users collection:", error);
+                
+                // Try creating in neurohealthhub collection as fallback
+                try {
+                  await setDoc(doc(db, "neurohealthhub", firebaseUser.uid), {
+                    email: firebaseUser.email,
+                    firstName: firebaseUser.displayName?.split(' ')[0] || "User",
+                    lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
+                    isAdmin: false,
+                    username: firebaseUser.email.split('@')[0] || "user",
+                    type: "user",
+                    createdAt: new Date()
+                  });
+                  console.log("Created new user profile in Firestore neurohealthhub collection");
+                } catch (fallbackError) {
+                  console.error("Error creating user profile in neurohealthhub collection:", fallbackError);
+                }
+              }
             }
           }
         } catch (error) {

@@ -14,20 +14,45 @@ This guide provides step-by-step instructions to fix the Firebase security rules
 
 ## Step 2: Fix Firebase Security Rules (Critical Issue)
 
-The main problem you're experiencing is related to Firebase Security Rules. Follow these steps:
+The main problem you're experiencing is related to Firebase Security Rules and path structures. Follow these steps:
 
 ### For Firestore Database:
 
 1. In the Firebase Console, navigate to **Firestore Database** in the left sidebar
 2. Click on the **Rules** tab
-3. Replace the current rules with the following permissive rules:
+3. Replace the current rules with the following improved rules that handle the neurohealthhub collection:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Match any document in the 'neurohealthhub' collection
+    match /neurohealthhub/{document=**} {
+      // Allow read/write access if the user is authenticated
+      allow read, write: if request.auth != null;
+    }
+    
+    // Match any document in the standard collections
+    match /users/{userId} {
+      // Allow users to read/write their own data
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Match subcollections under a user
+      match /{subcollection}/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    match /doctors/{doctorId} {
+      // Doctors can read/write their own data
+      allow read, write: if request.auth != null && request.auth.uid == doctorId;
+      
+      // Users can read doctor data (public profiles)
+      allow read: if request.auth != null;
+    }
+    
+    // For development allow all access (use only during development)
     match /{document=**} {
-      // Allow full access in development environment
       allow read, write: if true;
     }
   }
@@ -35,6 +60,13 @@ service cloud.firestore {
 ```
 
 4. Click the **Publish** button
+
+> **Important Path Structure Note**: The application now checks multiple locations for data:
+> - `users/{userId}` - Standard location for user data
+> - `doctors/{doctorId}` - Standard location for doctor data
+> - `neurohealthhub/{userId}` - Alternative location for both users and doctors
+>
+> The rules above allow for all these scenarios.
 
 ### For Firebase Storage:
 

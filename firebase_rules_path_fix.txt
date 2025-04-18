@@ -1,0 +1,66 @@
+// Firestore rules updated to handle both standard paths and neurohealthhub collection
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Match any document in the 'neurohealthhub' collection
+    match /neurohealthhub/{document=**} {
+      // Allow read/write access if the user is authenticated
+      allow read, write: if request.auth != null;
+    }
+    
+    // Match any document in the standard collections
+    match /users/{userId} {
+      // Allow users to read/write their own data
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow admins to read any user data
+      allow read: if request.auth != null && 
+                    (exists(/databases/$(database)/documents/doctors/$(request.auth.uid)) ||
+                     exists(/databases/$(database)/documents/neurohealthhub/$(request.auth.uid)) && 
+                     get(/databases/$(database)/documents/neurohealthhub/$(request.auth.uid)).data.isAdmin == true);
+                     
+      // Match subcollections under a user
+      match /{subcollection}/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        // Allow doctors to read patient questions
+        allow read: if request.auth != null && 
+                     (exists(/databases/$(database)/documents/doctors/$(request.auth.uid)) ||
+                      exists(/databases/$(database)/documents/neurohealthhub/$(request.auth.uid)) && 
+                      get(/databases/$(database)/documents/neurohealthhub/$(request.auth.uid)).data.isAdmin == true);
+      }
+    }
+    
+    match /doctors/{doctorId} {
+      // Doctors can read/write their own data
+      allow read, write: if request.auth != null && request.auth.uid == doctorId;
+      
+      // Users can read doctor data (public profiles)
+      allow read: if request.auth != null;
+      
+      // Match subcollections under a doctor
+      match /{subcollection}/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == doctorId;
+        // Allow patient to read their own questions sent to doctor
+        allow read: if request.auth != null && 
+                     resource.data.userId == request.auth.uid;
+      }
+    }
+    
+    // Public collections
+    match /questions/{questionId} {
+      // Allow read for authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow write for authenticated users if they are the owner
+      allow write: if request.auth != null && 
+                   (request.resource.data.userId == request.auth.uid ||
+                    exists(/databases/$(database)/documents/doctors/$(request.auth.uid)));
+    }
+    
+    // For development allow all access (uncomment in dev, remove for production)
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
