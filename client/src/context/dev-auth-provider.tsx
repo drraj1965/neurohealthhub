@@ -139,7 +139,7 @@ export const DevAuthProvider = ({ children }: { children: React.ReactNode }) => 
 
 export function useDevAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useDevAuth must be used within a DevAuthProvider");
   }
   return context;
