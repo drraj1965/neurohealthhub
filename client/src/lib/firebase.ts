@@ -21,7 +21,11 @@ console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+
+// Initialize Firestore with a specific database ID instead of the default
+const db = getFirestore(app, { databaseId: 'neurohealthhub' });
+console.log("Connecting to specific database: neurohealthhub");
+
 const storage = getStorage(app);
 
 // Enable offline persistence - this allows the app to work offline
