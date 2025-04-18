@@ -40,11 +40,18 @@ const SuperAdminPage: React.FC = () => {
   const { user, isAdmin } = useAuth();
   const [_, setLocation] = useLocation();
 
-  // Redirect if not super admin (check based on Firebase UID)
-  // For now we will use isAdmin for testing, but you should replace with a more specific check
+  // Grant super admin access based on both Firebase Auth UID and email
   React.useEffect(() => {
-    // Super admin check could be more sophisticated, like checking a specific UID or role
-    if (!user || !isAdmin) {
+    const superAdminEmails = [
+      "drphaniraj1965@gmail.com",
+      "doctornerves@gmail.com",
+      "g.rajshaker@gmail.com"
+    ];
+    
+    // Allow access if the user is an admin OR has one of the super admin emails
+    const isSuperAdmin = isAdmin || (user && user.email && superAdminEmails.includes(user.email));
+    
+    if (!user || !isSuperAdmin) {
       setLocation("/");
     }
   }, [user, isAdmin, setLocation]);
@@ -167,8 +174,16 @@ const SuperAdminPage: React.FC = () => {
     }
   };
   
+  // Get super admin status using the same logic as in the useEffect hook
+  const superAdminEmails = [
+    "drphaniraj1965@gmail.com",
+    "doctornerves@gmail.com",
+    "g.rajshaker@gmail.com"
+  ];
+  const isSuperAdmin = isAdmin || (user && user.email && superAdminEmails.includes(user.email));
+  
   // If not super admin, don't render the page
-  if (!user || !isAdmin) {
+  if (!user || !isSuperAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Alert variant="destructive">
