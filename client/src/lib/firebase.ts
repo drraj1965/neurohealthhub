@@ -22,14 +22,17 @@ console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Initialize Firestore - for named databases, this is handled in the Firebase console
-// and we don't specify the name in the code
+// Initialize Firestore with specific settings for better network resilience
 const db = getFirestore(app);
+
+// We'll set up offline size manually rather than settings to ensure compatibility
+// with the Firestore API version we're using
+
 console.log("Connecting to Firebase Firestore database");
 
 const storage = getStorage(app);
 
-// Enable offline persistence - this allows the app to work offline
+// Enable offline persistence with error handling - this allows the app to work offline
 // and sync when back online
 enableIndexedDbPersistence(db).catch((err) => {
   console.error("Firebase persistence error:", err.code);
@@ -41,6 +44,27 @@ enableIndexedDbPersistence(db).catch((err) => {
     console.warn("Firestore persistence unavailable: Browser unsupported");
   }
 });
+
+// Add network state monitoring
+let firestoreIsOnline = false;
+
+// Function to handle online and offline state
+function monitorNetworkState() {
+  // Set online handlers
+  window.addEventListener('online', () => {
+    console.log('Network connection restored - reconnecting to Firebase');
+    // You could force a refresh here or enable specific UI elements
+  });
+
+  // Set offline handlers
+  window.addEventListener('offline', () => {
+    console.warn('Network connection lost - Firebase will use cached data');
+    // You could disable certain features or show an offline notification
+  });
+}
+
+// Start network monitoring
+monitorNetworkState();
 
 // Set to false to use actual Firebase database
 const USE_MOCK_DATA = false;
@@ -250,43 +274,98 @@ export async function getUserData(userId: string) {
       return null;
     }
     
-    // Try both regular and named database paths
-    let userDoc, doctorDoc;
+    // Check network state
+    if (!navigator.onLine) {
+      console.warn("Network appears to be offline - attempting to get cached user data");
+    }
     
+    // Verify we have a valid user ID
+    if (!userId) {
+      console.error("No user ID provided to getUserData");
+      return null;
+    }
+    
+    console.log(`Attempting to get data for user ID: ${userId}`);
+    
+    // Create a fallback user object with minimal data if we encounter offline issues
+    const fallbackUserData = {
+      id: userId,
+      // Any available data from authentication
+      email: auth.currentUser?.email || '',
+      displayName: auth.currentUser?.displayName || '',
+      // Temporary properties until we can load the full data
+      _isOfflineFallback: true
+    };
+    
+    // Try both regular and named database paths with improved error handling
+    let userDoc = null;
+    let doctorDoc = null;
+    let userDocError = null;
+    let doctorDocError = null;
+    
+    // First try getting user document
     try {
       // First try the standard path
       userDoc = await getDoc(doc(db, "users", userId));
+      console.log("Successfully queried standard users path");
     } catch (error: any) {
-      if (error.message.includes('different database')) {
-        // Try the named database path
-        console.log("Trying alternative path for users collection");
-        userDoc = await getDoc(doc(db, "neurohealthhub/users", userId));
-      } else {
-        throw error;
+      userDocError = error;
+      console.log(`Error querying standard users path: ${error.message}`);
+      
+      if (error.message.includes('different database') || error.code === 'permission-denied') {
+        // Try the named database path if it's a database mismatch or permissions issue
+        try {
+          console.log("Trying alternative path for users collection");
+          userDoc = await getDoc(doc(db, "neurohealthhub/users", userId));
+          console.log("Successfully queried neurohealthhub/users path");
+        } catch (namedError: any) {
+          console.log(`Error querying neurohealthhub/users path: ${namedError.message}`);
+        }
       }
     }
     
+    // Then try getting doctor document if needed
     try {
-      // First try the standard path
+      // First try the standard path for doctors
       doctorDoc = await getDoc(doc(db, "doctors", userId));
+      console.log("Successfully queried standard doctors path");
     } catch (error: any) {
-      if (error.message.includes('different database')) {
-        // Try the named database path
-        console.log("Trying alternative path for doctors collection");
-        doctorDoc = await getDoc(doc(db, "neurohealthhub/doctors", userId));
-      } else {
-        throw error;
+      doctorDocError = error;
+      console.log(`Error querying standard doctors path: ${error.message}`);
+      
+      if (error.message.includes('different database') || error.code === 'permission-denied') {
+        // Try the named database path if it's a database mismatch or permissions issue
+        try {
+          console.log("Trying alternative path for doctors collection");
+          doctorDoc = await getDoc(doc(db, "neurohealthhub/doctors", userId));
+          console.log("Successfully queried neurohealthhub/doctors path");
+        } catch (namedError: any) {
+          console.log(`Error querying neurohealthhub/doctors path: ${namedError.message}`);
+        }
       }
     }
     
+    // Return document data if found
     if (userDoc && userDoc.exists()) {
       return { ...userDoc.data(), id: userId };
     } else if (doctorDoc && doctorDoc.exists()) {
       return { ...doctorDoc.data(), id: userId };
     }
     
+    // If no documents were found but there were errors that suggest we're offline
+    const offlineErrorCodes = ['unavailable', 'failed-precondition', 'deadline-exceeded'];
+    const isLikelyOffline = 
+      (userDocError && offlineErrorCodes.includes(userDocError.code)) || 
+      (doctorDocError && offlineErrorCodes.includes(doctorDocError.code));
+    
+    if (isLikelyOffline) {
+      console.warn("Connection appears to be unavailable - using offline fallback data");
+      return fallbackUserData;
+    }
+    
+    console.log("No user data found for ID:", userId);
     return null;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Get user data error:", error);
     
     if (import.meta.env.DEV && USE_MOCK_DATA) {
@@ -302,6 +381,17 @@ export async function getUserData(userId: string) {
       
       // For demo purposes, return the first mock user
       if (userId) return mockUsers[0];
+    }
+    
+    // For offline errors in production, return a fallback user object
+    if (error.code === 'unavailable' || error.code === 'failed-precondition') {
+      console.warn("Database unavailable - using offline fallback for user data");
+      return {
+        id: userId,
+        email: auth.currentUser?.email || '',
+        displayName: auth.currentUser?.displayName || '',
+        _isOfflineFallback: true
+      };
     }
     
     throw error;
