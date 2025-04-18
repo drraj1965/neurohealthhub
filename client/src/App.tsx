@@ -11,6 +11,7 @@ import UserDashboard from "@/pages/user-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AskQuestion from "@/pages/ask-question";
 import MyQuestions from "@/pages/my-questions";
+import FirebaseTest from "@/pages/firebase-test";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 
@@ -50,6 +51,7 @@ function AppRoutes() {
       <Route path="/" component={Welcome} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/firebase-test" component={FirebaseTest} />
       <Route path="/dashboard">
         {() => <ProtectedRoute component={UserDashboard} />}
       </Route>
