@@ -329,8 +329,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         // Real Firebase login
         console.log("Attempting Firebase login");
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        
+        // Force token refresh to ensure tokens are valid before any Firestore operations
+        const idToken = await userCredential.user.getIdToken(true);
+        console.log("Auth token has been refreshed");
+        
         // Firebase auth state listener will handle the user state update
+        // The onAuthStateChanged will trigger and fetch user data from Firestore
+        // using our enhanced email-based lookup if needed
         
         toast({
           title: "Login Successful",
@@ -381,6 +388,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Get the current user
         const currentUser = userCredential.user;
         console.log("Created account with ID:", currentUser.uid);
+        
+        // Force token refresh to ensure tokens are valid before Firestore operations
+        const idToken = await currentUser.getIdToken(true);
+        console.log("Auth token has been refreshed for new user");
         
         // Update display name
         await updateProfile(currentUser, {

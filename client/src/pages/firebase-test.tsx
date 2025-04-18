@@ -7,7 +7,8 @@ import {
   collectionGroup,
   doc,
   getDoc,
-  enableIndexedDbPersistence
+  enableIndexedDbPersistence,
+  where
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
@@ -258,6 +259,98 @@ const FirebaseTest: React.FC = () => {
     }
     
     return "Invalid timestamp";
+  };
+  
+  // Function to check user data access in different collections
+  const checkUserDataAccess = async (userId: string, userEmail: string) => {
+    console.log("DEBUG: Checking user data access for UID:", userId, "Email:", userEmail);
+    let foundInCollection = null;
+    let documentId = null;
+    
+    try {
+      // Step 1: Try with Firebase UID in users collection
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        console.log("DEBUG: User found in users collection with Firebase UID");
+        foundInCollection = 'users (by UID)';
+        documentId = userId;
+        return;
+      }
+      
+      // Step 2: Try with Firebase UID in doctors collection
+      const doctorDoc = await getDoc(doc(db, 'doctors', userId));
+      if (doctorDoc.exists()) {
+        console.log("DEBUG: User found in doctors collection with Firebase UID");
+        foundInCollection = 'doctors (by UID)';
+        documentId = userId;
+        return;
+      }
+      
+      // Step 3: Try with Firebase UID in neurohealthhub collection
+      const neuroDoc = await getDoc(doc(db, 'neurohealthhub', userId));
+      if (neuroDoc.exists()) {
+        console.log("DEBUG: User found in neurohealthhub collection with Firebase UID");
+        foundInCollection = 'neurohealthhub (by UID)';
+        documentId = userId;
+        return;
+      }
+      
+      // Step 4: Try by email in users collection if we have an email
+      if (userEmail) {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', userEmail));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0];
+          console.log("DEBUG: User found by email in users collection, document ID:", userDoc.id);
+          foundInCollection = 'users (by email)';
+          documentId = userDoc.id;
+          return;
+        }
+      }
+      
+      // Step 5: Try by email in doctors collection if we have an email
+      if (userEmail) {
+        const doctorsRef = collection(db, 'doctors');
+        const q = query(doctorsRef, where('email', '==', userEmail));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const doctorDoc = querySnapshot.docs[0];
+          console.log("DEBUG: User found by email in doctors collection, document ID:", doctorDoc.id);
+          foundInCollection = 'doctors (by email)';
+          documentId = doctorDoc.id;
+          return;
+        }
+      }
+      
+      // Step 6: Try by email in neurohealthhub collection if we have an email
+      if (userEmail) {
+        const neuroRef = collection(db, 'neurohealthhub');
+        const q = query(neuroRef, where('email', '==', userEmail));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const neuroDoc = querySnapshot.docs[0];
+          console.log("DEBUG: User found by email in neurohealthhub collection, document ID:", neuroDoc.id);
+          foundInCollection = 'neurohealthhub (by email)';
+          documentId = neuroDoc.id;
+          return;
+        }
+      }
+      
+      console.log("DEBUG: User data not found in any collection by UID or email");
+      
+    } catch (error) {
+      console.error("DEBUG: Error checking user data access:", error);
+    } finally {
+      if (foundInCollection && documentId) {
+        console.log(`DEBUG: User data found in ${foundInCollection} with document ID: ${documentId}`);
+      } else {
+        console.log("DEBUG: User data not found in any collection");
+      }
+    }
   };
 
   // Handle direct Firebase login
