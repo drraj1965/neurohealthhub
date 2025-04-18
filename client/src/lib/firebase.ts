@@ -24,8 +24,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Use mock data for development since we're having issues with Firebase security rules
-const USE_MOCK_DATA = true;
+// Set to false to use actual Firebase database
+const USE_MOCK_DATA = false;
 
 if (import.meta.env.DEV && USE_MOCK_DATA) {
   console.log("🔄 Using local mock data for development");

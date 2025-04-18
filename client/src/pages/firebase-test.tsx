@@ -270,12 +270,20 @@ const FirebaseTest: React.FC = () => {
               {error}
               {error.includes('security rules') && (
                 <div className="mt-2">
-                  <p className="font-medium">Possible solutions:</p>
-                  <ol className="list-decimal ml-5 mt-1">
-                    <li>For quick development, use the permissive rules in <code className="font-mono bg-muted px-1 py-0.5 rounded">firebase_rules_permissive.txt</code></li>
-                    <li>Follow the instructions in <code className="font-mono bg-muted px-1 py-0.5 rounded">README_FIREBASE_SETUP.md</code> for step-by-step setup</li>
-                    <li>Alternatively, set up Firebase emulators as described in <code className="font-mono bg-muted px-1 py-0.5 rounded">firebase_emulator_setup.txt</code></li>
-                  </ol>
+                  <p className="font-medium text-destructive">Security Rules Error Detected!</p>
+                  <p className="my-2">This is the most common error when setting up Firebase. We've created a detailed solution:</p>
+                  
+                  <div className="bg-muted p-4 rounded-md border border-primary mt-3">
+                    <h4 className="text-lg font-bold mb-2">Complete Solution:</h4>
+                    <p>Follow the step-by-step guide in <code className="font-mono bg-primary/10 px-1 py-0.5 rounded text-primary font-bold">FIREBASE_COMPLETE_SETUP.md</code></p>
+                    <p className="mt-2 text-sm">This guide includes:</p>
+                    <ul className="list-disc ml-5 mt-1 text-sm">
+                      <li>Exactly how to update your Firebase security rules</li>
+                      <li>How to add your domain to authorized domains</li>
+                      <li>Creating initial collections if needed</li>
+                      <li>Troubleshooting the most common issues</li>
+                    </ul>
+                  </div>
                 </div>
               )}
             </AlertDescription>
@@ -284,10 +292,16 @@ const FirebaseTest: React.FC = () => {
 
         <Alert className="mb-6">
           <InfoIcon className="h-4 w-4" />
-          <AlertTitle>Firebase Security Rules Information</AlertTitle>
+          <AlertTitle>Firebase Connectivity Test</AlertTitle>
           <AlertDescription>
-            <p>The 400 errors in the console indicate Firebase security rules are blocking access to your database.</p>
-            <p className="mt-2">For development, we recommend using the permissive rules from <code className="font-mono bg-muted px-1 py-0.5 rounded">firebase_rules_permissive.txt</code>. Follow the instructions in <code className="font-mono bg-muted px-1 py-0.5 rounded">README_FIREBASE_SETUP.md</code> to apply them.</p>
+            <p>We are now attempting to connect to the real Firebase database. If you see "permission-denied" errors, please follow our new guide.</p>
+            <p className="mt-2">See <code className="font-mono bg-muted px-1 py-0.5 rounded text-primary font-bold">FIREBASE_COMPLETE_SETUP.md</code> for a comprehensive solution that will fix the security rules.</p>
+            <p className="mt-2">
+              <Button variant="outline" onClick={() => fetchCollections()} className="mr-2">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Test Firebase Connection
+              </Button>
+            </p>
           </AlertDescription>
         </Alert>
 
