@@ -1,0 +1,43 @@
+Create a firebase project 'Neurohealthhub'
+Add a storage bucket
+Add three admins in a collection called 'doctors' in the default database
+The three admins have the following credentials:
+Admin1:
+doctor_email: "doctornerves@gmail.com"
+doctor_mobile: "+971501802970"
+firstName: "Dr. Rajshekher"
+lastName: "Garikapati"
+isAdmin: true
+username: "doctornerves"
+
+Admin2:
+doctor_email: "ponnusankar100@gmail.com"
+doctor_mobile: "+918547035009"
+firstName: "Dr. Ponnu"
+lastName: "Sankaran Pillai"
+isAdmin: true
+username: "ponnu"
+
+Admin3:
+doctor_email: "dr.ukzain@gmail.com"
+doctor_mobile: "+923002220302"
+firstName: "Dr. Rajshekher"
+lastName: "Zain Ul Abedin"
+isAdmin: true
+username: "ummulkiram"
+
+Create a subcollection within each admins document called 'doctor_questions';
+
+Create a collection called 'users' in the default database
+Add a user with the following credentials: 
+
+email: "drphaniraj1965@gmail.com"
+mobile: "+971501802970"
+firstName: "Rajshekher"
+lastName: "Garikapati"
+isAdmin: false
+username: "Raju Gentleman"
+
+Create a default password: Neurohealthhub@2025
+Add a mandatory requirement to change the password on first login/sign up for the three admins and the first user
+Other users have to fill up a registration form with their firstName, lastName, email, and share their mobile number if they want, and add a password with the usual constraints - minimum 8 characters, mix of upper and lower case, alphanumeric, with a special character; add an eyeball icon to view the password
