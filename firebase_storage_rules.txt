@@ -1,0 +1,61 @@
+// Firebase Storage Rules for neurohealthhub-1965.firebasestorage.app
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Default rule - deny all if not specified
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    
+    // User profiles - let users upload their own profile images
+    match /profiles/{userId}/{fileName} {
+      // Allow users to read any profile image
+      allow read: if request.auth != null;
+      // Allow users to upload/update only their own profile image
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Question attachments - for users to upload images/files with their questions
+    match /questions/{questionId}/{fileName} {
+      // Allow authenticated users to read question attachments
+      allow read: if request.auth != null;
+      // Allow question owners to upload attachments
+      // This simplified rule assumes the questionId contains or matches the userId
+      // In a real app, you'd check against Firestore document
+      allow write: if request.auth != null && 
+                     (request.resource.size < 5 * 1024 * 1024) && // 5MB limit
+                     (request.resource.contentType.matches('image/.*') || 
+                      request.resource.contentType.matches('application/pdf'));
+    }
+    
+    // Answer attachments - for doctors to upload images/files with their answers
+    match /answers/{answerId}/{fileName} {
+      // Allow authenticated users to read answer attachments
+      allow read: if request.auth != null;
+      // Allow answer owners (typically doctors) to upload
+      allow write: if request.auth != null && 
+                     (request.resource.size < 5 * 1024 * 1024) && // 5MB limit
+                     (request.resource.contentType.matches('image/.*') || 
+                      request.resource.contentType.matches('application/pdf'));
+    }
+    
+    // Admin-only uploads (for articles, general resources, etc.)
+    match /resources/{fileName} {
+      // Allow all authenticated users to read resources
+      allow read: if request.auth != null;
+      // Allow only admins to upload resource files
+      allow write: if request.auth != null && 
+                     firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Public images that anyone can view (like blog post images)
+    match /public/{fileName} {
+      // Allow anyone to read public files
+      allow read: if true;
+      // Only admins can upload public files
+      allow write: if request.auth != null && 
+                     firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+  }
+}

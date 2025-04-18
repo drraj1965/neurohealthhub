@@ -25,61 +25,89 @@ const storage = getStorage(app);
 async function initializeSampleData() {
   if (import.meta.env.DEV) {
     try {
+      console.log("DEV MODE: Checking if sample data needs to be initialized");
+      
       // Check if doctor data exists
       const doctorsCollection = collection(db, "doctors");
-      const doctorsQuery = await getDocs(doctorsCollection);
       
-      if (doctorsQuery.empty) {
-        console.log("DEV: No doctors found, adding sample doctor data");
+      try {
+        const doctorsQuery = await getDocs(doctorsCollection);
         
-        // Add some sample doctors
-        const doctors = [
-          {
-            firstName: "Dr.",
-            lastName: "Rajshekher",
-            email: "doctornerves@gmail.com",
-            mobile: "+971501802970",
-            specialization: "Neurology",
-            experience: "15 years",
-            bio: "Specialist in neurological disorders with focus on brain and spinal cord injuries.",
-            isAdmin: true,
-            username: "doctornerves"
-          },
-          {
-            firstName: "Dr.",
-            lastName: "Ponnu",
-            email: "drponnu@neurohealth.com",
-            mobile: "+971501234567",
-            specialization: "Neurosurgery",
-            experience: "12 years",
-            bio: "Experienced neurosurgeon specializing in complex brain surgeries.",
-            isAdmin: true,
-            username: "drponnu"
-          },
-          {
-            firstName: "Dr.",
-            lastName: "Zain",
-            email: "drzain@neurohealth.com",
-            mobile: "+971507654321",
-            specialization: "Psychiatry",
-            experience: "8 years",
-            bio: "Psychiatrist focusing on neurological disorders affecting mental health.",
-            isAdmin: true,
-            username: "drzain"
+        if (doctorsQuery.empty) {
+          console.log("DEV: No doctors found, adding sample doctor data");
+          
+          // Add some sample doctors
+          const doctors = [
+            {
+              firstName: "Dr.",
+              lastName: "Rajshekher",
+              email: "doctornerves@gmail.com",
+              mobile: "+971501802970",
+              specialization: "Neurology",
+              experience: "15 years",
+              bio: "Specialist in neurological disorders with focus on brain and spinal cord injuries.",
+              isAdmin: true,
+              username: "doctornerves"
+            },
+            {
+              firstName: "Dr.",
+              lastName: "Ponnu",
+              email: "drponnu@neurohealth.com",
+              mobile: "+971501234567",
+              specialization: "Neurosurgery",
+              experience: "12 years",
+              bio: "Experienced neurosurgeon specializing in complex brain surgeries.",
+              isAdmin: true,
+              username: "drponnu"
+            },
+            {
+              firstName: "Dr.",
+              lastName: "Zain",
+              email: "drzain@neurohealth.com",
+              mobile: "+971507654321",
+              specialization: "Psychiatry",
+              experience: "8 years",
+              bio: "Psychiatrist focusing on neurological disorders affecting mental health.",
+              isAdmin: true,
+              username: "drzain"
+            }
+          ];
+          
+          // Try to add each doctor individually to catch permission errors
+          let addedCount = 0;
+          for (const doctor of doctors) {
+            try {
+              const docRef = doc(db, "doctors", `dev-${doctor.username}-${Math.floor(Math.random() * 1000)}`);
+              await setDoc(docRef, {
+                ...doctor,
+                createdAt: new Date()
+              });
+              addedCount++;
+            } catch (docError: any) {
+              if (docError.code === 'permission-denied') {
+                console.warn("DEV: Permission denied adding doctor - check Firebase security rules");
+                break;
+              } else {
+                console.error("DEV: Error adding doctor:", docError);
+              }
+            }
           }
-        ];
-        
-        for (const doctor of doctors) {
-          const docRef = doc(db, "doctors", `dev-${doctor.username}-${Math.floor(Math.random() * 1000)}`);
-          await setDoc(docRef, {
-            ...doctor,
-            createdAt: new Date()
-          });
+          
+          if (addedCount > 0) {
+            console.log(`DEV: Added ${addedCount} sample doctors successfully`);
+          } else {
+            console.warn("DEV: Could not add any sample doctors. You may need to set up Firebase security rules.");
+          }
+        } else {
+          console.log(`DEV: ${doctorsQuery.size} doctors already exist, skipping initialization`);
         }
-        
-        console.log("DEV: Sample doctor data added successfully");
-      } else {
-        console.log("DEV: Sample doctors already exist, skipping initialization");
+      } catch (queryError: any) {
+        if (queryError.code === 'permission-denied') {
+          console.warn("DEV: Permission denied accessing doctors collection. Check Firebase security rules.");
+          console.warn("DEV: View firebase_firestore_rules_dev.txt for recommended development rules.");
+        } else {
+          console.error("DEV: Error querying doctors:", queryError);
+        }
       }
     } catch (error) {
       console.error("DEV: Error initializing sample data:", error);
@@ -88,7 +116,10 @@ async function initializeSampleData() {
 }
 
 // Call the function to initialize sample data
-initializeSampleData();
+initializeSampleData()
+  .catch(err => {
+    console.error("Failed to initialize sample data:", err);
+  });
 
 // Authentication functions
 export async function registerUser(email: string, password: string, firstName: string, lastName: string, mobile?: string) {

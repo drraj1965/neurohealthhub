@@ -1,0 +1,21 @@
+// Simple Firebase Storage Rules for neurohealthhub-1965.firebasestorage.app
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to read and write all files
+    // This is simplified for development - for production, use more specific rules
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+                    request.resource.size < 10 * 1024 * 1024 && // 10MB file size limit
+                    request.resource.contentType.matches('image/.*|application/pdf|text/plain');
+    }
+    
+    // Public files that anyone can view
+    match /public/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+                    firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+  }
+}
