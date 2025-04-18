@@ -1,106 +1,109 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { 
-  LayoutDashboard, 
-  HelpCircle, 
-  ClipboardList, 
-  BookOpen,
-  Video,
-  CheckCircle
-} from "lucide-react";
-import { Link } from "wouter";
-import AppLayout from "@/components/layout/app-layout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AskQuestionForm from "@/components/questions/ask-question-form";
 import TodayQuestions from "@/components/questions/today-questions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AppLayout from "@/components/layout/app-layout";
 import { useAuth } from "@/context/auth-context";
-import { useToast } from "@/hooks/use-toast";
+import { getTodaysUserQuestions } from "@/lib/firebase";
+import { Loader2 } from "lucide-react";
 
 const AskQuestion: React.FC = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [refreshTodayQuestions, setRefreshTodayQuestions] = useState(0);
+  const [todayQuestions, setTodayQuestions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleQuestionSubmitted = () => {
-    toast({
-      title: "Question submitted successfully",
-      description: "The doctor will be notified and respond soon."
-    });
-    setRefreshTodayQuestions(prev => prev + 1);
+  useEffect(() => {
+    const fetchTodayQuestions = async () => {
+      if (user?.uid) {
+        try {
+          setIsLoading(true);
+          const questions = await getTodaysUserQuestions(user.uid);
+          setTodayQuestions(questions);
+        } catch (error) {
+          console.error("Error fetching today's questions:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchTodayQuestions();
+  }, [user]);
+
+  // Refresh questions when a new one is submitted
+  const handleQuestionSubmitted = async () => {
+    if (user?.uid) {
+      try {
+        setIsLoading(true);
+        const questions = await getTodaysUserQuestions(user.uid);
+        setTodayQuestions(questions);
+      } catch (error) {
+        console.error("Error refreshing today's questions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
-  const sidebarItems = (
-    <nav className="space-y-1">
-      <Link href="/">
-        <a className="flex items-center px-3 py-2 text-sm font-medium text-neutral-600 rounded-md hover:bg-neutral-100 hover:text-neutral-800">
-          <LayoutDashboard className="w-5 h-5 mr-2 text-neutral-500" />
-          Dashboard
-        </a>
-      </Link>
-      <Link href="/ask-question">
-        <a className="flex items-center px-3 py-2 text-sm font-medium text-primary-700 bg-primary-50 rounded-md">
-          <HelpCircle className="w-5 h-5 mr-2 text-primary-600" />
-          Ask a Question
-        </a>
-      </Link>
-      <Link href="/my-questions">
-        <a className="flex items-center px-3 py-2 text-sm font-medium text-neutral-600 rounded-md hover:bg-neutral-100 hover:text-neutral-800">
-          <ClipboardList className="w-5 h-5 mr-2 text-neutral-500" />
-          My Questions
-        </a>
-      </Link>
-      <Link href="/articles">
-        <a className="flex items-center px-3 py-2 text-sm font-medium text-neutral-600 rounded-md hover:bg-neutral-100 hover:text-neutral-800">
-          <BookOpen className="w-5 h-5 mr-2 text-neutral-500" />
-          Medical Articles
-        </a>
-      </Link>
-      <Link href="/videos">
-        <a className="flex items-center px-3 py-2 text-sm font-medium text-neutral-600 rounded-md hover:bg-neutral-100 hover:text-neutral-800">
-          <Video className="w-5 h-5 mr-2 text-neutral-500" />
-          Medical Videos
-        </a>
-      </Link>
-    </nav>
-  );
-
   return (
-    <>
+    <AppLayout activePath="/ask-question">
       <Helmet>
         <title>Ask a Question | NeuroHealthHub</title>
       </Helmet>
-      <AppLayout sidebarItems={sidebarItems} activePath="/ask-question" showSidebar={true}>
-        <div className="space-y-8">
-          {/* Breadcrumbs */}
-          <nav className="mb-6">
-            <ol className="flex space-x-2 text-sm">
-              <li>
-                <Link href="/">
-                  <a className="text-primary-600 hover:text-primary-700">Dashboard</a>
-                </Link>
-              </li>
-              <li className="text-neutral-500">
-                <span className="mx-2">/</span>
-                <span>Ask a Question</span>
-              </li>
-            </ol>
-          </nav>
+      
+      <div className="container max-w-6xl mx-auto py-6 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Ask a Question</h1>
+          <p className="text-muted-foreground mt-2">
+            Get answers from our neurological healthcare specialists
+          </p>
+        </div>
 
-          {/* Ask Question Form */}
-          <Card className="rounded-xl">
+        <div className="grid grid-cols-1 gap-8">
+          <Card>
             <CardHeader>
-              <CardTitle>Ask a Question</CardTitle>
+              <CardTitle>Submit Your Question</CardTitle>
+              <CardDescription>
+                Your question will be directed to the specialist you select
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <AskQuestionForm onSuccess={handleQuestionSubmitted} />
             </CardContent>
           </Card>
 
-          {/* Today's Questions */}
-          <TodayQuestions key={refreshTodayQuestions} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Today's Questions</CardTitle>
+              <CardDescription>
+                Questions you've submitted today
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {todayQuestions.length === 0 ? (
+                    <p className="text-neutral-500 text-center py-4">No questions submitted today.</p>
+                  ) : (
+                    todayQuestions.map((question: any) => (
+                      <div key={question.id} className="border rounded-lg p-4">
+                        <h3 className="font-medium">{question.title}</h3>
+                        <p className="text-sm text-neutral-600 mt-1">{question.content}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      </AppLayout>
-    </>
+      </div>
+    </AppLayout>
   );
 };
 

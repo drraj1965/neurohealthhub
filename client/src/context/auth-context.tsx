@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { onAuthStateChanged, User as FirebaseAuthUser, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { 
+  onAuthStateChanged, 
+  User as FirebaseAuthUser, 
+  signOut, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { FirebaseUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
