@@ -315,10 +315,38 @@ const SuperAdminPage: React.FC = () => {
     "doctornerves@gmail.com",
     "g.rajshaker@gmail.com"
   ];
+  
+  console.log("Super Admin Page - Current user:", user?.email);
+  console.log("Is admin flag value:", isAdmin);
+  
+  // Allow access if user is super admin by email or has isAdmin flag
   const isSuperAdmin = isAdmin || (user && user.email && superAdminEmails.includes(user.email));
+  console.log("Is super admin?", isSuperAdmin);
+  
+  // Override for specific emails - always allow access
+  if (user && user.email && superAdminEmails.includes(user.email)) {
+    console.log("Super admin access granted by email override");
+  }
   
   // If not super admin, don't render the page
-  if (!user || !isSuperAdmin) {
+  if (!user) {
+    console.log("Access denied: No user logged in");
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Access Denied</AlertTitle>
+          <AlertDescription>
+            You must be logged in to access this page.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+  
+  // If user is logged in but not super admin
+  if (!isSuperAdmin) {
+    console.log("Access denied: User is not super admin");
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Alert variant="destructive">
@@ -326,6 +354,7 @@ const SuperAdminPage: React.FC = () => {
           <AlertTitle>Access Denied</AlertTitle>
           <AlertDescription>
             You do not have permission to access this page.
+            Current user: {user.email}
           </AlertDescription>
         </Alert>
       </div>

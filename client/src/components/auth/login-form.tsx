@@ -51,6 +51,7 @@ const LoginForm: React.FC = () => {
       
       // Use auth context login function
       await login(data.email, data.password);
+      console.log("LOGIN SUCCESS - Firebase auth completed");
       
       toast({
         title: "Login successful",
@@ -67,13 +68,21 @@ const LoginForm: React.FC = () => {
       // Redirect to appropriate dashboard based on email
       if (superAdminEmails.includes(data.email)) {
         console.log("Super admin detected, redirecting to super admin page");
-        setLocation("/super-admin");
+        // Add a slight delay to ensure auth state is fully updated
+        setTimeout(() => {
+          console.log("EXECUTING REDIRECT to /super-admin now");
+          setLocation("/super-admin");
+        }, 500);
       } else {
         console.log("Redirecting to regular dashboard");
-        setLocation("/dashboard");
+        // Add a slight delay to ensure auth state is fully updated
+        setTimeout(() => {
+          console.log("EXECUTING REDIRECT to /dashboard now");
+          setLocation("/dashboard");
+        }, 500);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
         description: "Invalid email or password. Please try again.",
