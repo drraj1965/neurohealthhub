@@ -316,10 +316,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Always use real Firebase Authentication
       console.log("Attempting Firebase login");
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Firebase login successful, user:", userCredential.user?.email);
       
       // Force token refresh to ensure tokens are valid before any Firestore operations
       const idToken = await userCredential.user.getIdToken(true);
       console.log("Auth token has been refreshed");
+      
+      // Check if special admin user
+      if (superAdminEmails.includes(email)) {
+        console.log("Super admin user detected:", email);
+      }
       
       // Firebase auth state listener will handle the user state update
       // The onAuthStateChanged will trigger and fetch user data from Firestore

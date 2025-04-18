@@ -57,8 +57,21 @@ const LoginForm: React.FC = () => {
         description: "Welcome back to NeuroHealthHub!",
       });
       
-      // Redirect to dashboard
-      setLocation("/dashboard");
+      // Super admin emails list (should match the one in auth-context.tsx)
+      const superAdminEmails = [
+        "drphaniraj1965@gmail.com",
+        "doctornerves@gmail.com",
+        "g.rajshaker@gmail.com"
+      ];
+      
+      // Redirect to appropriate dashboard based on email
+      if (superAdminEmails.includes(data.email)) {
+        console.log("Super admin detected, redirecting to super admin page");
+        setLocation("/super-admin");
+      } else {
+        console.log("Redirecting to regular dashboard");
+        setLocation("/dashboard");
+      }
     } catch (error) {
       console.error(error);
       toast({
