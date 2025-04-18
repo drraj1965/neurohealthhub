@@ -25,7 +25,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("Auth Provider initialized");
+    
+    // For testing in development, set a default user
+    // This allows us to bypass Firebase authentication during initial development
+    if (import.meta.env.DEV) {
+      console.log("Using development mode authentication");
+      setUser({
+        uid: "dev-user-123",
+        email: "dev@example.com",
+        firstName: "Dev",
+        lastName: "User",
+        isAdmin: false,
+        username: "devuser",
+      });
+      setIsAdmin(false);
+      setIsLoading(false);
+      return;
+    }
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log("Auth state changed", firebaseUser ? "User logged in" : "No user");
+      
       if (firebaseUser) {
         try {
           // Get user data from Firestore
@@ -87,33 +108,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
 
   const login = async (email: string, password: string) => {
-    // In a real implementation, we would use Firebase Authentication
     setIsLoading(true);
     try {
-      // Mock login for demo
-      if (email.includes('doctor')) {
-        setUser({
-          uid: "doctor123",
-          email: email,
-          firstName: "Dr.",
-          lastName: "Rajshekher",
-          mobile: "+971501802970",
-          isAdmin: true,
-          username: "doctornerves",
-        });
-        setIsAdmin(true);
-      } else {
-        setUser({
-          uid: "user123",
-          email: email,
-          firstName: "Rajshekher",
-          lastName: "Garikapati",
-          mobile: "+971501802970",
-          isAdmin: false,
-          username: "Raju Gentleman",
-        });
-        setIsAdmin(false);
-      }
+      // Use Firebase authentication
+      await signInWithEmailAndPassword(auth, email, password);
+      // The useEffect with onAuthStateChanged will handle setting the user
+      
+      toast({
+        title: "Login Successful",
+        description: "Welcome back to NeuroHealthHub!",
+      });
     } catch (error) {
       console.error("Login error:", error);
       toast({
@@ -128,20 +132,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (userData: any) => {
-    // In a real implementation, we would use Firebase Authentication
     setIsLoading(true);
     try {
-      // Mock registration for demo
-      setUser({
-        uid: "user123",
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        mobile: userData.mobile || "",
-        isAdmin: false,
-        username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
-      });
-      setIsAdmin(false);
+      // Use Firebase registration
+      await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+      
+      // Get the current user
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        // Update display name
+        await updateProfile(currentUser, {
+          displayName: `${userData.firstName} ${userData.lastName}`
+        });
+        
+        // Store additional user data in Firestore
+        await setDoc(doc(db, "users", currentUser.uid), {
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          mobile: userData.mobile || "",
+          isAdmin: false,
+          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`
+        });
+        
+        toast({
+          title: "Registration Successful",
+          description: "Your account has been created",
+        });
+      }
     } catch (error) {
       console.error("Registration error:", error);
       toast({

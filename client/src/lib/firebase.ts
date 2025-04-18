@@ -12,6 +12,9 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Log Firebase config for debugging (without sensitive values)
+console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

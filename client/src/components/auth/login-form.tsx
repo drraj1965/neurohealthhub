@@ -17,8 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/auth-context";
+import { loginUser } from "@/lib/firebase";
 import { loginSchema, type LoginData } from "@shared/schema";
+import { useAuth } from "@/context/auth-context";
 
 const LoginForm: React.FC = () => {
   const { login } = useAuth();
