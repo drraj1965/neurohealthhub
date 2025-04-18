@@ -7,6 +7,8 @@ import {
   collectionGroup,
   doc,
   getDoc,
+  setDoc,
+  deleteDoc,
   enableIndexedDbPersistence,
   where
 } from "firebase/firestore";
@@ -50,6 +52,7 @@ const FirebaseTest: React.FC = () => {
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [foundUserData, setFoundUserData] = useState<{collection: string, docId: string} | null>(null);
 
   useEffect(() => {
     // Get project ID from environment
@@ -274,7 +277,7 @@ const FirebaseTest: React.FC = () => {
         console.log("DEBUG: User found in users collection with Firebase UID");
         foundInCollection = 'users (by UID)';
         documentId = userId;
-        return;
+        return { collection: foundInCollection, docId: documentId };
       }
       
       // Step 2: Try with Firebase UID in doctors collection
@@ -283,7 +286,7 @@ const FirebaseTest: React.FC = () => {
         console.log("DEBUG: User found in doctors collection with Firebase UID");
         foundInCollection = 'doctors (by UID)';
         documentId = userId;
-        return;
+        return { collection: foundInCollection, docId: documentId };
       }
       
       // Step 3: Try with Firebase UID in neurohealthhub collection
@@ -292,7 +295,7 @@ const FirebaseTest: React.FC = () => {
         console.log("DEBUG: User found in neurohealthhub collection with Firebase UID");
         foundInCollection = 'neurohealthhub (by UID)';
         documentId = userId;
-        return;
+        return { collection: foundInCollection, docId: documentId };
       }
       
       // Step 4: Try by email in users collection if we have an email
@@ -306,7 +309,7 @@ const FirebaseTest: React.FC = () => {
           console.log("DEBUG: User found by email in users collection, document ID:", userDoc.id);
           foundInCollection = 'users (by email)';
           documentId = userDoc.id;
-          return;
+          return { collection: foundInCollection, docId: documentId, doc: userDoc };
         }
       }
       
@@ -321,7 +324,7 @@ const FirebaseTest: React.FC = () => {
           console.log("DEBUG: User found by email in doctors collection, document ID:", doctorDoc.id);
           foundInCollection = 'doctors (by email)';
           documentId = doctorDoc.id;
-          return;
+          return { collection: foundInCollection, docId: documentId, doc: doctorDoc };
         }
       }
       
@@ -336,20 +339,69 @@ const FirebaseTest: React.FC = () => {
           console.log("DEBUG: User found by email in neurohealthhub collection, document ID:", neuroDoc.id);
           foundInCollection = 'neurohealthhub (by email)';
           documentId = neuroDoc.id;
-          return;
+          return { collection: foundInCollection, docId: documentId, doc: neuroDoc };
         }
       }
       
       console.log("DEBUG: User data not found in any collection by UID or email");
+      return null;
       
     } catch (error) {
       console.error("DEBUG: Error checking user data access:", error);
+      return null;
     } finally {
       if (foundInCollection && documentId) {
         console.log(`DEBUG: User data found in ${foundInCollection} with document ID: ${documentId}`);
       } else {
         console.log("DEBUG: User data not found in any collection");
       }
+    }
+  };
+  
+  // Function to migrate a user document to match Firebase Auth UID
+  const migrateUserDocument = async (sourceCollection: string, oldDocId: string, targetUid: string) => {
+    console.log(`DEBUG: Migrating user document from ${sourceCollection}/${oldDocId} to ${sourceCollection}/${targetUid}`);
+    setIsAuthLoading(true);
+    
+    try {
+      // 1. Get the user document with the old ID
+      const oldDocRef = doc(db, sourceCollection, oldDocId);
+      const oldDocSnapshot = await getDoc(oldDocRef);
+      
+      if (!oldDocSnapshot.exists()) {
+        setError(`Original document not found at ${sourceCollection}/${oldDocId}`);
+        return false;
+      }
+      
+      // 2. Get the user data
+      const userData = oldDocSnapshot.data();
+      console.log("DEBUG: User data retrieved:", userData);
+      
+      // 3. Check if target document already exists
+      const newDocRef = doc(db, sourceCollection, targetUid);
+      const newDocSnapshot = await getDoc(newDocRef);
+      
+      if (newDocSnapshot.exists()) {
+        setError(`Target document already exists at ${sourceCollection}/${targetUid}. Cannot overwrite existing data.`);
+        return false;
+      }
+      
+      // 4. Create a new document with the Firebase Auth UID
+      await setDoc(newDocRef, userData);
+      console.log(`DEBUG: New document created at ${sourceCollection}/${targetUid}`);
+      
+      // 5. Delete the old document
+      await deleteDoc(oldDocRef);
+      console.log(`DEBUG: Old document deleted from ${sourceCollection}/${oldDocId}`);
+      
+      alert(`Document successfully migrated from ${sourceCollection}/${oldDocId} to ${sourceCollection}/${targetUid}`);
+      return true;
+    } catch (error) {
+      console.error("DEBUG: Error migrating document:", error);
+      setError(`Migration failed: ${error}`);
+      return false;
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
@@ -380,7 +432,15 @@ const FirebaseTest: React.FC = () => {
       console.log("DEBUG: Auth token refreshed");
       
       // Check for user data in Firestore to verify data access works
-      await checkUserDataAccess(userCredential.user.uid, userCredential.user.email || "");
+      const userData = await checkUserDataAccess(userCredential.user.uid, userCredential.user.email || "");
+      
+      // If we found user data with a different document ID than the Firebase Auth UID,
+      // we'll show a migration option
+      setFoundUserData(userData);
+      
+      if (userData && userData.docId !== userCredential.user.uid) {
+        console.log(`DEBUG: Found user data with mismatched ID. Firebase Auth UID: ${userCredential.user.uid}, Document ID: ${userData.docId}`);
+      }
       
       // Display success message
       alert(`Successfully logged in as ${userCredential.user.email}`);
@@ -492,6 +552,9 @@ const FirebaseTest: React.FC = () => {
       const freshAuth = getAuth();
       await signOut(freshAuth);
       console.log("DEBUG: Logged out successfully");
+      
+      // Reset user data
+      setFoundUserData(null);
       
       // Alert confirmation
       alert("You have been successfully logged out");
@@ -624,7 +687,45 @@ const FirebaseTest: React.FC = () => {
                   <p className="font-medium">User Information:</p>
                   <p className="text-sm mt-1">Email: {user.email}</p>
                   <p className="text-sm">UID: <span className="font-mono text-xs">{user.uid}</span></p>
+                  
+                  {/* Document ID information */}
+                  {foundUserData && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <p className="font-medium">Firestore Document:</p>
+                      <p className="text-sm mt-1">Location: <span className="font-mono text-xs">{foundUserData.collection}</span></p>
+                      <p className="text-sm">Document ID: <span className="font-mono text-xs">{foundUserData.docId}</span></p>
+                      
+                      {/* Show ID mismatch warning and migration option */}
+                      {foundUserData.docId !== user.uid && (
+                        <div className="mt-3 pt-3 border-t border-yellow-200 bg-yellow-50 -mx-4 -mb-4 p-4 rounded-b-md">
+                          <p className="text-sm font-medium text-yellow-800">⚠️ ID Mismatch Detected</p>
+                          <p className="text-xs text-yellow-700 mt-1">
+                            Your user document ID ({foundUserData.docId}) does not match your Firebase Auth UID ({user.uid}).
+                            This can cause issues with data access.
+                          </p>
+                          
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="mt-2 w-full bg-yellow-500 hover:bg-yellow-600"
+                            onClick={() => migrateUserDocument(
+                              foundUserData.collection.split(' ')[0], // Get collection name without the "(by...)" part
+                              foundUserData.docId,
+                              user.uid
+                            )}
+                            disabled={isAuthLoading}
+                          >
+                            {isAuthLoading ? (
+                              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                            ) : null}
+                            Migrate Document ID to Match Auth UID
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+                
                 <Button 
                   variant="outline" 
                   onClick={handleLogout}
