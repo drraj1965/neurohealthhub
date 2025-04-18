@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/context/auth-provider";
 import { registrationSchema, type RegistrationData } from "@shared/schema";
 
 const RegisterForm: React.FC = () => {
