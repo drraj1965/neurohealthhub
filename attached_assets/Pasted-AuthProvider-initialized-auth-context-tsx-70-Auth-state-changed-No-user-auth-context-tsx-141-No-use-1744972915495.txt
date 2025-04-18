@@ -1,0 +1,576 @@
+AuthProvider initialized
+auth-context.tsx:70 Auth state changed: No user
+auth-context.tsx:141 No user is logged in
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=yUiSspVIbJiN80v379mFH6liwtprSI5r3yLuiut60Eg&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=g9vDTAjs8xFYsmBjemXJnA&AID=0&CI=0&TYPE=xmlhttp&zx=rpryekja5p2z&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:29.769Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5762 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=aGSI4wtMzjvXCL8nTA5gJzx9P4gQOoP83MmcWq2w9Ng&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=BQcYp8S4EQbjYPlPwdVdVQ&AID=0&CI=0&TYPE=xmlhttp&zx=n3f6w2sox8vz&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:30.610Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5763 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=pM9QoHb6dKRQV7bP578VM7g_xg8EvCfDVDpyNNyrTgo&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=HZyIDuzNrvctINmqCT9hzw&AID=0&CI=0&TYPE=xmlhttp&zx=2sn5n7crg7er&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:31.450Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5764 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=fhxLOdmIf2jb7JLrxBk_Xtmfhc96ncue7Kvkc5ZXv2A&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=xopPEEzm-7xWX_z6UEGsUA&AID=0&CI=0&TYPE=xmlhttp&zx=10zxac1zz6it&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:33.125Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5765 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=3gyDBtG99bBKLzPoCqLcbYrFOFaCp_Nmkr2adSugDn8&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=hLR_9Cs17ZYTxV3VkIgXhA&AID=0&CI=0&TYPE=xmlhttp&zx=zg31n7oiyjiy&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:37.181Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5766 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=QRxYd3U2Zb4g431b0LYspHadJnpGAINhOM5KeRfWgNQ&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=YIVrGfW-JO5rRTW2JhIlQg&AID=0&CI=0&TYPE=xmlhttp&zx=vlaa3ivdigkc&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:42.683Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5767 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=a4TZVE2O3yTK2nq375FTCQb5TCRqclrOIsCQsYo_1Ug&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=W2GaXsGh8DMplrfatbKzcA&AID=0&CI=0&TYPE=xmlhttp&zx=pcyb1h8zjrz2&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:46.125Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5768 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=X-2vwezhDnlpsTgas4L77kVPHI0lqNx-cP0hsVEPCkk&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=Bp3vk9DgSpGw1X8XVpup3w&AID=0&CI=0&TYPE=xmlhttp&zx=yw0x5d4bd9k2&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:35:56.138Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5769 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firebase.ts:65 DEV: No doctors found, adding sample doctor data
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=uYaL94vuc_4ijNrPXo8CdmOjWsZisXOgjdUacihi5HQ&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=K4biGPepkGPJuCZ-7970bg&AID=0&CI=0&TYPE=xmlhttp&zx=3yokrmurbnxq&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:07.139Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c576a transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=uk3T8G51n_5Dy7N-s3bm8Qg921EUSmHkB0kL8Zd7Nyw&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=triIqCh5MAAvNE-ycxyq7A&AID=0&CI=0&TYPE=xmlhttp&zx=1i9lvx2cpgdy&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:07.417Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c576b transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=4OxlHI3Jw3Gg_WL9FXAj-J7pfb-agskRIDEUaFXe5JI&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=sBtI0leXD5FLMP1TN1VuwQ&AID=0&CI=0&TYPE=xmlhttp&zx=s80yztumji6e&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:09.129Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c576c transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=ynXX4yshmFTtWDgr2RSPZVRiI-VbUDZ_08c5f5Oi_Pg&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=L9-GZ9F4-ZIUEySKowcLDA&AID=0&CI=0&TYPE=xmlhttp&zx=7aozubdrqtlt&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:11.123Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c576d transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=zJUtiL3Do_KfhChPcE--cRbIXMDh2LN3wX9PKPj3Og4&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=_BOuEQ5zuV84s9FIGjI5AA&AID=0&CI=0&TYPE=xmlhttp&zx=j9c666gh6u9e&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:13.131Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c576e transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=lxGhqnhZkiqrlaFi1OAGNDbUxZ8LyrXtwhaV-l4sJl8&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=UbrlMbsJvTHmR_Sur-PKaQ&AID=0&CI=0&TYPE=xmlhttp&zx=m84hd5lh57fz&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:16.273Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c5770 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=kFhg9eQ33j1-KFjHUQdZrI3SJ9fB-Wqmcvj73QAFAwc&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=hq9nosRKBINflz_t19w-MA&AID=0&CI=0&TYPE=xmlhttp&zx=l5mnayog2srd&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:22.127Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c5771 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=ZxVPOHGioFc2sueHQrUvK2zmytudga1wRN8cSAE2tbU&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=lFEeZOeitW_xmnAdmFxVoQ&AID=0&CI=0&TYPE=xmlhttp&zx=jyidwq25lshb&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:33.126Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c5772 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=FrtRnkpNRPwStre7Z5FCljOkOBUW2b85RkWWRAHdIGQ&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=KH_ZmcvDn9EZtNzKrZfaNg&AID=0&CI=0&TYPE=xmlhttp&zx=8b4vzdlk693k&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:40.135Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c5773 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=HpEwqPcjT8iADGJJ0HhjVapS4vW6DLDradUIHNI_le8&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=ju9N6q3I6PW0AH6c7u5ELA&AID=0&CI=0&TYPE=xmlhttp&zx=26wo4e3748hx&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:54.820Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c576f transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=maGFvpOtH-viBBig6QhWxsoVV70Lx3Q418NVAAyz1dk&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=-Xg2vaUd2eCoTHWjCyKdJg&AID=0&CI=0&TYPE=xmlhttp&zx=tuycy04mp0ny&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:55.108Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5774 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=uIxbRgH8eXpNObHXdinuYvEM8iEP5JCWnSwJwPV4jjQ&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=qiuwkqWfjaZ810QyA1QL1w&AID=0&CI=0&TYPE=xmlhttp&zx=1vuv5sxcy4it&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:36:59.945Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c5775 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=YC0qIf-kim-RmYjvRsr1Q4lSGw3xqrECfXWqvobjjyw&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=uxEk2Ua7x7Lo8P0NsB06iQ&AID=0&CI=0&TYPE=xmlhttp&zx=vo2ucwbbsa54&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:37:24.214Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5776 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=JhC1yHbsNsxet6W9V7CDoXHpQg5rf7WVAeYY_tDjUI4&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=donxZ9hqa9ki1YIXtqbDhQ&AID=0&CI=0&TYPE=xmlhttp&zx=njm0s63026mo&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:37:26.136Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c5777 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=189uljUh3LTRie0kn56xKiouL86smz4YxZNh4f9oidw&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=9WgjY8p-sf9m1U1REWxxyA&AID=0&CI=0&TYPE=xmlhttp&zx=x6qp0v9fe46f&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:37:54.142Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c5778 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=YLuipgbeJtmTT6sSVN2-POyzrvZ5bUXcU5bdk647LCw&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=RonAeuc3tR7M1AWDcnan2g&AID=0&CI=0&TYPE=xmlhttp&zx=vdmribtlpk0&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:38:11.119Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c5779 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066Understand this warning
+firebase_firestore.js?v=c95cf77c:1776 
+            
+            
+           GET https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=Jo9WzYKYqkfW1sVZYgqccq83DybCZiRvPUYIPTqFVPE&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=bBAVT0AgWa4j18r9feOpwg&AID=0&CI=0&TYPE=xmlhttp&zx=ctnffrd6segp&t=1 400 (Bad Request)
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1203
+fd @ firebase_firestore.js?v=c95cf77c:2336
+h.Fa @ firebase_firestore.js?v=c95cf77c:2303
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+ec @ firebase_firestore.js?v=c95cf77c:2289
+Rb @ firebase_firestore.js?v=c95cf77c:1411
+M2.Y @ firebase_firestore.js?v=c95cf77c:1279
+M2.ca @ firebase_firestore.js?v=c95cf77c:1210
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Wc @ firebase_firestore.js?v=c95cf77c:1949
+h.bb @ firebase_firestore.js?v=c95cf77c:1944
+h.Ea @ firebase_firestore.js?v=c95cf77c:1941
+Lc @ firebase_firestore.js?v=c95cf77c:1841
+h.Pa @ firebase_firestore.js?v=c95cf77c:1808
+Promise.then
+Nc @ firebase_firestore.js?v=c95cf77c:1799
+h.Sa @ firebase_firestore.js?v=c95cf77c:1795
+Promise.then
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1198
+Hb @ firebase_firestore.js?v=c95cf77c:1173
+h.Ga @ firebase_firestore.js?v=c95cf77c:2223
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+fc @ firebase_firestore.js?v=c95cf77c:2167
+h.connect @ firebase_firestore.js?v=c95cf77c:2127
+Y2.m @ firebase_firestore.js?v=c95cf77c:2483
+Fo @ firebase_firestore.js?v=c95cf77c:12377
+send @ firebase_firestore.js?v=c95cf77c:12275
+I_ @ firebase_firestore.js?v=c95cf77c:12565
+y_ @ firebase_firestore.js?v=c95cf77c:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=c95cf77c:12973
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13002
+__PRIVATE_onWatchStreamOpen @ firebase_firestore.js?v=c95cf77c:13001
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+$o @ firebase_firestore.js?v=c95cf77c:12281
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12425
+setTimeout
+Wo @ firebase_firestore.js?v=c95cf77c:12424
+f_ @ firebase_firestore.js?v=c95cf77c:12676
+V_ @ firebase_firestore.js?v=c95cf77c:12640
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12630
+Promise.then
+auth @ firebase_firestore.js?v=c95cf77c:12626
+start @ firebase_firestore.js?v=c95cf77c:12525
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12652
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12472
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+handleDelayElapsed @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13243Understand this error
+firebase_firestore.js?v=c95cf77c:1776 
+            
+            
+           GET https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=Jo9WzYKYqkfW1sVZYgqccq83DybCZiRvPUYIPTqFVPE&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=bBAVT0AgWa4j18r9feOpwg&AID=0&CI=1&TYPE=xmlhttp&zx=z24967htql0e&t=1 net::ERR_ABORTED 400 (Bad Request)
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1203
+fd @ firebase_firestore.js?v=c95cf77c:2336
+h.ab @ firebase_firestore.js?v=c95cf77c:2311
+(anonymous) @ firebase_firestore.js?v=c95cf77c:1062
+setTimeout
+ub @ firebase_firestore.js?v=c95cf77c:1061
+h.Fa @ firebase_firestore.js?v=c95cf77c:2307
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+ec @ firebase_firestore.js?v=c95cf77c:2289
+Rb @ firebase_firestore.js?v=c95cf77c:1411
+M2.Y @ firebase_firestore.js?v=c95cf77c:1279
+M2.ca @ firebase_firestore.js?v=c95cf77c:1210
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Wc @ firebase_firestore.js?v=c95cf77c:1949
+h.bb @ firebase_firestore.js?v=c95cf77c:1944
+h.Ea @ firebase_firestore.js?v=c95cf77c:1941
+Lc @ firebase_firestore.js?v=c95cf77c:1841
+h.Pa @ firebase_firestore.js?v=c95cf77c:1808
+Promise.then
+Nc @ firebase_firestore.js?v=c95cf77c:1799
+h.Sa @ firebase_firestore.js?v=c95cf77c:1795
+Promise.then
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1198
+Hb @ firebase_firestore.js?v=c95cf77c:1173
+h.Ga @ firebase_firestore.js?v=c95cf77c:2223
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+fc @ firebase_firestore.js?v=c95cf77c:2167
+h.connect @ firebase_firestore.js?v=c95cf77c:2127
+Y2.m @ firebase_firestore.js?v=c95cf77c:2483
+Fo @ firebase_firestore.js?v=c95cf77c:12377
+send @ firebase_firestore.js?v=c95cf77c:12275
+I_ @ firebase_firestore.js?v=c95cf77c:12565
+y_ @ firebase_firestore.js?v=c95cf77c:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=c95cf77c:12973
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13002
+__PRIVATE_onWatchStreamOpen @ firebase_firestore.js?v=c95cf77c:13001
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+$o @ firebase_firestore.js?v=c95cf77c:12281
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12425
+setTimeout
+Wo @ firebase_firestore.js?v=c95cf77c:12424
+f_ @ firebase_firestore.js?v=c95cf77c:12676
+V_ @ firebase_firestore.js?v=c95cf77c:12640
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12630
+Promise.then
+auth @ firebase_firestore.js?v=c95cf77c:12626
+start @ firebase_firestore.js?v=c95cf77c:12525
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12652
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12472
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+handleDelayElapsed @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13243Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:39:05.885Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x429c577a transport errored: jd {type: 'c', target: Y2, g: Y2, defaultPrevented: false, status: 1}
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066
+warn @ chunk-RH4CA3U7.js?v=c95cf77c:1130
+__PRIVATE_logWarn @ firebase_firestore.js?v=c95cf77c:2627
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12396
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12383
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Z2.sa @ firebase_firestore.js?v=c95cf77c:2538
+R @ firebase_firestore.js?v=c95cf77c:2393
+Ub @ firebase_firestore.js?v=c95cf77c:2370
+Qb @ firebase_firestore.js?v=c95cf77c:1334
+M2.Y @ firebase_firestore.js?v=c95cf77c:1292
+M2.ca @ firebase_firestore.js?v=c95cf77c:1210
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Wc @ firebase_firestore.js?v=c95cf77c:1949
+h.bb @ firebase_firestore.js?v=c95cf77c:1944
+h.Ea @ firebase_firestore.js?v=c95cf77c:1941
+Lc @ firebase_firestore.js?v=c95cf77c:1841
+h.Pa @ firebase_firestore.js?v=c95cf77c:1808
+Promise.then
+Nc @ firebase_firestore.js?v=c95cf77c:1799
+h.Sa @ firebase_firestore.js?v=c95cf77c:1795
+Promise.then
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1203
+fd @ firebase_firestore.js?v=c95cf77c:2336
+h.ab @ firebase_firestore.js?v=c95cf77c:2311
+(anonymous) @ firebase_firestore.js?v=c95cf77c:1062
+setTimeout
+ub @ firebase_firestore.js?v=c95cf77c:1061
+h.Fa @ firebase_firestore.js?v=c95cf77c:2307
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+ec @ firebase_firestore.js?v=c95cf77c:2289
+Rb @ firebase_firestore.js?v=c95cf77c:1411
+M2.Y @ firebase_firestore.js?v=c95cf77c:1279
+M2.ca @ firebase_firestore.js?v=c95cf77c:1210
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Wc @ firebase_firestore.js?v=c95cf77c:1949
+h.bb @ firebase_firestore.js?v=c95cf77c:1944
+h.Ea @ firebase_firestore.js?v=c95cf77c:1941
+Lc @ firebase_firestore.js?v=c95cf77c:1841
+h.Pa @ firebase_firestore.js?v=c95cf77c:1808
+Promise.then
+Nc @ firebase_firestore.js?v=c95cf77c:1799
+h.Sa @ firebase_firestore.js?v=c95cf77c:1795
+Promise.then
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1198
+Hb @ firebase_firestore.js?v=c95cf77c:1173
+h.Ga @ firebase_firestore.js?v=c95cf77c:2223
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+fc @ firebase_firestore.js?v=c95cf77c:2167
+h.connect @ firebase_firestore.js?v=c95cf77c:2127
+Y2.m @ firebase_firestore.js?v=c95cf77c:2483
+Fo @ firebase_firestore.js?v=c95cf77c:12377
+send @ firebase_firestore.js?v=c95cf77c:12275
+I_ @ firebase_firestore.js?v=c95cf77c:12565
+y_ @ firebase_firestore.js?v=c95cf77c:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=c95cf77c:12973
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13002
+__PRIVATE_onWatchStreamOpen @ firebase_firestore.js?v=c95cf77c:13001
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+$o @ firebase_firestore.js?v=c95cf77c:12281
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12425
+setTimeout
+Wo @ firebase_firestore.js?v=c95cf77c:12424
+f_ @ firebase_firestore.js?v=c95cf77c:12676
+V_ @ firebase_firestore.js?v=c95cf77c:12640
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12630
+Promise.then
+auth @ firebase_firestore.js?v=c95cf77c:12626
+start @ firebase_firestore.js?v=c95cf77c:12525
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12652
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12472
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+handleDelayElapsed @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13243Understand this warning
+firebase_firestore.js?v=c95cf77c:1776 
+            
+            
+           GET https://firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=Nx4ys0ViZuJWP6mFH_DE8wKX4KbNmfcI2ucW1kb6nYQ&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=myh8FEnUSxZ__Qt-c3XhwA&AID=0&CI=0&TYPE=xmlhttp&zx=s9yxts1mjvwi&t=1 400 (Bad Request)
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1203
+fd @ firebase_firestore.js?v=c95cf77c:2336
+h.Fa @ firebase_firestore.js?v=c95cf77c:2303
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+ec @ firebase_firestore.js?v=c95cf77c:2289
+Rb @ firebase_firestore.js?v=c95cf77c:1411
+M2.Y @ firebase_firestore.js?v=c95cf77c:1279
+M2.ca @ firebase_firestore.js?v=c95cf77c:1210
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Wc @ firebase_firestore.js?v=c95cf77c:1949
+h.bb @ firebase_firestore.js?v=c95cf77c:1944
+h.Ea @ firebase_firestore.js?v=c95cf77c:1941
+Lc @ firebase_firestore.js?v=c95cf77c:1841
+h.Pa @ firebase_firestore.js?v=c95cf77c:1808
+Promise.then
+Nc @ firebase_firestore.js?v=c95cf77c:1799
+h.Sa @ firebase_firestore.js?v=c95cf77c:1795
+Promise.then
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1198
+Hb @ firebase_firestore.js?v=c95cf77c:1173
+h.Ga @ firebase_firestore.js?v=c95cf77c:2223
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+fc @ firebase_firestore.js?v=c95cf77c:2167
+h.connect @ firebase_firestore.js?v=c95cf77c:2127
+Y2.m @ firebase_firestore.js?v=c95cf77c:2483
+Fo @ firebase_firestore.js?v=c95cf77c:12377
+send @ firebase_firestore.js?v=c95cf77c:12275
+I_ @ firebase_firestore.js?v=c95cf77c:12565
+C_ @ firebase_firestore.js?v=c95cf77c:12768
+__PRIVATE_onWriteStreamOpen @ firebase_firestore.js?v=c95cf77c:13120
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+$o @ firebase_firestore.js?v=c95cf77c:12281
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12425
+setTimeout
+Wo @ firebase_firestore.js?v=c95cf77c:12424
+f_ @ firebase_firestore.js?v=c95cf77c:12747
+V_ @ firebase_firestore.js?v=c95cf77c:12640
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12630
+Promise.then
+auth @ firebase_firestore.js?v=c95cf77c:12626
+start @ firebase_firestore.js?v=c95cf77c:12525
+start @ firebase_firestore.js?v=c95cf77c:12741
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12652
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12472
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+handleDelayElapsed @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13243Understand this error
+chunk-RH4CA3U7.js?v=c95cf77c:1066 [2025-04-18T10:39:23.901Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Write' stream 0x429c577b transport errored: jd {type: 'c', target: Y2, g: Y2, defaultPrevented: false, status: 1}
+defaultLogHandler @ chunk-RH4CA3U7.js?v=c95cf77c:1066
+warn @ chunk-RH4CA3U7.js?v=c95cf77c:1130
+__PRIVATE_logWarn @ firebase_firestore.js?v=c95cf77c:2627
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12396
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12383
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Z2.sa @ firebase_firestore.js?v=c95cf77c:2538
+R @ firebase_firestore.js?v=c95cf77c:2393
+Ub @ firebase_firestore.js?v=c95cf77c:2370
+Qb @ firebase_firestore.js?v=c95cf77c:1334
+M2.Y @ firebase_firestore.js?v=c95cf77c:1292
+M2.ca @ firebase_firestore.js?v=c95cf77c:1210
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Wc @ firebase_firestore.js?v=c95cf77c:1949
+h.bb @ firebase_firestore.js?v=c95cf77c:1944
+h.Ea @ firebase_firestore.js?v=c95cf77c:1941
+Lc @ firebase_firestore.js?v=c95cf77c:1841
+h.Pa @ firebase_firestore.js?v=c95cf77c:1808
+Promise.then
+Nc @ firebase_firestore.js?v=c95cf77c:1799
+h.Sa @ firebase_firestore.js?v=c95cf77c:1795
+Promise.then
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1203
+fd @ firebase_firestore.js?v=c95cf77c:2336
+h.Fa @ firebase_firestore.js?v=c95cf77c:2303
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+ec @ firebase_firestore.js?v=c95cf77c:2289
+Rb @ firebase_firestore.js?v=c95cf77c:1411
+M2.Y @ firebase_firestore.js?v=c95cf77c:1279
+M2.ca @ firebase_firestore.js?v=c95cf77c:1210
+ab @ firebase_firestore.js?v=c95cf77c:945
+F2 @ firebase_firestore.js?v=c95cf77c:915
+Wc @ firebase_firestore.js?v=c95cf77c:1949
+h.bb @ firebase_firestore.js?v=c95cf77c:1944
+h.Ea @ firebase_firestore.js?v=c95cf77c:1941
+Lc @ firebase_firestore.js?v=c95cf77c:1841
+h.Pa @ firebase_firestore.js?v=c95cf77c:1808
+Promise.then
+Nc @ firebase_firestore.js?v=c95cf77c:1799
+h.Sa @ firebase_firestore.js?v=c95cf77c:1795
+Promise.then
+h.send @ firebase_firestore.js?v=c95cf77c:1776
+h.ea @ firebase_firestore.js?v=c95cf77c:1917
+Jb @ firebase_firestore.js?v=c95cf77c:1198
+Hb @ firebase_firestore.js?v=c95cf77c:1173
+h.Ga @ firebase_firestore.js?v=c95cf77c:2223
+Da @ firebase_firestore.js?v=c95cf77c:664
+Promise.then
+x2 @ firebase_firestore.js?v=c95cf77c:658
+fc @ firebase_firestore.js?v=c95cf77c:2167
+h.connect @ firebase_firestore.js?v=c95cf77c:2127
+Y2.m @ firebase_firestore.js?v=c95cf77c:2483
+Fo @ firebase_firestore.js?v=c95cf77c:12377
+send @ firebase_firestore.js?v=c95cf77c:12275
+I_ @ firebase_firestore.js?v=c95cf77c:12565
+C_ @ firebase_firestore.js?v=c95cf77c:12768
+__PRIVATE_onWriteStreamOpen @ firebase_firestore.js?v=c95cf77c:13120
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12667
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12643
+$o @ firebase_firestore.js?v=c95cf77c:12281
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12425
+setTimeout
+Wo @ firebase_firestore.js?v=c95cf77c:12424
+f_ @ firebase_firestore.js?v=c95cf77c:12747
+V_ @ firebase_firestore.js?v=c95cf77c:12640
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12630
+Promise.then
+auth @ firebase_firestore.js?v=c95cf77c:12626
+start @ firebase_firestore.js?v=c95cf77c:12525
+start @ firebase_firestore.js?v=c95cf77c:12741
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12652
+(anonymous) @ firebase_firestore.js?v=c95cf77c:12472
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15690
+(anonymous) @ firebase_firestore.js?v=c95cf77c:15721
+Promise.then
+vu @ firebase_firestore.js?v=c95cf77c:15721
+enqueue @ firebase_firestore.js?v=c95cf77c:15690
+enqueueAndForget @ firebase_firestore.js?v=c95cf77c:15672
+handleDelayElapsed @ firebase_firestore.js?v=c95cf77c:13263
+(anonymous) @ firebase_firestore.js?v=c95cf77c:13243Understand this warning

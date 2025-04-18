@@ -10,7 +10,8 @@ import {
   enableIndexedDbPersistence
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
-import { Loader2, Database, RefreshCw, InfoIcon, FileWarning, Shield } from "lucide-react";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import { Loader2, Database, RefreshCw, InfoIcon, FileWarning, Shield, LogIn, UserPlus, LogOut } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,6 +19,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/auth-context";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 interface Collection {
   id: string;
@@ -39,6 +43,12 @@ const FirebaseTest: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [projectId, setProjectId] = useState<string | null>(null);
   const { user, isLoading: authLoading } = useAuth();
+  
+  // Authentication state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
 
   useEffect(() => {
     // Get project ID from environment
@@ -221,6 +231,94 @@ const FirebaseTest: React.FC = () => {
     return "Invalid timestamp";
   };
 
+  // Handle direct Firebase login
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setAuthError("Please enter both email and password");
+      return;
+    }
+    
+    setIsAuthLoading(true);
+    setAuthError(null);
+    
+    try {
+      console.log(`Attempting to sign in with email: ${email}`);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Login successful:", userCredential.user.uid);
+      setAuthError(null);
+      
+      // Clear form after successful login
+      setEmail("");
+      setPassword("");
+      
+      // Fetch collections to show data is working
+      fetchCollections();
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setAuthError(err.message || "Login failed. Please check your credentials.");
+      
+      // Show more helpful errors for common cases
+      if (err.code === 'auth/user-not-found') {
+        setAuthError("No user found with this email. Please register first or check your email.");
+      } else if (err.code === 'auth/wrong-password') {
+        setAuthError("Incorrect password. Please try again.");
+      } else if (err.code === 'auth/invalid-email') {
+        setAuthError("Invalid email format. Please check your email.");
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+  
+  // Handle direct Firebase registration
+  const handleRegister = async () => {
+    if (!email || !password) {
+      setAuthError("Please enter both email and password");
+      return;
+    }
+    
+    setIsAuthLoading(true);
+    setAuthError(null);
+    
+    try {
+      console.log(`Attempting to register with email: ${email}`);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Registration successful:", userCredential.user.uid);
+      setAuthError(null);
+      
+      // Clear form after successful registration
+      setEmail("");
+      setPassword("");
+      
+      // Fetch collections to show data is working
+      fetchCollections();
+    } catch (err: any) {
+      console.error("Registration error:", err);
+      setAuthError(err.message || "Registration failed.");
+      
+      // Show more helpful errors for common cases
+      if (err.code === 'auth/email-already-in-use') {
+        setAuthError("This email is already registered. Please log in instead.");
+      } else if (err.code === 'auth/weak-password') {
+        setAuthError("Password is too weak. Please use at least 6 characters.");
+      } else if (err.code === 'auth/invalid-email') {
+        setAuthError("Invalid email format. Please check your email.");
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+  
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("Logged out successfully");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
   // Format data for display in table
   const formatData = (data: any): string => {
     if (data === null || data === undefined) return "null";
@@ -309,6 +407,108 @@ const FirebaseTest: React.FC = () => {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Authentication Card */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              {user ? (
+                <>
+                  <Shield className="mr-2 h-5 w-5 text-green-500" />
+                  Authenticated as {user.email}
+                </>
+              ) : (
+                <>
+                  <Shield className="mr-2 h-5 w-5" />
+                  Firebase Authentication
+                </>
+              )}
+            </CardTitle>
+            <CardDescription>
+              {user 
+                ? "You are logged in and can access the Firebase database" 
+                : "Log in to access Firebase data with proper authentication"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {user ? (
+              <div className="space-y-4">
+                <div className="bg-muted p-4 rounded-md">
+                  <p className="font-medium">User Information:</p>
+                  <p className="text-sm mt-1">Email: {user.email}</p>
+                  <p className="text-sm">UID: <span className="font-mono text-xs">{user.uid}</span></p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout}
+                  className="w-full"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email"
+                    type="email" 
+                    placeholder="Enter your email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input 
+                    id="password"
+                    type="password" 
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                {authError && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Authentication Error</AlertTitle>
+                    <AlertDescription>{authError}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={handleLogin}
+                    disabled={isAuthLoading}
+                    className="flex-1"
+                  >
+                    {isAuthLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <LogIn className="mr-2 h-4 w-4" />
+                    )}
+                    Sign In
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleRegister}
+                    disabled={isAuthLoading}
+                    className="flex-1"
+                  >
+                    {isAuthLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <UserPlus className="mr-2 h-4 w-4" />
+                    )}
+                    Register
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Use any email/password for testing purposes
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Alert className="mb-6">
           <InfoIcon className="h-4 w-4" />
