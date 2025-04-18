@@ -272,9 +272,9 @@ const FirebaseTest: React.FC = () => {
                 <div className="mt-2">
                   <p className="font-medium">Possible solutions:</p>
                   <ol className="list-decimal ml-5 mt-1">
-                    <li>Add proper security rules to your Firebase project</li>
-                    <li>Make sure the project ID is correct</li>
-                    <li>Verify that you're logged in with a user that has proper permissions</li>
+                    <li>For quick development, use the permissive rules in <code className="font-mono bg-muted px-1 py-0.5 rounded">firebase_rules_permissive.txt</code></li>
+                    <li>Follow the instructions in <code className="font-mono bg-muted px-1 py-0.5 rounded">README_FIREBASE_SETUP.md</code> for step-by-step setup</li>
+                    <li>Alternatively, set up Firebase emulators as described in <code className="font-mono bg-muted px-1 py-0.5 rounded">firebase_emulator_setup.txt</code></li>
                   </ol>
                 </div>
               )}
@@ -284,9 +284,10 @@ const FirebaseTest: React.FC = () => {
 
         <Alert className="mb-6">
           <InfoIcon className="h-4 w-4" />
-          <AlertTitle>Firebase security rules</AlertTitle>
+          <AlertTitle>Firebase Security Rules Information</AlertTitle>
           <AlertDescription>
-            Make sure you have set up proper Firebase security rules in your Firebase console to allow read/write access to your collections. Check the firebase_rules.txt file for recommended rules.
+            <p>The 400 errors in the console indicate Firebase security rules are blocking access to your database.</p>
+            <p className="mt-2">For development, we recommend using the permissive rules from <code className="font-mono bg-muted px-1 py-0.5 rounded">firebase_rules_permissive.txt</code>. Follow the instructions in <code className="font-mono bg-muted px-1 py-0.5 rounded">README_FIREBASE_SETUP.md</code> to apply them.</p>
           </AlertDescription>
         </Alert>
 

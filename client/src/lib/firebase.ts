@@ -1,7 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, query, where, orderBy } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, connectAuthEmulator } from "firebase/auth";
+import { 
+  getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, query, where, orderBy,
+  connectFirestoreEmulator
+} from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL, connectStorageEmulator } from "firebase/storage";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,6 +23,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// Use mock data for development since we're having issues with Firebase security rules
+const USE_MOCK_DATA = true;
+
+if (import.meta.env.DEV && USE_MOCK_DATA) {
+  console.log("🔄 Using local mock data for development");
+}
 
 // Add sample doctor data in development mode - this will run only in development
 async function initializeSampleData() {
@@ -190,9 +200,60 @@ export async function getUserData(userId: string) {
   }
 }
 
+// Mock data for development
+const mockDoctors = [
+  {
+    id: "dev-doctornerves-123",
+    firstName: "Dr.",
+    lastName: "Rajshekher",
+    email: "doctornerves@gmail.com",
+    mobile: "+971501802970",
+    specialization: "Neurology",
+    experience: "15 years",
+    bio: "Specialist in neurological disorders with focus on brain and spinal cord injuries.",
+    isAdmin: true,
+    username: "doctornerves",
+    createdAt: new Date()
+  },
+  {
+    id: "dev-drponnu-456",
+    firstName: "Dr.",
+    lastName: "Ponnu",
+    email: "drponnu@neurohealth.com",
+    mobile: "+971501234567",
+    specialization: "Neurosurgery",
+    experience: "12 years",
+    bio: "Experienced neurosurgeon specializing in complex brain surgeries.",
+    isAdmin: true,
+    username: "drponnu",
+    createdAt: new Date()
+  },
+  {
+    id: "dev-drzain-789",
+    firstName: "Dr.",
+    lastName: "Zain",
+    email: "drzain@neurohealth.com",
+    mobile: "+971507654321",
+    specialization: "Psychiatry",
+    experience: "8 years",
+    bio: "Psychiatrist focusing on neurological disorders affecting mental health.",
+    isAdmin: true,
+    username: "drzain",
+    createdAt: new Date()
+  }
+];
+
+const mockQuestions: any[] = [];
+const mockUsers: any[] = [];
+
 // Doctor functions
 export async function getAllDoctors() {
   try {
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Using mock doctor data");
+      return mockDoctors;
+    }
+    
     const doctorsRef = collection(db, "doctors");
     const doctorDocs = await getDocs(doctorsRef);
     
@@ -202,6 +263,12 @@ export async function getAllDoctors() {
     }));
   } catch (error) {
     console.error("Get all doctors error:", error);
+    
+    if (import.meta.env.DEV && USE_MOCK_DATA) {
+      console.log("🔄 Falling back to mock doctor data after error");
+      return mockDoctors;
+    }
+    
     throw error;
   }
 }
