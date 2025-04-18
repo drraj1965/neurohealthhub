@@ -306,44 +306,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log("Attempting login with:", email);
       
-      if (isDev && email.includes('doctor')) {
-        console.log("DEV MODE: Using doctor mock login");
-        // For development, use mock doctor data
-        setUser(mockDoctorUser);
-        setIsAdmin(true);
-        
-        toast({
-          title: "Login Successful (Dev Mode)",
-          description: "Welcome to development mode, Doctor!",
-        });
-      } else if (isDev) {
-        console.log("DEV MODE: Using regular user mock login");
-        // For development, use mock user data
-        setUser(mockRegularUser);
-        setIsAdmin(false);
-        
-        toast({
-          title: "Login Successful (Dev Mode)",
-          description: "Welcome back to development mode!",
-        });
-      } else {
-        // Real Firebase login
-        console.log("Attempting Firebase login");
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        
-        // Force token refresh to ensure tokens are valid before any Firestore operations
-        const idToken = await userCredential.user.getIdToken(true);
-        console.log("Auth token has been refreshed");
-        
-        // Firebase auth state listener will handle the user state update
-        // The onAuthStateChanged will trigger and fetch user data from Firestore
-        // using our enhanced email-based lookup if needed
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome back to NeuroHealthHub!",
-        });
-      }
+      // List of super admin emails
+      const superAdminEmails = [
+        "drphaniraj1965@gmail.com",
+        "doctornerves@gmail.com",
+        "g.rajshaker@gmail.com"
+      ];
+      
+      // Always use real Firebase Authentication
+      console.log("Attempting Firebase login");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Force token refresh to ensure tokens are valid before any Firestore operations
+      const idToken = await userCredential.user.getIdToken(true);
+      console.log("Auth token has been refreshed");
+      
+      // Firebase auth state listener will handle the user state update
+      // The onAuthStateChanged will trigger and fetch user data from Firestore
+      // using our enhanced email-based lookup if needed
+      
+      toast({
+        title: "Login Successful",
+        description: "Welcome back to NeuroHealthHub!",
+      });
     } catch (error) {
       console.error("Login error:", error);
       toast({
@@ -360,62 +345,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: any) => {
     setIsLoading(true);
     try {
-      if (isDev) {
-        console.log("DEV MODE: Creating mock user account");
-        // For development, create and use mock user
-        const newUser: FirebaseUser = {
-          uid: `user-${Date.now().toString()}`,
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          mobile: userData.mobile || "",
-          isAdmin: false,
-          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
-        };
-        
-        setUser(newUser);
-        setIsAdmin(false);
-        
-        toast({
-          title: "Registration Successful (Dev Mode)",
-          description: "Your account has been created",
-        });
-      } else {
-        // Real Firebase registration
-        console.log("Creating account with:", userData.email);
-        const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-        
-        // Get the current user
-        const currentUser = userCredential.user;
-        console.log("Created account with ID:", currentUser.uid);
-        
-        // Force token refresh to ensure tokens are valid before Firestore operations
-        const idToken = await currentUser.getIdToken(true);
-        console.log("Auth token has been refreshed for new user");
-        
-        // Update display name
-        await updateProfile(currentUser, {
-          displayName: `${userData.firstName} ${userData.lastName}`
-        });
-        
-        // Store additional user data in Firestore
-        await setDoc(doc(db, "users", currentUser.uid), {
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          mobile: userData.mobile || "",
-          isAdmin: false,
-          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
-          createdAt: new Date()
-        });
-        
-        console.log("User profile created in Firestore");
-        
-        toast({
-          title: "Registration Successful",
-          description: "Your account has been created",
-        });
-      }
+      // Always use real Firebase registration
+      console.log("Creating account with:", userData.email);
+      const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+      
+      // Get the current user
+      const currentUser = userCredential.user;
+      console.log("Created account with ID:", currentUser.uid);
+      
+      // Force token refresh to ensure tokens are valid before Firestore operations
+      const idToken = await currentUser.getIdToken(true);
+      console.log("Auth token has been refreshed for new user");
+      
+      // Update display name
+      await updateProfile(currentUser, {
+        displayName: `${userData.firstName} ${userData.lastName}`
+      });
+      
+      // Store additional user data in Firestore
+      await setDoc(doc(db, "users", currentUser.uid), {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        mobile: userData.mobile || "",
+        isAdmin: false,
+        username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
+        createdAt: new Date()
+      });
+      
+      console.log("User profile created in Firestore");
+      
+      toast({
+        title: "Registration Successful",
+        description: "Your account has been created",
+      });
     } catch (error) {
       console.error("Registration error:", error);
       toast({
@@ -433,16 +396,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log("Logging out user");
       
-      if (isDev) {
-        console.log("DEV MODE: Logging out mock user");
-        // Simple logout for development
-        setUser(null);
-        setIsAdmin(false);
-      } else {
-        // Real Firebase logout
-        await signOut(auth);
-        // Firebase auth state listener will handle the user state update
-      }
+      // Always use real Firebase logout
+      await signOut(auth);
+      // Firebase auth state listener will handle the user state update
       
       toast({
         title: "Logged Out",
