@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { 
   onAuthStateChanged, 
-  User as FirebaseAuthUser, 
   signOut, 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -11,9 +10,10 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { FirebaseUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
-// Import Firebase components from our lib file instead of initializing here
+// Import Firebase components from our lib file
 import { auth, db } from "@/lib/firebase";
 
+// Define AuthContext type
 interface AuthContextType {
   user: FirebaseUser | null;
   isAdmin: boolean;
@@ -23,21 +23,20 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
+// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const isDev = import.meta.env.DEV;
 
   useEffect(() => {
-    console.log("Auth Provider initialized");
-    
-    // For testing in development, set a default user
-    // This allows us to bypass Firebase authentication during initial development
-    if (import.meta.env.DEV) {
-      console.log("Using development mode authentication");
+    // Development mode - use mock data
+    if (isDev) {
+      console.log("DevAuthProvider initialized - providing development user");
       setUser({
         uid: "dev-user-123",
         email: "dev@example.com",
@@ -50,6 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return;
     }
+    
+    // Production mode - use Firebase auth
+    console.log("Firebase Auth Provider initialized");
     
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       console.log("Auth state changed", firebaseUser ? "User logged in" : "No user");
@@ -112,19 +114,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [toast, isDev]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Use Firebase authentication
-      await signInWithEmailAndPassword(auth, email, password);
-      // The useEffect with onAuthStateChanged will handle setting the user
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to NeuroHealthHub!",
-      });
+      if (isDev) {
+        // Development mock login
+        if (email.includes('doctor')) {
+          setUser({
+            uid: "doctor123",
+            email: email,
+            firstName: "Dr.",
+            lastName: "Rajshekher",
+            mobile: "+971501802970",
+            isAdmin: true,
+            username: "doctornerves",
+          });
+          setIsAdmin(true);
+        } else {
+          setUser({
+            uid: "user123",
+            email: email,
+            firstName: "Rajshekher",
+            lastName: "Garikapati",
+            mobile: "+971501802970",
+            isAdmin: false,
+            username: "rajugent",
+          });
+          setIsAdmin(false);
+        }
+        
+        toast({
+          title: "Login Successful (Dev Mode)",
+          description: "Welcome to development mode!",
+        });
+      } else {
+        // Production login with Firebase
+        await signInWithEmailAndPassword(auth, email, password);
+        toast({
+          title: "Login Successful",
+          description: "Welcome back to NeuroHealthHub!",
+        });
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast({
@@ -141,31 +173,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (userData: any) => {
     setIsLoading(true);
     try {
-      // Use Firebase registration
-      await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      
-      // Get the current user
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        // Update display name
-        await updateProfile(currentUser, {
-          displayName: `${userData.firstName} ${userData.lastName}`
-        });
-        
-        // Store additional user data in Firestore
-        await setDoc(doc(db, "users", currentUser.uid), {
+      if (isDev) {
+        // Set a default user for development
+        setUser({
+          uid: "user123",
           email: userData.email,
           firstName: userData.firstName,
           lastName: userData.lastName,
           mobile: userData.mobile || "",
           isAdmin: false,
-          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`
+          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
         });
+        setIsAdmin(false);
         
         toast({
-          title: "Registration Successful",
+          title: "Registration Successful (Dev Mode)",
           description: "Your account has been created",
         });
+      } else {
+        // Use Firebase registration in production
+        await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+        
+        // Get the current user
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          // Update display name
+          await updateProfile(currentUser, {
+            displayName: `${userData.firstName} ${userData.lastName}`
+          });
+          
+          // Store additional user data in Firestore
+          await setDoc(doc(db, "users", currentUser.uid), {
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            mobile: userData.mobile || "",
+            isAdmin: false,
+            username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`
+          });
+          
+          toast({
+            title: "Registration Successful",
+            description: "Your account has been created",
+          });
+        }
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -182,7 +233,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      if (!isDev) {
+        await signOut(auth);
+      }
       setUser(null);
       setIsAdmin(false);
       window.location.href = "/login";
@@ -210,7 +263,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export function useAuth() {
   const context = useContext(AuthContext);
