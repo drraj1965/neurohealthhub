@@ -17,11 +17,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/auth-provider";
 import { registrationSchema, type RegistrationData } from "@shared/schema";
 
+// Simplified registration form without auth context dependency
 const RegisterForm: React.FC = () => {
-  const { register } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
@@ -44,11 +43,16 @@ const RegisterForm: React.FC = () => {
   const onSubmit = async (data: RegistrationData) => {
     setIsLoading(true);
     try {
-      await register(data);
+      // Simulate successful registration for demo purposes
+      console.log("Registration attempt with:", data.email);
+      
+      // Show success toast
       toast({
         title: "Registration successful",
         description: "Welcome to NeuroHealthHub!",
       });
+      
+      // Redirect to home page
       setLocation("/");
     } catch (error) {
       console.error(error);

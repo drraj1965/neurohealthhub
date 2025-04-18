@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/auth-provider";
+import { useAuth } from "@/context/auth-context";
 import { questionFormSchema, type QuestionFormData } from "@shared/schema";
 import SpeechToTextService from "@/lib/speech-to-text";
 import { submitQuestion, uploadFile, getAllDoctors } from "@/lib/firebase";
