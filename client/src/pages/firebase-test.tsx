@@ -146,25 +146,45 @@ const FirebaseTest: React.FC = () => {
     
     setLoading(true);
     setError(null);
+    setDocuments([]); // Clear previous documents
+    
     try {
+      console.log(`Fetching documents from collection: ${collectionPath}`);
       const pathSegments = collectionPath.split('/');
+      
       // Create collection reference based on path segments
       let collectionRef;
       if (pathSegments.length === 1) {
+        // Standard top-level collection (e.g., 'users')
         collectionRef = collection(db, pathSegments[0]);
       } else if (pathSegments.length === 3) {
+        // Subcollection (e.g., 'users/userId/questions')
         collectionRef = collection(db, pathSegments[0], pathSegments[1], pathSegments[2]);
       } else {
         throw new Error(`Unsupported collection path format: ${collectionPath}`);
       }
       
+      // Add more detailed logging
+      console.log(`Executing query on collection: ${collectionPath}`);
       const querySnapshot = await getDocs(query(collectionRef));
+      console.log(`Retrieved ${querySnapshot.size} documents from ${collectionPath}`);
       
-      const documentsData: Document[] = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        path: `${collectionPath}/${doc.id}`,
-        data: doc.data()
-      }));
+      // Process documents with better error handling
+      const documentsData: Document[] = [];
+      
+      querySnapshot.forEach(doc => {
+        try {
+          const data = doc.data();
+          console.log(`Document ID: ${doc.id}, data:`, data);
+          documentsData.push({
+            id: doc.id,
+            path: `${collectionPath}/${doc.id}`,
+            data: data
+          });
+        } catch (docError) {
+          console.error(`Error processing document ${doc.id}:`, docError);
+        }
+      });
       
       setDocuments(documentsData);
       setSelectedCollection(collectionPath);
@@ -407,25 +427,33 @@ const FirebaseTest: React.FC = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {documents.map((doc) => (
-                            <TableRow key={doc.id}>
-                              <TableCell className="font-medium font-mono">
-                                {doc.id}
-                              </TableCell>
-                              <TableCell>
-                                <div className="grid grid-cols-1 gap-1">
-                                  {Object.entries(doc.data).map(([key, value]) => (
-                                    <div key={key} className="flex items-start text-sm">
-                                      <span className="font-medium mr-2">{key}:</span>
-                                      <span className="text-muted-foreground break-all">
-                                        {formatData(value)}
-                                      </span>
+                          {documents.map((doc) => {
+                            // Add better logging to debug document rendering issues
+                            console.log("Rendering document:", doc.id, doc.data);
+                            return (
+                              <TableRow key={doc.id}>
+                                <TableCell className="font-medium font-mono">
+                                  {doc.id}
+                                </TableCell>
+                                <TableCell>
+                                  {doc.data && typeof doc.data === 'object' ? (
+                                    <div className="grid grid-cols-1 gap-1">
+                                      {Object.entries(doc.data).map(([key, value]) => (
+                                        <div key={key} className="flex items-start text-sm py-1 border-b border-muted last:border-0">
+                                          <span className="font-medium mr-2 min-w-[120px]">{key}:</span>
+                                          <span className="text-muted-foreground break-all">
+                                            {formatData(value)}
+                                          </span>
+                                        </div>
+                                      ))}
                                     </div>
-                                  ))}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                  ) : (
+                                    <span className="text-muted-foreground italic">Empty document or error loading data</span>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
