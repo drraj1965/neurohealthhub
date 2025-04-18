@@ -13,6 +13,7 @@ import AskQuestion from "@/pages/ask-question";
 import MyQuestions from "@/pages/my-questions";
 import FirebaseTest from "@/pages/firebase-test";
 import SuperAdmin from "@/pages/super-admin";
+import FirebaseAccountCheck from "@/pages/firebase-account-check";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 
@@ -53,6 +54,7 @@ function AppRoutes() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/firebase-test" component={FirebaseTest} />
+      <Route path="/firebase-account-check" component={FirebaseAccountCheck} />
       <Route path="/dashboard">
         {() => <ProtectedRoute component={UserDashboard} />}
       </Route>
