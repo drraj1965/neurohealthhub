@@ -237,7 +237,59 @@ export async function registerUser(email: string, password: string, firstName: s
 
 export async function loginUser(email: string, password: string) {
   try {
+    console.log("Attempting Firebase login with:", email);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Force token refresh to ensure valid auth state
+    const idToken = await userCredential.user.getIdToken(true);
+    console.log("Login successful with ID:", userCredential.user.uid);
+    console.log("Auth token has been refreshed");
+    
+    // First try to get user data from standard path
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      if (userDoc.exists()) {
+        console.log("User data found in users collection");
+        return { 
+          ...userCredential.user, 
+          customData: userDoc.data()
+        };
+      }
+    } catch (err) {
+      console.log("User data not found in standard users collection");
+    }
+    
+    // If not found, try doctors collection
+    try {
+      const doctorDoc = await getDoc(doc(db, 'doctors', userCredential.user.uid));
+      if (doctorDoc.exists()) {
+        console.log("User data found in doctors collection");
+        return { 
+          ...userCredential.user,
+          customData: doctorDoc.data(),
+          isDoctor: true
+        };
+      }
+    } catch (err) {
+      console.log("User data not found in standard doctors collection");
+    }
+    
+    // Finally try neurohealthhub collection
+    try {
+      const neuroDoc = await getDoc(doc(db, 'neurohealthhub', userCredential.user.uid));
+      if (neuroDoc.exists()) {
+        console.log("User data found in neurohealthhub collection");
+        return { 
+          ...userCredential.user,
+          customData: neuroDoc.data(),
+          isDoctor: neuroDoc.data().isAdmin === true
+        };
+      }
+    } catch (err) {
+      console.log("User data not found in neurohealthhub collection");
+    }
+    
+    // Return the user if no custom data found
     return userCredential.user;
   } catch (error) {
     console.error("Login error:", error);
@@ -287,6 +339,17 @@ export async function getUserData(userId: string) {
     
     console.log(`Attempting to get data for user ID: ${userId}`);
     
+    // Ensure we have valid authentication - this may refresh the token if needed
+    if (auth.currentUser && auth.currentUser.uid === userId) {
+      try {
+        await auth.currentUser.getIdToken(true);
+        console.log("Auth token refreshed for getUserData");
+      } catch (tokenError) {
+        console.warn("Could not refresh auth token:", tokenError);
+        // Continue anyway as we may still be able to access the data with the existing token
+      }
+    }
+    
     // Create a fallback user object with minimal data if we encounter offline issues
     const fallbackUserData = {
       id: userId,
@@ -297,87 +360,62 @@ export async function getUserData(userId: string) {
       _isOfflineFallback: true
     };
     
-    // Try both regular and named database paths with improved error handling
-    let userDoc = null;
-    let doctorDoc = null;
-    let userDocError = null;
-    let doctorDocError = null;
-    
-    // First try getting user document from standard collection
+    // First try to get user data from standard path
     try {
-      // Try the standard root-level path
-      userDoc = await getDoc(doc(db, "users", userId));
-      console.log("Successfully queried standard users path");
-    } catch (error: any) {
-      userDocError = error;
-      console.log(`Error querying standard users path: ${error.message}`);
-    }
-    
-    // If we don't find the user at standard path, try as a document in the neurohealthhub collection
-    if (!userDoc || !userDoc.exists()) {
-      try {
-        // Try direct user document fetch within neurohealthhub collection
-        const neuroDocRef = doc(db, "neurohealthhub", userId);
-        const neuroDoc = await getDoc(neuroDocRef);
-        
-        // If the document exists and has a role or type field that indicates it's a user
-        if (neuroDoc.exists() && 
-            (neuroDoc.data().role === 'user' || 
-             neuroDoc.data().type === 'user' || 
-             neuroDoc.data().isAdmin === false)) {
-          userDoc = neuroDoc;
-          console.log("Found user document in neurohealthhub collection");
-        }
-      } catch (error) {
-        console.log("Error checking neurohealthhub collection for user:", error);
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        console.log("User data found in users collection");
+        return { 
+          ...userDoc.data(), 
+          id: userId,
+          collection: 'users'
+        };
       }
+    } catch (err) {
+      console.log("User data not found in standard users collection");
     }
     
-    // Then try getting doctor document from standard collection
+    // If not found, try doctors collection
     try {
-      doctorDoc = await getDoc(doc(db, "doctors", userId));
-      console.log("Successfully queried standard doctors path");
-    } catch (error: any) {
-      doctorDocError = error;
-      console.log(`Error querying standard doctors path: ${error.message}`);
-    }
-    
-    // If we don't find the doctor at standard path, try as a document in the neurohealthhub collection
-    if (!doctorDoc || !doctorDoc.exists()) {
-      try {
-        // Try direct doctor document fetch within neurohealthhub collection
-        const neuroDocRef = doc(db, "neurohealthhub", userId);
-        const neuroDoc = await getDoc(neuroDocRef);
-        
-        // If the document exists and has a role or type field that indicates it's a doctor
-        if (neuroDoc.exists() && 
-            (neuroDoc.data().role === 'doctor' || 
-             neuroDoc.data().type === 'doctor' || 
-             neuroDoc.data().isAdmin === true ||
-             neuroDoc.data().specialization)) {
-          doctorDoc = neuroDoc;
-          console.log("Found doctor document in neurohealthhub collection");
-        }
-      } catch (error) {
-        console.log("Error checking neurohealthhub collection for doctor:", error);
+      const doctorDoc = await getDoc(doc(db, 'doctors', userId));
+      if (doctorDoc.exists()) {
+        console.log("User data found in doctors collection");
+        return { 
+          ...doctorDoc.data(),
+          id: userId,
+          isDoctor: true,
+          collection: 'doctors'
+        };
       }
+    } catch (err) {
+      console.log("User data not found in standard doctors collection");
     }
     
-    // Return document data if found
-    if (userDoc && userDoc.exists()) {
-      return { ...userDoc.data(), id: userId };
-    } else if (doctorDoc && doctorDoc.exists()) {
-      return { ...doctorDoc.data(), id: userId };
+    // Finally try neurohealthhub collection
+    try {
+      const neuroDoc = await getDoc(doc(db, 'neurohealthhub', userId));
+      if (neuroDoc.exists()) {
+        console.log("User data found in neurohealthhub collection");
+        // Determine if it's a doctor or regular user
+        const isDoctor = neuroDoc.data().isAdmin === true || 
+                         neuroDoc.data().role === 'doctor' || 
+                         neuroDoc.data().type === 'doctor' ||
+                         neuroDoc.data().specialization;
+        
+        return { 
+          ...neuroDoc.data(),
+          id: userId,
+          isDoctor: isDoctor,
+          collection: 'neurohealthhub'
+        };
+      }
+    } catch (err) {
+      console.log("User data not found in neurohealthhub collection");
     }
     
-    // If no documents were found but there were errors that suggest we're offline
-    const offlineErrorCodes = ['unavailable', 'failed-precondition', 'deadline-exceeded'];
-    const isLikelyOffline = 
-      (userDocError && offlineErrorCodes.includes(userDocError.code)) || 
-      (doctorDocError && offlineErrorCodes.includes(doctorDocError.code));
-    
-    if (isLikelyOffline) {
-      console.warn("Connection appears to be unavailable - using offline fallback data");
+    // If network is offline, return fallback data
+    if (!navigator.onLine) {
+      console.warn("Network appears to be offline - using fallback user data");
       return fallbackUserData;
     }
     
