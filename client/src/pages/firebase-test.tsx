@@ -4,18 +4,20 @@ import {
   collection, 
   getDocs, 
   query, 
-  getFirestore, 
   collectionGroup,
   doc,
-  getDoc
+  getDoc,
+  enableIndexedDbPersistence
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { Loader2, Database, RefreshCw } from "lucide-react";
+import { db, auth } from "@/lib/firebase";
+import { Loader2, Database, RefreshCw, InfoIcon, FileWarning, Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/context/auth-context";
 
 interface Collection {
   id: string;
@@ -33,15 +35,40 @@ const FirebaseTest: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const { user, isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    // Get project ID from environment
+    setProjectId(import.meta.env.VITE_FIREBASE_PROJECT_ID);
+    
+    // Enable persistence for better offline support
+    try {
+      enableIndexedDbPersistence(db)
+        .then(() => {
+          console.log("Offline persistence enabled");
+        })
+        .catch((err) => {
+          console.warn("Persistence error:", err);
+        });
+    } catch (err) {
+      // Already enabled or not supported
+    }
+  }, []);
 
   // Helper function to fetch all collections and subcollections
   const fetchCollections = async () => {
+    if (!user && !import.meta.env.DEV) {
+      setError("You must be logged in to access Firebase data. Please log in first.");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
-      // Root level collections
+      // Root level collections - Common collections in Firebase
       const rootCollections = ["users", "doctors", "questions", "answers"];
       const collectionsData: Collection[] = [];
 
@@ -56,8 +83,9 @@ const FirebaseTest: React.FC = () => {
             documentCount: querySnapshot.size
           });
 
-          // Check for subcollections in each document
-          for (const docSnapshot of querySnapshot.docs) {
+          // Check for subcollections in each document - only check first 5 docs to avoid too many requests
+          const docsToCheck = querySnapshot.docs.slice(0, 5);
+          for (const docSnapshot of docsToCheck) {
             try {
               // Common subcollections we expect
               const subCollectionNames = ["my_questions", "user_questions", "answers"];
@@ -82,16 +110,28 @@ const FirebaseTest: React.FC = () => {
               console.log(`Error fetching subcollections for ${collectionName}/${docSnapshot.id}:`, err);
             }
           }
-        } catch (err) {
-          console.log(`Collection ${collectionName} might not exist:`, err);
+        } catch (err: any) {
+          console.log(`Collection ${collectionName} might not exist or permission denied:`, err);
+          if (err.code === 'permission-denied') {
+            setError(`Permission denied accessing collection '${collectionName}'. Please check Firebase security rules.`);
+          }
         }
       }
 
       setCollections(collectionsData);
-      setError(null);
-    } catch (err) {
+      
+      if (collectionsData.length === 0) {
+        setError("No collections found. You may need to check your Firebase security rules or create initial data.");
+      } else {
+        setError(null);
+      }
+    } catch (err: any) {
       console.error("Error fetching collections:", err);
-      setError("Failed to fetch collections. Check console for details.");
+      if (err.code === 'permission-denied') {
+        setError("Permission denied accessing Firebase. Make sure you set up proper Firebase security rules.");
+      } else {
+        setError(`Failed to fetch collections: ${err.message}. Check console for details.`);
+      }
     } finally {
       setLoading(false);
     }
@@ -99,6 +139,11 @@ const FirebaseTest: React.FC = () => {
 
   // Fetch documents for a specific collection
   const fetchDocuments = async (collectionPath: string) => {
+    if (!user && !import.meta.env.DEV) {
+      setError("You must be logged in to access Firebase data. Please log in first.");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
@@ -124,9 +169,17 @@ const FirebaseTest: React.FC = () => {
       setDocuments(documentsData);
       setSelectedCollection(collectionPath);
       setError(null);
-    } catch (err) {
+      
+      if (documentsData.length === 0) {
+        setError("No documents found in this collection.");
+      }
+    } catch (err: any) {
       console.error(`Error fetching documents for ${collectionPath}:`, err);
-      setError(`Failed to fetch documents for ${collectionPath}. Check console for details.`);
+      if (err.code === 'permission-denied') {
+        setError(`Permission denied accessing collection '${collectionPath}'. Please check Firebase security rules.`);
+      } else {
+        setError(`Failed to fetch documents for ${collectionPath}: ${err.message}`);
+      }
       setDocuments([]);
     } finally {
       setLoading(false);
@@ -171,11 +224,6 @@ const FirebaseTest: React.FC = () => {
     return String(data);
   };
 
-  // Load collections on mount
-  useEffect(() => {
-    fetchCollections();
-  }, []);
-
   return (
     <>
       <Helmet>
@@ -188,23 +236,59 @@ const FirebaseTest: React.FC = () => {
             <p className="text-muted-foreground">
               Verify Firebase connection and view database collections
             </p>
+            {projectId && (
+              <p className="text-sm mt-1">
+                Project ID: <span className="font-mono">{projectId}</span>
+              </p>
+            )}
           </div>
-          <Button onClick={fetchCollections} disabled={loading}>
+          <Button onClick={fetchCollections} disabled={loading || (!user && !import.meta.env.DEV)}>
             {loading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <RefreshCw className="mr-2 h-4 w-4" />
             )}
-            Refresh
+            Refresh Collections
           </Button>
         </div>
 
-        {error && (
-          <div className="bg-destructive/20 text-destructive p-4 rounded-md mb-6">
-            <p className="font-medium">Error</p>
-            <p>{error}</p>
-          </div>
+        {!user && !import.meta.env.DEV && (
+          <Alert className="mb-6">
+            <Shield className="h-4 w-4" />
+            <AlertTitle>Authentication required</AlertTitle>
+            <AlertDescription>
+              You need to be logged in to access Firebase data. Please log in and try again.
+            </AlertDescription>
+          </Alert>
         )}
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <FileWarning className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error}
+              {error.includes('security rules') && (
+                <div className="mt-2">
+                  <p className="font-medium">Possible solutions:</p>
+                  <ol className="list-decimal ml-5 mt-1">
+                    <li>Add proper security rules to your Firebase project</li>
+                    <li>Make sure the project ID is correct</li>
+                    <li>Verify that you're logged in with a user that has proper permissions</li>
+                  </ol>
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <Alert className="mb-6">
+          <InfoIcon className="h-4 w-4" />
+          <AlertTitle>Firebase security rules</AlertTitle>
+          <AlertDescription>
+            Make sure you have set up proper Firebase security rules in your Firebase console to allow read/write access to your collections. Check the firebase_rules.txt file for recommended rules.
+          </AlertDescription>
+        </Alert>
 
         <Tabs defaultValue="collections">
           <TabsList className="mb-4">
@@ -222,7 +306,9 @@ const FirebaseTest: React.FC = () => {
                   Firebase Collections
                 </CardTitle>
                 <CardDescription>
-                  Found {collections.length} collections and subcollections
+                  {collections.length > 0 
+                    ? `Found ${collections.length} collections and subcollections`
+                    : 'No collections fetched yet. Click "Refresh Collections" to begin.'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -273,7 +359,7 @@ const FirebaseTest: React.FC = () => {
                   </Table>
                 ) : (
                   <div className="text-center p-6 text-muted-foreground">
-                    No collections found
+                    No collections found. Click "Refresh Collections" to check available collections.
                   </div>
                 )}
               </CardContent>
