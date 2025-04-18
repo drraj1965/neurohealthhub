@@ -242,19 +242,38 @@ const FirebaseTest: React.FC = () => {
     setAuthError(null);
     
     try {
-      console.log(`Attempting to sign in with email: ${email}`);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login successful:", userCredential.user.uid);
+      console.log(`DEBUG: Attempting to sign in with email: ${email}`);
+      
+      // Get a fresh auth instance to avoid any stale state
+      const freshAuth = getAuth();
+      console.log("DEBUG: Got fresh auth instance");
+      
+      const userCredential = await signInWithEmailAndPassword(freshAuth, email, password);
+      console.log("DEBUG: Login response received", userCredential);
+      console.log("DEBUG: Login successful for UID:", userCredential.user.uid);
+      console.log("DEBUG: User email:", userCredential.user.email);
+      
+      // Display success message
+      alert(`Successfully logged in as ${userCredential.user.email}`);
+      
       setAuthError(null);
       
       // Clear form after successful login
       setEmail("");
       setPassword("");
       
-      // Fetch collections to show data is working
-      fetchCollections();
+      // Force a UI refresh by setting a state variable
+      setLoading(true);
+      setTimeout(() => {
+        // Fetch collections to show data is working
+        fetchCollections();
+        setLoading(false);
+      }, 500);
     } catch (err: any) {
-      console.error("Login error:", err);
+      console.error("DEBUG: Login error:", err);
+      console.error("DEBUG: Error code:", err.code);
+      console.error("DEBUG: Error message:", err.message);
+      
       setAuthError(err.message || "Login failed. Please check your credentials.");
       
       // Show more helpful errors for common cases
@@ -264,6 +283,8 @@ const FirebaseTest: React.FC = () => {
         setAuthError("Incorrect password. Please try again.");
       } else if (err.code === 'auth/invalid-email') {
         setAuthError("Invalid email format. Please check your email.");
+      } else if (err.code === 'auth/invalid-credential') {
+        setAuthError("Invalid credentials. The email or password is incorrect.");
       }
     } finally {
       setIsAuthLoading(false);
@@ -277,23 +298,47 @@ const FirebaseTest: React.FC = () => {
       return;
     }
     
+    if (password.length < 6) {
+      setAuthError("Password must be at least 6 characters long");
+      return;
+    }
+    
     setIsAuthLoading(true);
     setAuthError(null);
     
     try {
-      console.log(`Attempting to register with email: ${email}`);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Registration successful:", userCredential.user.uid);
+      console.log(`DEBUG: Attempting to register with email: ${email}`);
+      
+      // Get a fresh auth instance
+      const freshAuth = getAuth();
+      console.log("DEBUG: Got fresh auth instance for registration");
+      
+      const userCredential = await createUserWithEmailAndPassword(freshAuth, email, password);
+      console.log("DEBUG: Registration response received", userCredential);
+      console.log("DEBUG: Registration successful for UID:", userCredential.user.uid);
+      console.log("DEBUG: New user email:", userCredential.user.email);
+      
+      // Display success message  
+      alert(`Successfully registered as ${userCredential.user.email}`);
+      
       setAuthError(null);
       
       // Clear form after successful registration
       setEmail("");
       setPassword("");
       
-      // Fetch collections to show data is working
-      fetchCollections();
+      // Force a UI refresh
+      setLoading(true);
+      setTimeout(() => {
+        // Fetch collections to show data is working
+        fetchCollections();
+        setLoading(false);
+      }, 500);
     } catch (err: any) {
-      console.error("Registration error:", err);
+      console.error("DEBUG: Registration error:", err);
+      console.error("DEBUG: Error code:", err.code);
+      console.error("DEBUG: Error message:", err.message);
+      
       setAuthError(err.message || "Registration failed.");
       
       // Show more helpful errors for common cases
@@ -303,6 +348,8 @@ const FirebaseTest: React.FC = () => {
         setAuthError("Password is too weak. Please use at least 6 characters.");
       } else if (err.code === 'auth/invalid-email') {
         setAuthError("Invalid email format. Please check your email.");
+      } else if (err.code === 'auth/network-request-failed') {
+        setAuthError("Network error. Please check your internet connection.");
       }
     } finally {
       setIsAuthLoading(false);
@@ -312,10 +359,21 @@ const FirebaseTest: React.FC = () => {
   // Handle logout
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      console.log("Logged out successfully");
+      console.log("DEBUG: Attempting to sign out");
+      const freshAuth = getAuth();
+      await signOut(freshAuth);
+      console.log("DEBUG: Logged out successfully");
+      
+      // Alert confirmation
+      alert("You have been successfully logged out");
+      
+      // Force UI update
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error("DEBUG: Logout error:", err);
     }
   };
 
