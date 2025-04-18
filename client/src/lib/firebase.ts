@@ -22,9 +22,10 @@ console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Initialize Firestore with a specific database ID instead of the default
-const db = getFirestore(app, { databaseId: 'neurohealthhub' });
-console.log("Connecting to specific database: neurohealthhub");
+// Initialize Firestore - for named databases, this is handled in the Firebase console
+// and we don't specify the name in the code
+const db = getFirestore(app);
+console.log("Connecting to Firebase Firestore database");
 
 const storage = getStorage(app);
 
@@ -59,12 +60,35 @@ async function initializeSampleData() {
     try {
       console.log("DEV MODE: Checking if sample data needs to be initialized");
       
-      // Check if doctor data exists
+      // Check if doctor data exists - try both regular collection path and named database path
+      // First try with default database path
       const doctorsCollection = collection(db, "doctors");
+      let doctorsQuery;
+      let querySuccessful = false;
       
       try {
-        const doctorsQuery = await getDocs(doctorsCollection);
-        
+        doctorsQuery = await getDocs(doctorsCollection);
+        console.log("Successfully queried 'doctors' collection");
+        querySuccessful = true;
+      } catch (error: any) {
+        if (error.code === 'permission-denied' || error.message?.includes('different database')) {
+          // If there's a permission error or database mismatch, try with database name in the path
+          console.log("Initial query failed, trying with neurohealthhub/doctors path");
+          try {
+            const namedDbCollection = collection(db, "neurohealthhub/doctors");
+            doctorsQuery = await getDocs(namedDbCollection);
+            console.log("Successfully queried 'neurohealthhub/doctors' collection");
+            querySuccessful = true;
+          } catch (namedError) {
+            console.error("Error querying named database path:", namedError);
+          }
+        } else {
+          console.error("Error querying doctors collection:", error);
+        }
+      }
+      
+      // Only proceed if one of the queries was successful
+      if (querySuccessful && doctorsQuery) {
         if (doctorsQuery.empty) {
           console.log("DEV: No doctors found, adding sample doctor data");
           
@@ -133,13 +157,8 @@ async function initializeSampleData() {
         } else {
           console.log(`DEV: ${doctorsQuery.size} doctors already exist, skipping initialization`);
         }
-      } catch (queryError: any) {
-        if (queryError.code === 'permission-denied') {
-          console.warn("DEV: Permission denied accessing doctors collection. Check Firebase security rules.");
-          console.warn("DEV: View firebase_firestore_rules_dev.txt for recommended development rules.");
-        } else {
-          console.error("DEV: Error querying doctors:", queryError);
-        }
+      } else {
+        console.warn("DEV: Could not query doctors collection. Check Firebase security rules or database path.");
       }
     } catch (error) {
       console.error("DEV: Error initializing sample data:", error);
@@ -223,12 +242,38 @@ export async function getUserData(userId: string) {
       return null;
     }
     
-    const userDoc = await getDoc(doc(db, "users", userId));
-    const doctorDoc = await getDoc(doc(db, "doctors", userId));
+    // Try both regular and named database paths
+    let userDoc, doctorDoc;
     
-    if (userDoc.exists()) {
+    try {
+      // First try the standard path
+      userDoc = await getDoc(doc(db, "users", userId));
+    } catch (error: any) {
+      if (error.message.includes('different database')) {
+        // Try the named database path
+        console.log("Trying alternative path for users collection");
+        userDoc = await getDoc(doc(db, "neurohealthhub/users", userId));
+      } else {
+        throw error;
+      }
+    }
+    
+    try {
+      // First try the standard path
+      doctorDoc = await getDoc(doc(db, "doctors", userId));
+    } catch (error: any) {
+      if (error.message.includes('different database')) {
+        // Try the named database path
+        console.log("Trying alternative path for doctors collection");
+        doctorDoc = await getDoc(doc(db, "neurohealthhub/doctors", userId));
+      } else {
+        throw error;
+      }
+    }
+    
+    if (userDoc && userDoc.exists()) {
       return { ...userDoc.data(), id: userId };
-    } else if (doctorDoc.exists()) {
+    } else if (doctorDoc && doctorDoc.exists()) {
       return { ...doctorDoc.data(), id: userId };
     }
     
