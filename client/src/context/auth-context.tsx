@@ -6,7 +6,15 @@ import {
   createUserWithEmailAndPassword,
   updateProfile
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  collection, 
+  query, 
+  where, 
+  getDocs 
+} from "firebase/firestore";
 import { FirebaseUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
@@ -80,17 +88,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           let userData = null;
           let userType = null;
           
-          // Step 1: Try standard collections first
+          // Step 1: Try standard collections first with Firebase UID
           try {
-            // Check users collection
+            // Check users collection using Firebase UID
             const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
             if (userDoc.exists()) {
-              console.log("Regular user found in standard Firestore path");
+              console.log("Regular user found in standard Firestore path with Firebase UID");
               userData = userDoc.data();
               userType = 'user';
             }
           } catch (error) {
-            console.log("Error fetching from users collection:", error);
+            console.log("Error fetching from users collection with Firebase UID:", error);
+          }
+          
+          // Step 1b: If not found with Firebase UID, try querying by email
+          if (!userData && firebaseUser.email) {
+            try {
+              // Query for user by email instead of UID
+              const usersRef = collection(db, 'users');
+              const q = query(usersRef, where('email', '==', firebaseUser.email));
+              const querySnapshot = await getDocs(q);
+              
+              if (!querySnapshot.empty) {
+                console.log("User found by email in users collection, document ID:", querySnapshot.docs[0].id);
+                const userDoc = querySnapshot.docs[0];
+                userData = userDoc.data();
+                userType = 'user';
+                
+                // Store the document ID for future reference
+                console.log("Using user data from document with ID:", userDoc.id, "instead of Firebase UID");
+              }
+            } catch (error) {
+              console.log("Error querying users by email:", error);
+            }
           }
           
           // Step 2: Try doctors collection if user not found
@@ -98,12 +128,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
               const doctorDoc = await getDoc(doc(db, 'doctors', firebaseUser.uid));
               if (doctorDoc.exists()) {
-                console.log("Doctor found in standard Firestore path");
+                console.log("Doctor found in standard Firestore path with Firebase UID");
                 userData = doctorDoc.data();
                 userType = 'doctor';
               }
             } catch (error) {
-              console.log("Error fetching from doctors collection:", error);
+              console.log("Error fetching from doctors collection with Firebase UID:", error);
+            }
+            
+            // Step 2b: If not found with Firebase UID, try querying by email
+            if (!userData && firebaseUser.email) {
+              try {
+                // Query for doctor by email instead of UID
+                const doctorsRef = collection(db, 'doctors');
+                const q = query(doctorsRef, where('email', '==', firebaseUser.email));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                  console.log("Doctor found by email in doctors collection, document ID:", querySnapshot.docs[0].id);
+                  const doctorDoc = querySnapshot.docs[0];
+                  userData = doctorDoc.data();
+                  userType = 'doctor';
+                  
+                  // Store the document ID for future reference
+                  console.log("Using doctor data from document with ID:", doctorDoc.id, "instead of Firebase UID");
+                }
+              } catch (error) {
+                console.log("Error querying doctors by email:", error);
+              }
             }
           }
           
@@ -112,7 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
               const neuroDoc = await getDoc(doc(db, 'neurohealthhub', firebaseUser.uid));
               if (neuroDoc.exists()) {
-                console.log("User found in neurohealthhub collection");
+                console.log("User found in neurohealthhub collection with Firebase UID");
                 userData = neuroDoc.data();
                 
                 // Determine if it's a doctor or regular user
@@ -123,7 +175,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
               }
             } catch (error) {
-              console.log("Error fetching from neurohealthhub collection:", error);
+              console.log("Error fetching from neurohealthhub collection with Firebase UID:", error);
+            }
+            
+            // Step 3b: If not found with Firebase UID, try querying neurohealthhub by email
+            if (!userData && firebaseUser.email) {
+              try {
+                // Query for user by email instead of UID in neurohealthhub collection
+                const neuroRef = collection(db, 'neurohealthhub');
+                const q = query(neuroRef, where('email', '==', firebaseUser.email));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                  console.log("User found by email in neurohealthhub collection, document ID:", querySnapshot.docs[0].id);
+                  const neuroDoc = querySnapshot.docs[0];
+                  userData = neuroDoc.data();
+                  
+                  // Determine if it's a doctor or regular user
+                  if (userData.isAdmin === true || userData.specialization) {
+                    userType = 'doctor';
+                  } else {
+                    userType = 'user';
+                  }
+                  
+                  // Store the document ID for future reference
+                  console.log("Using neurohealthhub data from document with ID:", neuroDoc.id, "instead of Firebase UID");
+                }
+              } catch (error) {
+                console.log("Error querying neurohealthhub by email:", error);
+              }
             }
           }
           

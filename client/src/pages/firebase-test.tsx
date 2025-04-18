@@ -282,6 +282,13 @@ const FirebaseTest: React.FC = () => {
       console.log("DEBUG: Login successful for UID:", userCredential.user.uid);
       console.log("DEBUG: User email:", userCredential.user.email);
       
+      // Force token refresh to ensure tokens are valid
+      const idToken = await userCredential.user.getIdToken(true);
+      console.log("DEBUG: Auth token refreshed");
+      
+      // Check for user data in Firestore to verify data access works
+      await checkUserDataAccess(userCredential.user.uid, userCredential.user.email || "");
+      
       // Display success message
       alert(`Successfully logged in as ${userCredential.user.email}`);
       

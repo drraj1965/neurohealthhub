@@ -5,7 +5,8 @@ We identified an issue with Firebase Authentication that was preventing access t
 
 1. **Authentication token management**: The application needed to explicitly refresh tokens to ensure valid authentication state
 2. **Firestore path handling**: The application needed to properly check multiple paths for user data
-3. **Offline state detection**: Improved handling of network connectivity issues to distinguish between offline mode and permission errors
+3. **Document ID mismatch**: The Firebase Auth UID was different from the document IDs in Firestore collections
+4. **Offline state detection**: Improved handling of network connectivity issues to distinguish between offline mode and permission errors
 
 ## Implemented Solutions
 
@@ -19,22 +20,44 @@ console.log("Auth token has been refreshed");
 
 This explicit token refresh ensures the authentication state is up-to-date and valid for accessing Firestore data.
 
-### 2. Multi-Path Data Access
+### 2. Multi-Path Data Access with Email-Based Lookup
 
-We improved the data access strategy to check multiple locations:
+We improved the data access strategy to check multiple locations and use email-based lookup when the Firebase Auth UID doesn't match Firestore document IDs:
 
 ```javascript
-// First try standard collections
-const userDoc = await getDoc(doc(db, 'users', userId));
+// First try standard collections with Firebase UID
+try {
+  const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+  if (userDoc.exists()) {
+    console.log("Regular user found with Firebase UID");
+    userData = userDoc.data();
+    userType = 'user';
+  }
+} catch (error) {
+  console.log("Error fetching from users collection with Firebase UID:", error);
+}
 
-// If not found, try doctors collection
-const doctorDoc = await getDoc(doc(db, 'doctors', userId));  
-
-// Finally try neurohealthhub collection
-const neuroDoc = await getDoc(doc(db, 'neurohealthhub', userId));
+// If not found with UID, try querying by email
+if (!userData && firebaseUser.email) {
+  try {
+    // Query for user by email instead of UID
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('email', '==', firebaseUser.email));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      console.log("User found by email, document ID:", querySnapshot.docs[0].id);
+      const userDoc = querySnapshot.docs[0];
+      userData = userDoc.data();
+      userType = 'user';
+    }
+  } catch (error) {
+    console.log("Error querying users by email:", error);
+  }
+}
 ```
 
-This allows the application to find user data regardless of which collection it's stored in.
+This allows the application to find user data regardless of which collection it's stored in and handles the case where the Firebase Authentication UID doesn't match the document ID in Firestore.
 
 ### 3. Network State Monitoring
 
