@@ -5,7 +5,8 @@ import {
   LayoutDashboard, 
   Settings, 
   LogOut,
-  User
+  User,
+  Shield
 } from "lucide-react";
 import {
   DropdownMenu,

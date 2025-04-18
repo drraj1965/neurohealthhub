@@ -12,6 +12,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AskQuestion from "@/pages/ask-question";
 import MyQuestions from "@/pages/my-questions";
 import FirebaseTest from "@/pages/firebase-test";
+import SuperAdmin from "@/pages/super-admin";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 
@@ -63,6 +64,9 @@ function AppRoutes() {
       </Route>
       <Route path="/my-questions">
         {() => <ProtectedRoute component={MyQuestions} />}
+      </Route>
+      <Route path="/super-admin">
+        {() => <ProtectedRoute component={SuperAdmin} admin={true} />}
       </Route>
       <Route component={NotFound} />
     </Switch>
