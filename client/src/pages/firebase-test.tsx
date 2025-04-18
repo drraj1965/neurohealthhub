@@ -87,13 +87,11 @@ const FirebaseTest: React.FC = () => {
     setError(null);
     try {
       // Root level collections - Common collections in Firebase
-      // Include full path versions for potentially non-default databases
       const rootCollections = [
-        // Regular paths
+        // Try collections at the root level
         "users", "doctors", "questions", "answers",
-        // Named database paths - add your database name here if needed
-        "neurohealthhub/users", "neurohealthhub/doctors", 
-        "neurohealthhub/questions", "neurohealthhub/answers"
+        // Try collections with neurohealthhub as a top-level collection itself
+        "neurohealthhub"
       ];
       const collectionsData: Collection[] = [];
 
@@ -187,24 +185,23 @@ const FirebaseTest: React.FC = () => {
       
       // Create collection reference based on path segments
       let collectionRef;
+      
+      // For any path, we just pass all the segments correctly
+      // This correctly handles paths like 'neurohealthhub' or 'users'
+      // as well as subcollections like 'neurohealthhub/users' (which would be
+      // a collection 'users' inside document 'neurohealthhub')
+      console.log(`Creating collection reference from path: ${collectionPath}`);
+      // Handle the path segments dynamically based on the number of segments
       if (pathSegments.length === 1) {
-        // Standard top-level collection (e.g., 'users')
         collectionRef = collection(db, pathSegments[0]);
       } else if (pathSegments.length === 2) {
-        // This could be a named database path (e.g., 'neurohealthhub/users')
-        // For specific named database collections
-        collectionRef = collection(db, pathSegments[1]);
-        console.log(`Accessing named database collection: ${pathSegments[1]}`);
+        collectionRef = collection(db, pathSegments[0], pathSegments[1]);
       } else if (pathSegments.length === 3) {
-        // Subcollection (e.g., 'users/userId/questions')
         collectionRef = collection(db, pathSegments[0], pathSegments[1], pathSegments[2]);
-      } else if (pathSegments.length === 4) {
-        // Named database subcollection (e.g., 'neurohealthhub/users/userId/questions')
-        collectionRef = collection(db, pathSegments[1], pathSegments[2], pathSegments[3]);
-        console.log(`Accessing named database subcollection: ${pathSegments[1]}/${pathSegments[2]}/${pathSegments[3]}`);
       } else {
-        throw new Error(`Unsupported collection path format: ${collectionPath}`);
+        throw new Error(`Path has too many segments: ${collectionPath}`);
       }
+      console.log(`Successfully created reference for ${collectionPath}`);
       
       // Add more detailed logging
       console.log(`Executing query on collection: ${collectionPath}`);

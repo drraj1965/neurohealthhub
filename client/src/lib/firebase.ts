@@ -303,45 +303,63 @@ export async function getUserData(userId: string) {
     let userDocError = null;
     let doctorDocError = null;
     
-    // First try getting user document
+    // First try getting user document from standard collection
     try {
-      // First try the standard path
+      // Try the standard root-level path
       userDoc = await getDoc(doc(db, "users", userId));
       console.log("Successfully queried standard users path");
     } catch (error: any) {
       userDocError = error;
       console.log(`Error querying standard users path: ${error.message}`);
-      
-      if (error.message.includes('different database') || error.code === 'permission-denied') {
-        // Try the named database path if it's a database mismatch or permissions issue
-        try {
-          console.log("Trying alternative path for users collection");
-          userDoc = await getDoc(doc(db, "neurohealthhub/users", userId));
-          console.log("Successfully queried neurohealthhub/users path");
-        } catch (namedError: any) {
-          console.log(`Error querying neurohealthhub/users path: ${namedError.message}`);
+    }
+    
+    // If we don't find the user at standard path, try as a document in the neurohealthhub collection
+    if (!userDoc || !userDoc.exists()) {
+      try {
+        // Try direct user document fetch within neurohealthhub collection
+        const neuroDocRef = doc(db, "neurohealthhub", userId);
+        const neuroDoc = await getDoc(neuroDocRef);
+        
+        // If the document exists and has a role or type field that indicates it's a user
+        if (neuroDoc.exists() && 
+            (neuroDoc.data().role === 'user' || 
+             neuroDoc.data().type === 'user' || 
+             neuroDoc.data().isAdmin === false)) {
+          userDoc = neuroDoc;
+          console.log("Found user document in neurohealthhub collection");
         }
+      } catch (error) {
+        console.log("Error checking neurohealthhub collection for user:", error);
       }
     }
     
-    // Then try getting doctor document if needed
+    // Then try getting doctor document from standard collection
     try {
-      // First try the standard path for doctors
       doctorDoc = await getDoc(doc(db, "doctors", userId));
       console.log("Successfully queried standard doctors path");
     } catch (error: any) {
       doctorDocError = error;
       console.log(`Error querying standard doctors path: ${error.message}`);
-      
-      if (error.message.includes('different database') || error.code === 'permission-denied') {
-        // Try the named database path if it's a database mismatch or permissions issue
-        try {
-          console.log("Trying alternative path for doctors collection");
-          doctorDoc = await getDoc(doc(db, "neurohealthhub/doctors", userId));
-          console.log("Successfully queried neurohealthhub/doctors path");
-        } catch (namedError: any) {
-          console.log(`Error querying neurohealthhub/doctors path: ${namedError.message}`);
+    }
+    
+    // If we don't find the doctor at standard path, try as a document in the neurohealthhub collection
+    if (!doctorDoc || !doctorDoc.exists()) {
+      try {
+        // Try direct doctor document fetch within neurohealthhub collection
+        const neuroDocRef = doc(db, "neurohealthhub", userId);
+        const neuroDoc = await getDoc(neuroDocRef);
+        
+        // If the document exists and has a role or type field that indicates it's a doctor
+        if (neuroDoc.exists() && 
+            (neuroDoc.data().role === 'doctor' || 
+             neuroDoc.data().type === 'doctor' || 
+             neuroDoc.data().isAdmin === true ||
+             neuroDoc.data().specialization)) {
+          doctorDoc = neuroDoc;
+          console.log("Found doctor document in neurohealthhub collection");
         }
+      } catch (error) {
+        console.log("Error checking neurohealthhub collection for doctor:", error);
       }
     }
     
@@ -528,28 +546,70 @@ export async function getAllDoctors() {
     
     console.log("Authenticated user fetching doctors:", currentUser.uid, currentUser.email);
     
-    // Try both paths
+    // Try paths with proper Firestore collection structure
     let doctorDocs;
+    let doctors = [];
+    
+    // First try standard path - top-level "doctors" collection
     try {
-      // Standard path first
       const doctorsRef = collection(db, "doctors");
       console.log("Attempting to get doctors from standard path");
       doctorDocs = await getDocs(doctorsRef);
       console.log(`Retrieved ${doctorDocs.size} doctors from standard path`);
+      
+      if (doctorDocs.size > 0) {
+        // Add these docs to our results
+        doctors = doctorDocs.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      }
     } catch (error: any) {
       console.log("Error accessing standard doctors path:", error.message);
-      
-      // Try named database path
-      const namedDoctorsRef = collection(db, "neurohealthhub/doctors");
-      console.log("Attempting to get doctors from neurohealthhub/doctors path");
-      doctorDocs = await getDocs(namedDoctorsRef);
-      console.log(`Retrieved ${doctorDocs.size} doctors from neurohealthhub/doctors path`);
     }
     
-    return doctorDocs.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    // Then also try getting doctors directly from neurohealthhub collection
+    try {
+      // Try querying neurohealthhub collection and filter for doctor-type documents
+      const neuroRef = collection(db, "neurohealthhub");
+      console.log("Attempting to query neurohealthhub collection for doctors");
+      
+      // Get all documents from neurohealthhub collection
+      const neuroSnapshot = await getDocs(neuroRef);
+      console.log(`Retrieved ${neuroSnapshot.size} documents from neurohealthhub`);
+      
+      // Filter for documents that look like doctors (have specialization or isAdmin=true)
+      const doctorDocs = neuroSnapshot.docs.filter(doc => {
+        const data = doc.data();
+        return data.specialization || 
+              (data.isAdmin === true) || 
+              (data.role === 'doctor') || 
+              (data.type === 'doctor');
+      });
+      
+      console.log(`Found ${doctorDocs.length} doctors in neurohealthhub collection`);
+      
+      // Add these to our results if found
+      if (doctorDocs.length > 0) {
+        const neuroDoctors = doctorDocs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Merge with any doctors found in the standard path
+        doctors = [...doctors, ...neuroDoctors];
+      }
+    } catch (error: any) {
+      console.log("Error accessing neurohealthhub collection:", error.message);
+    }
+    
+    // If no doctors found, throw an error
+    if (doctors.length === 0) {
+      throw new Error("No doctors found in any collection. Please check your database structure.");
+    }
+    
+    // Return the combined results
+    return doctors;
   } catch (error) {
     console.error("Get all doctors error:", error);
     
