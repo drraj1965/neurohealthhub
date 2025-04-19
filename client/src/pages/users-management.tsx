@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import { collection, getDocs, doc, updateDoc, where, query } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, where, query, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/auth-context";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { User, Shield, AlertTriangle, CheckCircle, RefreshCw, Filter } from "lucide-react";
+import { User, Shield, AlertTriangle, CheckCircle, RefreshCw, Filter, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Define user type
@@ -185,20 +185,13 @@ const UsersManagementPage: React.FC = () => {
           isAdmin: true
         });
         
-        // 2. Create a new document in doctors collection
+        // 2. Create a new document in doctors collection with the same ID
         // Note: We keep the original user document to maintain app history and data integrity
-        await updateDoc(doc(db, "users", user.id), {
-          isAdmin: true
-        });
-
-        // Bonus: If you want to use setDoc instead to copy the user to doctors collection
-        /*
         await setDoc(doc(db, "doctors", user.id), {
           ...user,
           isAdmin: true,
           updatedAt: new Date()
         });
-        */
       }
       
       // Refresh the lists
@@ -254,15 +247,19 @@ const UsersManagementPage: React.FC = () => {
           await updateDoc(doc(db, "users", userSnapshot.docs[0].id), {
             isAdmin: false
           });
+        } else {
+          // If no user record exists, create one from the doctor record
+          await setDoc(doc(db, "users", doctor.id), {
+            ...doctor,
+            isAdmin: false,
+            updatedAt: new Date()
+          });
         }
         
         // Also update the doctor document in the doctors collection
         await updateDoc(doc(db, "doctors", doctor.id), {
           isAdmin: false
         });
-
-        // Optionally delete the doctor document if needed
-        // await deleteDoc(doc(db, "doctors", doctor.id));
       }
       
       // Refresh the lists
@@ -342,7 +339,12 @@ const UsersManagementPage: React.FC = () => {
         <title>User Management | NeuroHealthHub</title>
       </Helmet>
       <div className="container mx-auto py-10">
-        <div className="flex justify-between items-center mb-8">
+        <Link href="/super-admin" className="mb-4 flex items-center text-primary hover:underline">
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back to Super Admin
+        </Link>
+        
+        <div className="flex justify-between items-center mb-8 mt-4">
           <div>
             <h1 className="text-3xl font-bold text-primary">User Management</h1>
             <p className="text-muted-foreground">Manage users and doctors in the system</p>

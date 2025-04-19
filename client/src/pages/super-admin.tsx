@@ -372,10 +372,12 @@ const SuperAdminPage: React.FC = () => {
           <p className="text-muted-foreground mb-4">Create authenticated users and doctor accounts</p>
           
           <div className="flex gap-4 mb-8">
-            <Button variant="outline" onClick={() => window.location.href = "/users-management"}>
-              <User className="h-4 w-4 mr-2" />
-              Manage Users & Doctors
-            </Button>
+            <Link href="/users-management">
+              <Button variant="outline">
+                <User className="h-4 w-4 mr-2" />
+                Manage Users & Doctors
+              </Button>
+            </Link>
           </div>
           
           <Tabs defaultValue="createUser" className="mb-8">
