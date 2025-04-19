@@ -33,7 +33,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     
     const msg = {
       to: params.to,
-      from: 'neurohealthhub@gmail.com', // Using Gmail - replace with your verified sender
+      from: 'noreply@sendgrid.net', // Using a SendGrid domain that's already verified
       subject: params.subject,
       text: params.text || '',
       html: params.html || params.text || '',

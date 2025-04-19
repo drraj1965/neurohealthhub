@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { User, Shield, AlertTriangle, CheckCircle, RefreshCw, Filter, ArrowLeft, Mail, Plus } from "lucide-react";
+import { User, Shield, AlertTriangle, CheckCircle, RefreshCw, Filter, ArrowLeft, Mail, Plus, Link as LinkIcon, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Define user type
@@ -404,6 +404,9 @@ const UsersManagementPage: React.FC = () => {
     return users.some(user => user.id === uid) || doctors.some(doctor => doctor.id === uid);
   };
   
+  // State to store the verification link
+  const [verificationLink, setVerificationLink] = useState<string | null>(null);
+  
   // Send email verification to a user
   const sendVerificationEmail = async (uid: string) => {
     try {
@@ -420,10 +423,20 @@ const UsersManagementPage: React.FC = () => {
       
       const result = await response.json();
       
-      toast({
-        title: "Verification Email Sent",
-        description: `Successfully sent verification email to the user.`,
-      });
+      // Store the verification link for display
+      if (result.verificationLink) {
+        setVerificationLink(result.verificationLink);
+        toast({
+          title: "Verification Link Generated",
+          description: "Verification link has been generated and is displayed below. You can share this link with the user.",
+          duration: 6000,
+        });
+      } else {
+        toast({
+          title: "Verification Email Sent",
+          description: `Email delivery attempted. Check server logs for delivery status.`,
+        });
+      }
       
       // Refresh to update the UI
       await fetchUsersAndDoctors();
@@ -583,6 +596,39 @@ const UsersManagementPage: React.FC = () => {
             <CheckCircle className="h-4 w-4 text-green-500" />
             <AlertTitle className="text-green-700">Success!</AlertTitle>
             <AlertDescription className="text-green-600">{success}</AlertDescription>
+          </Alert>
+        )}
+        
+        {verificationLink && (
+          <Alert className="mb-4">
+            <LinkIcon className="h-4 w-4" />
+            <AlertTitle>Verification Link Generated</AlertTitle>
+            <AlertDescription>
+              <p className="mb-2">Share this link with the user to verify their email:</p>
+              <div className="bg-muted p-2 rounded-md mb-2 relative break-all text-xs">
+                <code>{verificationLink}</code>
+                <button
+                  className="absolute right-2 top-2 text-primary hover:text-primary/80"
+                  onClick={() => {
+                    navigator.clipboard.writeText(verificationLink);
+                    toast({
+                      title: "Copied to clipboard",
+                      description: "The verification link has been copied to your clipboard.",
+                    });
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setVerificationLink(null)}
+                className="mt-2"
+              >
+                Dismiss
+              </Button>
+            </AlertDescription>
           </Alert>
         )}
 
