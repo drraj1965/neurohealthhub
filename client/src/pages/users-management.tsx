@@ -491,9 +491,10 @@ const UsersManagementPage: React.FC = () => {
       await fetchUsersAndDoctors();
     } catch (error) {
       console.error("Error adding user to Firestore:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Failed to Add User",
-        description: `Error: ${error.message}`,
+        description: `Error: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
