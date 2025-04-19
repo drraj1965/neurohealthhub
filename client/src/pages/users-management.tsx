@@ -164,6 +164,15 @@ const UsersManagementPage: React.FC = () => {
       doctor.username.toLowerCase().includes(searchLower)
     );
   });
+  
+  // Filter Firebase Auth users based on search query
+  const filteredAuthUsers = firebaseAuthUsers.filter(authUser => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      (authUser.email && authUser.email.toLowerCase().includes(searchLower)) ||
+      (authUser.displayName && authUser.displayName.toLowerCase().includes(searchLower))
+    );
+  });
 
   // Toggle selection of a user
   const toggleSelectUser = (id: string) => {
@@ -474,7 +483,7 @@ const UsersManagementPage: React.FC = () => {
         </div>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="mb-6 grid grid-cols-2 w-[400px]">
+          <TabsList className="mb-6 grid grid-cols-3 w-[600px]">
             <TabsTrigger value="users" className="flex items-center">
               <User className="h-4 w-4 mr-2" />
               Regular Users
@@ -482,6 +491,10 @@ const UsersManagementPage: React.FC = () => {
             <TabsTrigger value="doctors" className="flex items-center">
               <Shield className="h-4 w-4 mr-2" />
               Doctors
+            </TabsTrigger>
+            <TabsTrigger value="authUsers" className="flex items-center">
+              <User className="h-4 w-4 mr-2" />
+              Firebase Auth
             </TabsTrigger>
           </TabsList>
           
@@ -622,6 +635,75 @@ const UsersManagementPage: React.FC = () => {
                           <TableCell>{doctor.username}</TableCell>
                           <TableCell>{doctor.mobile || 'N/A'}</TableCell>
                           <TableCell>{doctor.isAdmin ? 'Yes' : 'No'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Firebase Auth Users Tab */}
+          <TabsContent value="authUsers">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <User className="h-5 w-5 mr-2" />
+                    Firebase Auth Users
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      ({filteredAuthUsers.length} auth users)
+                    </span>
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  View users registered in Firebase Authentication. Note: These operations require the Firebase Admin SDK on a secure server and cannot be performed from the client-side.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingAuth ? (
+                  <div className="flex justify-center py-8">
+                    <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : filteredAuthUsers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Alert className="max-w-lg mx-auto">
+                      <AlertTitle>Firebase Auth Users Not Available</AlertTitle>
+                      <AlertDescription>
+                        <p className="mb-2">
+                          Firebase Authentication user management requires the Firebase Admin SDK on a secure server.
+                        </p>
+                        <p className="mb-2">
+                          This functionality needs to be implemented with a backend service to securely manage Firebase Auth users.
+                        </p>
+                        <p>
+                          Current user data is handled through Firestore collections.
+                        </p>
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>UID</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Display Name</TableHead>
+                        <TableHead>Email Verified</TableHead>
+                        <TableHead>Created At</TableHead>
+                        <TableHead>Last Sign In</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAuthUsers.map((authUser) => (
+                        <TableRow key={authUser.uid}>
+                          <TableCell>{authUser.uid}</TableCell>
+                          <TableCell>{authUser.email || 'N/A'}</TableCell>
+                          <TableCell>{authUser.displayName || 'N/A'}</TableCell>
+                          <TableCell>{authUser.emailVerified ? 'Yes' : 'No'}</TableCell>
+                          <TableCell>{authUser.creationTime || 'N/A'}</TableCell>
+                          <TableCell>{authUser.lastSignInTime || 'N/A'}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
