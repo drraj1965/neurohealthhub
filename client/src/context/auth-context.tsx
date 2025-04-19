@@ -156,6 +156,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           let userData = null;
           let userType = null;
           
+          // Check if user has a verified email - we'll need this later
+          const hasVerifiedEmail = firebaseUser.emailVerified;
+          console.log(`User ${firebaseUser.uid} has verified email: ${hasVerifiedEmail}`);
+          
           // Step 1: Try standard collections first with Firebase UID
           try {
             // Check users collection using Firebase UID

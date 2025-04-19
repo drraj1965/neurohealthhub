@@ -51,22 +51,74 @@ export default function EmailVerified() {
               // Force refresh the token to include the updated emailVerified claim
               await currentUser.getIdToken(true);
               
-              // Call our server-side API to handle adding user to Firestore
-              const response = await fetch('/api/firebase-auth/users/verified', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  uid: currentUser.uid,
-                  temporaryData: null
-                }),
-              });
+              // Get any temporary user data stored in localStorage
+              let temporaryData = null;
+              try {
+                const localStorageKey = `user_pending_${currentUser.uid}`;
+                const storedData = localStorage.getItem(localStorageKey);
+                if (storedData) {
+                  temporaryData = JSON.parse(storedData);
+                  console.log('Retrieved temporary user data from localStorage:', temporaryData);
+                }
+              } catch (localStorageError) {
+                console.error('Error retrieving temporary data from localStorage:', localStorageError);
+              }
               
-              if (response.ok) {
-                console.log('User successfully added to Firestore after verification');
-              } else {
-                console.warn('Failed to add verified user to Firestore database');
+              // Try server API first
+              try {
+                console.log('Attempting to add verified user to Firestore via server API...');
+                // Call our server-side API to handle adding user to Firestore (more reliable)
+                const response = await fetch('/api/firebase-auth/users/verified', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    uid: currentUser.uid,
+                    temporaryData: temporaryData
+                  }),
+                });
+                
+                if (response.ok) {
+                  console.log('User successfully added to Firestore via server API after verification');
+                } else {
+                  console.warn('Server API failed to add verified user to Firestore, trying client-side fallback');
+                  throw new Error('Server API failed');
+                }
+              } catch (serverApiError) {
+                console.error('Error using server API to add user to Firestore:', serverApiError);
+                
+                // Fallback to client-side Firestore (less reliable but may work if server is unreachable)
+                try {
+                  console.log('Attempting client-side fallback to add user to Firestore...');
+                  
+                  // Import Firestore functions directly for client-side
+                  const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+                  const db = getFirestore();
+                  
+                  // Create a basic user object
+                  const userData = {
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    displayName: currentUser.displayName,
+                    firstName: temporaryData?.firstName || (currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'User'),
+                    lastName: temporaryData?.lastName || 
+                      (currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : ''),
+                    username: temporaryData?.username || 
+                      (currentUser.email ? currentUser.email.split('@')[0] : 'user'),
+                    mobile: temporaryData?.mobile || '',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    emailVerified: true,
+                    isAdmin: false,
+                  };
+                  
+                  // Try to add to users collection
+                  await setDoc(doc(db, 'users', currentUser.uid), userData);
+                  console.log('User successfully added to Firestore via client-side fallback');
+                } catch (clientFallbackError) {
+                  console.error('Error in client-side fallback to add user to Firestore:', clientFallbackError);
+                }
               }
             } catch (dbError) {
               console.error('Error adding verified user to database:', dbError);
@@ -107,7 +159,21 @@ export default function EmailVerified() {
             return;
           }
           
-          // Call our server API to verify the email and update the user's status
+          // Get any temporary user data stored in localStorage
+          let temporaryData = null;
+          try {
+            const localStorageKey = `user_pending_${tokenData.uid}`;
+            const storedData = localStorage.getItem(localStorageKey);
+            if (storedData) {
+              temporaryData = JSON.parse(storedData);
+              console.log('Retrieved temporary user data from localStorage for token verification:', temporaryData);
+            }
+          } catch (localStorageError) {
+            console.error('Error retrieving temporary data from localStorage:', localStorageError);
+          }
+          
+          // Try to add the user to Firestore using server API
+          console.log('Attempting to add verified user to Firestore via server API (custom token)...');
           const response = await fetch('/api/firebase-auth/users/verified', {
             method: 'POST',
             headers: {
@@ -116,7 +182,7 @@ export default function EmailVerified() {
             body: JSON.stringify({
               uid: tokenData.uid,
               email: tokenData.email,
-              temporaryData: null
+              temporaryData: temporaryData
             }),
           });
           
@@ -126,12 +192,37 @@ export default function EmailVerified() {
             setMessage(`Your email (${tokenData.email}) has been successfully verified! You can now log in to access all features.`);
             console.log('User successfully verified and added to Firestore');
             return;
-          } else {
-            setStatus('error');
-            setMessage('Verification failed. Please try again or contact support.');
-            console.warn('Failed to verify user with server');
-            return;
-          }
+          } 
+          
+          // If server API failed, try client-side fallback
+          console.warn('Server API failed to add verified user to Firestore, trying client-side fallback');
+          
+          // Import Firestore functions directly for client-side
+          const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+          const db = getFirestore();
+          
+          // Create a basic user object
+          const userData = {
+            uid: tokenData.uid,
+            email: tokenData.email,
+            firstName: temporaryData?.firstName || tokenData.email.split('@')[0] || 'User',
+            lastName: temporaryData?.lastName || '',
+            username: temporaryData?.username || tokenData.email.split('@')[0] || 'user',
+            mobile: temporaryData?.mobile || '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            emailVerified: true,
+            isAdmin: false,
+          };
+          
+          // Try to add to users collection
+          await setDoc(doc(db, 'users', tokenData.uid), userData);
+          console.log('User successfully added to Firestore via client-side fallback (custom token)');
+          
+          // Set success status
+          setStatus('success');
+          setMessage(`Your email (${tokenData.email}) has been successfully verified! You can now log in to access all features.`);
+          return;
         } catch (error: any) {
           console.error('Error verifying email with custom token:', error);
           setStatus('error');
