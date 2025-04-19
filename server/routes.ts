@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
@@ -10,7 +10,26 @@ import {
   insertAnswerSchema 
 } from "@shared/schema";
 
+// Import Firebase Admin functions
+import { 
+  getFirebaseAuthUsers, 
+  getFirebaseAuthUserByUid, 
+  getFirebaseAuthUserByEmail,
+  createFirebaseAuthUser,
+  updateFirebaseAuthUser,
+  deleteFirebaseAuthUser,
+  initializeFirebaseAdmin
+} from './firebase-admin';
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Firebase Admin SDK
+  try {
+    initializeFirebaseAdmin();
+    console.log('Firebase Admin SDK initialized in routes');
+  } catch (error) {
+    console.error('Error initializing Firebase Admin SDK in routes:', error);
+  }
+
   // API routes
   app.get("/api/doctors", async (req: Request, res: Response) => {
     try {
@@ -258,6 +277,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedQuestion);
     } catch (error) {
       res.status(500).json({ message: "Failed to update question" });
+    }
+  });
+
+  // FIREBASE AUTH API ENDPOINTS
+  
+  // Get all Firebase Auth users
+  app.get("/api/firebase-auth/users", async (req: Request, res: Response) => {
+    try {
+      const users = await getFirebaseAuthUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching Firebase Auth users:", error);
+      res.status(500).json({ message: "Failed to fetch Firebase Auth users" });
+    }
+  });
+  
+  // Get a Firebase Auth user by UID
+  app.get("/api/firebase-auth/users/:uid", async (req: Request, res: Response) => {
+    try {
+      const { uid } = req.params;
+      const user = await getFirebaseAuthUserByUid(uid);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching Firebase Auth user:", error);
+      res.status(500).json({ message: "Failed to fetch Firebase Auth user" });
+    }
+  });
+  
+  // Get a Firebase Auth user by email
+  app.get("/api/firebase-auth/users/email/:email", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.params;
+      const user = await getFirebaseAuthUserByEmail(email);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching Firebase Auth user by email:", error);
+      res.status(500).json({ message: "Failed to fetch Firebase Auth user" });
+    }
+  });
+  
+  // Create a new Firebase Auth user
+  app.post("/api/firebase-auth/users", async (req: Request, res: Response) => {
+    try {
+      const { email, password, displayName, phoneNumber } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      const user = await createFirebaseAuthUser({
+        email,
+        password,
+        displayName,
+        phoneNumber
+      });
+      
+      if (!user) {
+        return res.status(500).json({ message: "Failed to create user" });
+      }
+      
+      res.status(201).json(user);
+    } catch (error) {
+      console.error("Error creating Firebase Auth user:", error);
+      res.status(500).json({ message: "Failed to create Firebase Auth user" });
+    }
+  });
+  
+  // Update a Firebase Auth user
+  app.patch("/api/firebase-auth/users/:uid", async (req: Request, res: Response) => {
+    try {
+      const { uid } = req.params;
+      const { email, password, displayName, phoneNumber, disabled } = req.body;
+      
+      const user = await updateFirebaseAuthUser(uid, {
+        email,
+        password,
+        displayName,
+        phoneNumber,
+        disabled
+      });
+      
+      if (!user) {
+        return res.status(500).json({ message: "Failed to update user" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating Firebase Auth user:", error);
+      res.status(500).json({ message: "Failed to update Firebase Auth user" });
+    }
+  });
+  
+  // Delete a Firebase Auth user
+  app.delete("/api/firebase-auth/users/:uid", async (req: Request, res: Response) => {
+    try {
+      const { uid } = req.params;
+      const success = await deleteFirebaseAuthUser(uid);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to delete user" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting Firebase Auth user:", error);
+      res.status(500).json({ message: "Failed to delete Firebase Auth user" });
     }
   });
 

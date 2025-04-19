@@ -1,11 +1,8 @@
-const admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json"); // Download this from Firebase Console
+// Renamed to es-firebase-admin.js to avoid import issues
+// This file is now a dummy placeholder and is not used
+// The actual Firebase Admin SDK is implemented in server/firebase-admin.ts
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://<your-project-id>.firebaseio.com"
-});
+console.log('This firebase-admin.js file is deprecated and should not be used');
 
-const db = admin.firestore();
-
-module.exports = { admin, db };
+export const admin = {};
+export const db = {};
