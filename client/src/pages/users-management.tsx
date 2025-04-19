@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import { collection, getDocs, doc, updateDoc, where, query, setDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, where, query, setDoc, getDoc } from "firebase/firestore";
 import { getAuth, User as FirebaseAuthUser } from "firebase/auth";
 import { db } from "@/lib/firebase";
 import { getFirebaseAdminApp, getFirebaseUsers, UserRecord } from "../lib/firebase-admin";
@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { User, Shield, AlertTriangle, CheckCircle, RefreshCw, Filter, ArrowLeft } from "lucide-react";
+import { User, Shield, AlertTriangle, CheckCircle, RefreshCw, Filter, ArrowLeft, Mail, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Define user type
@@ -397,6 +397,108 @@ const UsersManagementPage: React.FC = () => {
       description: "User and doctor lists have been refreshed",
     });
   };
+  
+  // Check if a user exists in Firestore (either in users or doctors collection)
+  const userExistsInFirestore = (uid: string): boolean => {
+    // Check if the user is already in the users or doctors array
+    return users.some(user => user.id === uid) || doctors.some(doctor => doctor.id === uid);
+  };
+  
+  // Send email verification to a user
+  const sendVerificationEmail = async (uid: string) => {
+    try {
+      setLoading(true);
+      console.log(`Sending verification email to user with UID: ${uid}`);
+      
+      const response = await fetch(`/api/firebase-auth/users/${uid}/send-verification-email`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      toast({
+        title: "Verification Email Sent",
+        description: `Successfully sent verification email to the user.`,
+      });
+      
+      // Refresh to update the UI
+      await fetchUsersAndDoctors();
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      toast({
+        title: "Failed to Send Email",
+        description: `Error: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Add a verified Firebase Auth user to Firestore
+  const addVerifiedUserToFirestore = async (authUser: FirebaseAuthUserData) => {
+    try {
+      setLoading(true);
+      console.log(`Adding verified user to Firestore: ${authUser.email} (${authUser.uid})`);
+      
+      if (!authUser.emailVerified) {
+        toast({
+          title: "Email Not Verified",
+          description: "User must verify their email before being added to the system.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check if user already exists
+      if (userExistsInFirestore(authUser.uid)) {
+        toast({
+          title: "User Already Exists",
+          description: "This user already exists in the system.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Create a new user document with the same ID as the Firebase Auth UID
+      const firstName = authUser.displayName ? authUser.displayName.split(' ')[0] : '';
+      const lastName = authUser.displayName ? authUser.displayName.split(' ').slice(1).join(' ') : '';
+      
+      const userData = {
+        email: authUser.email,
+        firstName: firstName,
+        lastName: lastName,
+        mobile: authUser.phoneNumber || "",
+        username: authUser.email.split('@')[0],
+        isAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await setDoc(doc(db, "users", authUser.uid), userData);
+      
+      toast({
+        title: "User Added",
+        description: `Successfully added ${authUser.email} to users collection.`,
+      });
+      
+      // Refresh to update the UI
+      await fetchUsersAndDoctors();
+    } catch (error) {
+      console.error("Error adding user to Firestore:", error);
+      toast({
+        title: "Failed to Add User",
+        description: `Error: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Check if the current user is a super admin
   const superAdminEmails = [
@@ -717,6 +819,7 @@ const UsersManagementPage: React.FC = () => {
                         <TableHead>Email Verified</TableHead>
                         <TableHead>Created At</TableHead>
                         <TableHead>Last Sign In</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -728,6 +831,30 @@ const UsersManagementPage: React.FC = () => {
                           <TableCell>{authUser.emailVerified ? 'Yes' : 'No'}</TableCell>
                           <TableCell>{authUser.creationTime || 'N/A'}</TableCell>
                           <TableCell>{authUser.lastSignInTime || 'N/A'}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {!authUser.emailVerified && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => sendVerificationEmail(authUser.uid)}
+                                >
+                                  <Mail className="h-4 w-4 mr-1" />
+                                  Send Verification
+                                </Button>
+                              )}
+                              {authUser.emailVerified && !userExistsInFirestore(authUser.uid) && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => addVerifiedUserToFirestore(authUser)}
+                                >
+                                  <Plus className="h-4 w-4 mr-1" />
+                                  Add to Users
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
