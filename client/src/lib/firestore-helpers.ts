@@ -16,28 +16,89 @@ export async function ensureUserInFirestore(
   try {
     console.log(`Ensuring user ${uid} is created in Firestore...`);
     
-    // Call our API endpoint
-    const response = await fetch('/api/firebase-auth/manual-create-user', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        uid,
-        email,
-        firstName,
-        lastName
-      }),
-    });
+    // Try both server API and direct approaches
+    let serverSuccess = false;
     
-    if (response.ok) {
-      const result = await response.json();
-      console.log('User Firestore creation result:', result);
-      return true;
-    } else {
-      console.error('Failed to create user in Firestore:', await response.json());
-      return false;
+    // First try server API
+    try {
+      console.log('Trying server API first...');
+      const response = await fetch('/api/firebase-auth/manual-create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid,
+          email,
+          firstName,
+          lastName
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('User Firestore creation via server API result:', result);
+        serverSuccess = true;
+      } else {
+        console.error('Server API failed to create user in Firestore:', await response.text());
+      }
+    } catch (serverError) {
+      console.error('Error calling server API:', serverError);
     }
+    
+    // If server approach failed, try direct approach
+    if (!serverSuccess) {
+      console.log('Server API approach failed, trying direct connection...');
+      
+      try {
+        // Dynamically import to avoid circular dependencies
+        const { directCreateUserInFirestore } = await import('./firebase-direct');
+        
+        // Call direct method
+        const directSuccess = await directCreateUserInFirestore({
+          uid,
+          email,
+          firstName,
+          lastName,
+          emailVerified: true
+        });
+        
+        if (directSuccess) {
+          console.log('Successfully created user in Firestore via direct connection');
+          return true;
+        } else {
+          console.error('Failed to create user via direct connection too');
+        }
+      } catch (directError) {
+        console.error('Error with direct connection approach:', directError);
+      }
+      
+      // Try basic "last resort" approach
+      try {
+        console.log('Trying last resort basic connection...');
+        const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+        const db = getFirestore();
+        
+        await setDoc(doc(db, 'users', uid), {
+          uid,
+          email,
+          firstName: firstName || 'User',
+          lastName: lastName || '',
+          isAdmin: false,
+          emailVerified: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }, { merge: true });
+        
+        console.log('User created with last resort approach');
+        return true;
+      } catch (lastResortError) {
+        console.error('All approaches failed to create user in Firestore:', lastResortError);
+        return false;
+      }
+    }
+    
+    return serverSuccess;
   } catch (error) {
     console.error('Error ensuring user is in Firestore:', error);
     return false;
