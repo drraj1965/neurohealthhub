@@ -11,75 +11,142 @@ export default function EmailVerified() {
   const [message, setMessage] = useState<string>('Verifying your email address...');
   const [, navigate] = useLocation();
   
-  // Extract the custom token from the URL
-  const getVerificationToken = useCallback(() => {
+  // Extract verification parameters from the URL
+  const getVerificationParameters = useCallback(() => {
     const searchParams = new URLSearchParams(window.location.search);
     
-    // Check for our custom token parameter first
+    // For Firebase native verification links
+    const oobCode = searchParams.get('oobCode');
+    const mode = searchParams.get('mode');
+    const apiKey = searchParams.get('apiKey');
+    
+    // For our custom token (fallback)
     const token = searchParams.get('token');
     
     // Log for debugging
-    console.log(`Verification Token: ${token ? 'present' : 'missing'}`);
+    console.log(`Verification Parameters - Mode: ${mode}, OobCode: ${oobCode ? 'present' : 'missing'}, Token: ${token ? 'present' : 'missing'}`);
     
-    return token;
+    return { oobCode, mode, apiKey, token };
   }, []);
 
   // Handle the verification process
   useEffect(() => {
     const verifyEmail = async () => {
-      const token = getVerificationToken();
+      const params = getVerificationParameters();
       
-      // If there's no token, display an error
-      if (!token) {
-        setStatus('error');
-        setMessage('Invalid verification link. The link may be malformed or has expired.');
+      // Handle Firebase's native verification links
+      if (params.oobCode && params.mode === 'verifyEmail') {
+        try {
+          console.log('Verifying email with Firebase Auth native flow');
+          
+          // Apply the action code to verify the email
+          await applyActionCode(auth, params.oobCode);
+          
+          // Check if we need to add the user to Firestore database
+          const currentUser = auth.currentUser;
+          
+          // Add the verified user to the database via server API
+          if (currentUser) {
+            try {
+              // Force refresh the token to include the updated emailVerified claim
+              await currentUser.getIdToken(true);
+              
+              // Call our server-side API to handle adding user to Firestore
+              const response = await fetch('/api/firebase-auth/users/verified', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  uid: currentUser.uid,
+                  temporaryData: null
+                }),
+              });
+              
+              if (response.ok) {
+                console.log('User successfully added to Firestore after verification');
+              } else {
+                console.warn('Failed to add verified user to Firestore database');
+              }
+            } catch (dbError) {
+              console.error('Error adding verified user to database:', dbError);
+              // We don't change status to error as the email verification itself succeeded
+            }
+          }
+          
+          // Set success status
+          setStatus('success');
+          setMessage('Your email has been successfully verified! You can now log in to access all features.');
+        } catch (error: any) {
+          console.error('Error verifying email with Firebase:', error);
+          setStatus('error');
+          
+          // Provide specific error messages based on the error code
+          if (error.code === 'auth/invalid-action-code') {
+            setMessage('The verification link has expired or already been used. Please request a new verification email.');
+          } else if (error.code === 'auth/user-not-found') {
+            setMessage('User account not found. The account may have been deleted.');
+          } else {
+            setMessage(`Verification failed: ${error.message || 'Unknown error occurred'}`);
+          }
+        }
         return;
       }
       
-      try {
-        // Decode the token
-        const tokenData = JSON.parse(Buffer.from(token, 'base64').toString());
-        console.log('Token data:', tokenData);
-        
-        // Check if the token is expired
-        if (tokenData.expires && tokenData.expires < Date.now()) {
+      // Handle our custom token verification as a fallback
+      if (params.token) {
+        try {
+          // Decode the token
+          const tokenData = JSON.parse(Buffer.from(params.token, 'base64').toString());
+          console.log('Custom token data:', tokenData);
+          
+          // Check if the token is expired
+          if (tokenData.expires && tokenData.expires < Date.now()) {
+            setStatus('error');
+            setMessage('This verification link has expired. Please request a new verification email.');
+            return;
+          }
+          
+          // Call our server API to verify the email and update the user's status
+          const response = await fetch('/api/firebase-auth/users/verified', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              uid: tokenData.uid,
+              email: tokenData.email,
+              temporaryData: null
+            }),
+          });
+          
+          if (response.ok) {
+            // Set success status
+            setStatus('success');
+            setMessage(`Your email (${tokenData.email}) has been successfully verified! You can now log in to access all features.`);
+            console.log('User successfully verified and added to Firestore');
+            return;
+          } else {
+            setStatus('error');
+            setMessage('Verification failed. Please try again or contact support.');
+            console.warn('Failed to verify user with server');
+            return;
+          }
+        } catch (error: any) {
+          console.error('Error verifying email with custom token:', error);
           setStatus('error');
-          setMessage('This verification link has expired. Please request a new verification email.');
+          setMessage('Invalid verification link. The token may be corrupted or expired.');
           return;
         }
-        
-        // Call our server API to verify the email and update the user's status
-        const response = await fetch('/api/firebase-auth/users/verified', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            uid: tokenData.uid,
-            email: tokenData.email,
-            temporaryData: null // We could retrieve from localStorage if needed
-          }),
-        });
-        
-        if (response.ok) {
-          // Set success status
-          setStatus('success');
-          setMessage(`Your email (${tokenData.email}) has been successfully verified! You can now log in to access all features.`);
-          console.log('User successfully verified and added to Firestore');
-        } else {
-          setStatus('error');
-          setMessage('Verification failed. Please try again or contact support.');
-          console.warn('Failed to verify user with server');
-        }
-      } catch (error: any) {
-        console.error('Error verifying email:', error);
-        setStatus('error');
-        setMessage('Invalid verification link. The token may be corrupted or expired.');
       }
+      
+      // If we get here, there's no valid verification parameter
+      setStatus('error');
+      setMessage('Invalid verification link. The link may be malformed or has expired.');
     };
     
     verifyEmail();
-  }, [getVerificationToken]);
+  }, [getVerificationParameters]);
   
   // Render different content based on status
   return (
