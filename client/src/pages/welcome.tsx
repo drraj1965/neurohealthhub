@@ -7,17 +7,15 @@ const Welcome: React.FC = () => {
   const { user, isAdmin, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   
-  // Redirect authenticated users to their dashboard
+  // We no longer auto-redirect users from the welcome page
+  // This allows them to access login/register pages even when already logged in
+  // They can manually navigate to their dashboard using the header links
   useEffect(() => {
+    // Just log if user is already logged in, but don't redirect
     if (user && !isLoading) {
-      console.log("User already logged in, redirecting to dashboard");
-      if (isAdmin) {
-        setLocation("/admin");
-      } else {
-        setLocation("/dashboard");
-      }
+      console.log("User is logged in, they can navigate using the header links or buttons below");
     }
-  }, [user, isAdmin, isLoading, setLocation]);
+  }, [user, isLoading]);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -28,12 +26,41 @@ const Welcome: React.FC = () => {
               <h1 className="text-2xl font-bold text-primary-600 cursor-pointer">NeuroHealthHub</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button variant="outline">Login</Button>
-              </Link>
-              <Link href="/register">
-                <Button>Register</Button>
-              </Link>
+              {!user ? (
+                // Show login/register buttons if not logged in
+                <>
+                  <Link href="/login">
+                    <Button variant="outline">Login</Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button>Register</Button>
+                  </Link>
+                </>
+              ) : (
+                // Show dashboard buttons if logged in
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="outline">User Dashboard</Button>
+                  </Link>
+                  
+                  {isAdmin && (
+                    <Link href="/admin">
+                      <Button variant="outline">Admin Dashboard</Button>
+                    </Link>
+                  )}
+                  
+                  {/* Super Admin link for super admin emails */}
+                  {user.email && [
+                    "drphaniraj1965@gmail.com",
+                    "doctornerves@gmail.com",
+                    "g.rajshaker@gmail.com"
+                  ].includes(user.email) && (
+                    <Link href="/super-admin">
+                      <Button>Super Admin</Button>
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
