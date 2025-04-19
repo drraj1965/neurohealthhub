@@ -355,7 +355,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       firstName: firebaseUser.displayName?.split(' ')[0] || "User",
                       lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
                       isAdmin: false,
-                      username: firebaseUser.email.split('@')[0] || "user",
+                      username: firebaseUser.email ? firebaseUser.email.split('@')[0] : "user",
                       createdAt: new Date(),
                       emailVerified: true
                     });
@@ -378,7 +378,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                           firstName: firebaseUser.displayName?.split(' ')[0] || "User",
                           lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
                           isAdmin: false,
-                          username: firebaseUser.email.split('@')[0] || "user",
+                          username: firebaseUser.email ? firebaseUser.email.split('@')[0] : "user",
                           type: "user",
                           createdAt: new Date(),
                           emailVerified: true
