@@ -418,10 +418,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Special endpoint to handle adding verified users to Firestore database
+  // Special endpoint to handle custom email verification and adding verified users to Firestore database
   app.post("/api/firebase-auth/users/verified", async (req: Request, res: Response) => {
     try {
-      const { uid, temporaryData } = req.body;
+      const { uid, email, temporaryData } = req.body;
       
       if (!uid) {
         return res.status(400).json({ error: "User ID is required" });
@@ -433,19 +433,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       initializeFirebaseAdmin();
       const auth = getAuth();
       
-      // Get user record to check if email is verified
+      // Get user record
       const userRecord = await auth.getUser(uid);
       
       if (!userRecord) {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Only proceed if email is verified
-      if (!userRecord.emailVerified) {
-        return res.status(400).json({ 
-          error: "Email not verified", 
-          message: "User's email must be verified before adding to Firestore"
+      // Update the user's email verification status in Firebase Auth
+      try {
+        await auth.updateUser(uid, {
+          emailVerified: true
         });
+        console.log(`Updated user ${uid} email verification status to true in Firebase Auth`);
+      } catch (updateError) {
+        console.error('Error updating user verification status:', updateError);
+        return res.status(500).json({ error: "Failed to update user verification status" });
       }
       
       // Get Firestore instance
