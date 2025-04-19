@@ -47,15 +47,53 @@ export default function VerifyEmail() {
   // Handle resend verification email
   const handleResendVerification = async () => {
     if (!auth.currentUser) {
-      // If we don't have a current user but have an email, try to sign in first
+      // If we don't have a current user but have an email, try to use the API to send verification
       if (email) {
-        // We can't actually sign in without a password, so just show a message
-        return Promise.reject(new Error('You need to log in again to resend the verification email'));
+        try {
+          // Call our server-side API to send a verification email
+          const response = await fetch(`/api/firebase-auth/users/email/${encodeURIComponent(email)}/send-verification`, {
+            method: 'POST',
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Verification email sent via API:', data);
+            return Promise.resolve();
+          } else {
+            const errorData = await response.json();
+            console.error('Failed to send verification email via API:', errorData);
+            return Promise.reject(new Error(errorData.message || 'Failed to send verification email. Please try logging in again.'));
+          }
+        } catch (error) {
+          console.error('Error sending verification email via API:', error);
+          return Promise.reject(new Error('Network error when sending verification email. Please try again later.'));
+        }
+      } else {
+        return Promise.reject(new Error('No email address found. Please try logging in again.'));
       }
-      return Promise.reject(new Error('No user is currently signed in'));
     }
     
-    return sendEmailVerification(auth.currentUser);
+    // If user is logged in, use Firebase client SDK to send verification email
+    try {
+      // Get the current Replit URL for the redirect
+      const baseUrl = window.location.origin;
+      console.log(`Using base URL for verification: ${baseUrl}`);
+      
+      // Configure action code settings for email verification
+      const actionCodeSettings = {
+        // URL you want to redirect back to after email verification
+        url: `${baseUrl}/email-verified`,
+        // This must be true for mobile apps
+        handleCodeInApp: false,
+      };
+      
+      // Send a verification email with custom redirect
+      await sendEmailVerification(auth.currentUser, actionCodeSettings);
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      return Promise.reject(new Error('Failed to send verification email. Please try again later.'));
+    }
   };
 
   return (

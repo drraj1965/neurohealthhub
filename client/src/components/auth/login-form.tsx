@@ -50,8 +50,23 @@ const LoginForm: React.FC = () => {
     try {
       console.log("Login attempt with:", data.email);
       
-      // Use auth context login function
-      await login(data.email, data.password);
+      // Use auth context login function - the result could be a user object or undefined
+      const result: any = await login(data.email, data.password);
+      console.log("Login result:", result);
+      
+      // Check if the login result indicates email verification is needed
+      if (result && typeof result === 'object' && 'needsVerification' in result && result.needsVerification) {
+        console.log("User email not verified, redirecting to verification page");
+        toast({
+          title: "Email verification required",
+          description: "Please check your inbox for a verification link and follow the instructions.",
+        });
+        
+        // Redirect to email verification page with the email address
+        setLocation(`/verify-email?email=${encodeURIComponent(data.email)}`);
+        return;
+      }
+      
       console.log("LOGIN SUCCESS - Firebase auth completed");
       
       toast({
@@ -85,13 +100,28 @@ const LoginForm: React.FC = () => {
           setLocation("/dashboard");
         }
       }, 500);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Check for special error conditions like email verification
+      if (error.message && error.message.includes("verification")) {
+        toast({
+          title: "Email verification required",
+          description: error.message,
+          variant: "destructive",
+        });
+        
+        // Redirect to email verification page if the error is about verification
+        if (data.email) {
+          setLocation(`/verify-email?email=${encodeURIComponent(data.email)}`);
+        }
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
