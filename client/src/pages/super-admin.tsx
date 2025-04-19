@@ -397,6 +397,12 @@ const SuperAdminPage: React.FC = () => {
                 Manage Users & Doctors
               </Button>
             </Link>
+            <Link href="/admin">
+              <Button variant="outline">
+                <Shield className="h-4 w-4 mr-2" />
+                Go to Admin Dashboard
+              </Button>
+            </Link>
           </div>
           
           <Tabs defaultValue="createUser" className="mb-8">
