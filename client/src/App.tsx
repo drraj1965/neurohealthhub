@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Welcome from "@/pages/welcome";
+import NewLogin from "@/pages/new-login";  // Import the new login page
 import UserDashboard from "@/pages/user-dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AskQuestion from "@/pages/ask-question";
@@ -50,8 +51,8 @@ const ProtectedRoute = ({ component: Component, admin = false, superAdmin = fals
   }
 
   if (!user) {
-    // Redirect to login if not authenticated
-    return <Redirect to="/login" />;
+    // Redirect to root (which is now the login page) if not authenticated
+    return <Redirect to="/" />;
   }
 
   // Special check for super admin pages
@@ -79,8 +80,9 @@ const ProtectedRoute = ({ component: Component, admin = false, superAdmin = fals
 function AppRoutes() {
   return (
     <Switch>
-      <Route path="/" component={Welcome} />
-      <Route path="/login" component={Login} />
+      <Route path="/" component={NewLogin} />
+      <Route path="/welcome" component={Welcome} />
+      <Route path="/login" component={NewLogin} />
       <Route path="/register" component={Register} />
       <Route path="/firebase-test" component={FirebaseTest} />
       <Route path="/firebase-account-check" component={FirebaseAccountCheck} />
