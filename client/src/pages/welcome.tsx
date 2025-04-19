@@ -2,20 +2,36 @@ import React, { useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-context';
+import { auth } from '@/lib/firebase';
 
 const Welcome: React.FC = () => {
   const { user, isAdmin, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   
-  // We no longer auto-redirect users from the welcome page
-  // This allows them to access login/register pages even when already logged in
-  // They can manually navigate to their dashboard using the header links
+  // We'll forcibly log out any existing user to ensure we can access the login page
+  // This effectively clears the Firebase Authentication state
+  const { logout } = useAuth();
+  
   useEffect(() => {
-    // Just log if user is already logged in, but don't redirect
+    // If a user is detected as logged in, log them out automatically
     if (user && !isLoading) {
-      console.log("User is logged in, they can navigate using the header links or buttons below");
+      console.log("User detected, clearing authentication state...");
+      
+      const performSignOut = async () => {
+        try {
+          await logout();
+          console.log("Successfully signed out user");
+          // Force reload the page to clear any cached state
+          window.location.reload();
+        } catch (error) {
+          console.error("Error signing out:", error);
+        }
+      };
+      
+      // Execute the sign out
+      performSignOut();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, logout]);
   
   return (
     <div className="min-h-screen flex flex-col">
