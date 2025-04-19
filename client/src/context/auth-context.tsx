@@ -138,16 +138,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           if (firebaseUser.email && superAdminEmails.includes(firebaseUser.email)) {
             console.log("★ ★ ★ Super admin user detected in auth state change:", firebaseUser.email);
-            // Force set admin privileges for super admins
-            setUser({
+            
+            // Create a super admin profile
+            const userProfile: FirebaseUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               firstName: firebaseUser.displayName?.split(' ')[0] || "Admin",
               lastName: firebaseUser.displayName?.split(' ')[1] || "User",
               isAdmin: true,
               username: firebaseUser.email.split('@')[0] || "admin",
-            });
+            };
+            
+            // Force set admin privileges for super admins
+            setUser(userProfile);
             setIsAdmin(true);
+            
+            // Ensure super admin is properly stored in Firestore
+            try {
+              // Update the document with merge option
+              await setDoc(doc(db, 'users', firebaseUser.uid), {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                firstName: userProfile.firstName,
+                lastName: userProfile.lastName,
+                username: userProfile.username,
+                isAdmin: true,
+                emailVerified: true,
+                updatedAt: new Date()
+              }, { merge: true });
+              
+              console.log('Super admin data updated in Firestore during auth state change');
+            } catch (firestoreError) {
+              console.error('Error updating super admin data:', firestoreError);
+              
+              // Try an alternative approach if the first fails
+              try {
+                // Import Firestore functions directly to avoid circular dependencies
+                const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+                const directDb = getFirestore();
+                
+                // Try a simpler update
+                await setDoc(doc(directDb, 'users', firebaseUser.uid), {
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email,
+                  isAdmin: true
+                }, { merge: true });
+                
+                console.log('Super admin data updated with simplified approach');
+              } catch (retryError) {
+                console.error('All attempts to update super admin data failed:', retryError);
+              }
+            }
+            
             setIsLoading(false);
             return; // Skip the regular user data lookup
           }
@@ -493,8 +535,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Check if special admin user
       if (superAdminEmails.includes(email)) {
         console.log("★ ★ ★ Super admin user detected in login function:", email);
+        
         // Force set admin privileges for super admins regardless of Firestore data
         setIsAdmin(true);
+        
         // Create a custom user object with admin privileges
         const userProfile: FirebaseUser = {
           uid: userCredential.user.uid,
@@ -506,6 +550,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setUser(userProfile);
         
+        // Ensure super admin is in Firestore
+        try {
+          // Try to create the user record directly in Firestore
+          const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+          const db = getFirestore();
+          
+          // Simple direct update for user document
+          await setDoc(doc(db, 'users', userCredential.user.uid), {
+            uid: userCredential.user.uid,
+            email: email,
+            firstName: userCredential.user.displayName?.split(' ')[0] || email.split('@')[0],
+            lastName: userCredential.user.displayName?.split(' ').slice(1).join(' ') || '',
+            isAdmin: true,
+            emailVerified: true,
+            updatedAt: new Date()
+          }, { merge: true });
+          
+          console.log('Super admin document updated successfully in Firestore');
+        } catch (firestoreError) {
+          console.error('Direct Firestore update for super admin failed:', firestoreError);
+        }
+        
         // Log the state we've set
         console.log("Super admin state set in login function:", {
           user: userProfile,
@@ -514,9 +580,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return; // Skip any further Firestore checks to prevent overriding our super admin status
       }
       
+      // For regular or doctor users, ensure they exist in Firestore
+      try {
+        const { getFirestore, doc, setDoc, getDoc } = await import('firebase/firestore');
+        const db = getFirestore();
+        
+        // Check if user exists in Firestore
+        const userRef = doc(db, 'users', userCredential.user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          console.log("User doesn't exist in Firestore, creating record now");
+          
+          // Create a new user record
+          const isDoctor = email.endsWith('@doctor.com');
+          await setDoc(userRef, {
+            uid: userCredential.user.uid,
+            email: email,
+            firstName: userCredential.user.displayName?.split(' ')[0] || email.split('@')[0],
+            lastName: userCredential.user.displayName?.split(' ').slice(1).join(' ') || '',
+            isAdmin: isDoctor,
+            emailVerified: userCredential.user.emailVerified,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+          
+          console.log("User successfully created in Firestore");
+        } else {
+          console.log("User already exists in Firestore");
+        }
+      } catch (firestoreError) {
+        console.error("Error ensuring user exists in Firestore:", firestoreError);
+      }
+      
       // Firebase auth state listener will handle the user state update
       // The onAuthStateChanged will trigger and fetch user data from Firestore
-      // using our enhanced email-based lookup if needed
       
       toast({
         title: "Login Successful",

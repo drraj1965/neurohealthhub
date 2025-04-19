@@ -88,39 +88,58 @@ const LoginForm: React.FC = () => {
       const isSuperAdmin = data.email && superAdminEmails.includes(data.email);
       const isDoctor = data.email.endsWith("@doctor.com");
       
-      // Import our custom helper for handling redirects after login
-      import('@/lib/firestore-helpers').then(({ handleLoginRedirect }) => {
-        // Get the current user's UID from Firebase Auth
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          // This will ensure the user exists in Firestore before redirecting
-          handleLoginRedirect(data.email, currentUser.uid);
-        } else {
-          console.error('No current user found after login');
-          // Fallback to simple redirect
-          setTimeout(() => {
-            if (isSuperAdmin) {
-              setLocation("/super-admin");
-            } else if (isDoctor) {
-              setLocation("/admin");
-            } else {
-              setLocation("/dashboard");
-            }
-          }, 500);
+      // Get the current Firebase user
+      const currentUser = auth.currentUser;
+      
+      // Take direct action without relying on import
+      if (currentUser) {
+        console.log('Current user found after login, ensuring user exists in Firestore...');
+        
+        // Create a direct action to ensure user is in Firestore
+        try {
+          // Try to create the user record directly in Firestore
+          const { getFirestore, doc, setDoc } = await import('firebase/firestore');
+          const db = getFirestore();
+          
+          // Simple direct update for user document
+          await setDoc(doc(db, 'users', currentUser.uid), {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            firstName: currentUser.displayName ? currentUser.displayName.split(' ')[0] : data.email.split('@')[0],
+            lastName: currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : '',
+            isAdmin: isSuperAdmin || isDoctor,
+            emailVerified: currentUser.emailVerified,
+            updatedAt: new Date()
+          }, { merge: true });
+          
+          console.log('User document updated successfully in Firestore');
+        } catch (firestoreError) {
+          console.error('Direct Firestore update failed:', firestoreError);
+          // Continue to redirect anyway
         }
-      }).catch(error => {
-        console.error('Error importing firestore helpers:', error);
-        // Fallback to simple redirect
-        setTimeout(() => {
-          if (isSuperAdmin) {
-            setLocation("/super-admin");
-          } else if (isDoctor) {
-            setLocation("/admin");
-          } else {
-            setLocation("/dashboard");
-          }
-        }, 500);
-      });
+        
+        // Now redirect directly
+        console.log('Redirecting user to appropriate dashboard');
+        
+        // Don't use timeout, do it immediately
+        if (isSuperAdmin) {
+          window.location.href = "/super-admin";
+        } else if (isDoctor) {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/dashboard";
+        }
+      } else {
+        console.error('No current user found after login');
+        // Fallback to simple redirect with window.location for guaranteed navigation
+        if (isSuperAdmin) {
+          window.location.href = "/super-admin";
+        } else if (isDoctor) {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/dashboard";
+        }
+      }
     } catch (error: any) {
       console.error("Login error:", error);
       
