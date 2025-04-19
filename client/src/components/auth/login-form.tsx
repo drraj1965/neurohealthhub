@@ -130,7 +130,27 @@ const LoginForm: React.FC = () => {
         // Now redirect directly using window.location for guaranteed navigation
         console.log('Redirecting user to appropriate dashboard...');
         
-        // Small delay to ensure storage operations complete
+        // Save the target URL to session storage for reliable redirection
+        try {
+          const redirectTarget = isSuperAdmin 
+            ? "/super-admin" 
+            : (isDoctor ? "/admin" : "/dashboard");
+          
+          // Store redirect target in session storage
+          sessionStorage.setItem('post_login_redirect', redirectTarget);
+          console.log('Saved redirect target to session storage:', redirectTarget);
+          
+          // Try to save admin to session if applicable
+          if (isSuperAdmin) {
+            const { saveAdminToSession } = await import('@/lib/admin-preload');
+            saveAdminToSession(userProfile);
+            console.log('Saved super admin to session for reliable access');
+          }
+        } catch (storageError) {
+          console.error('Failed to save to session storage:', storageError);
+        }
+        
+        // Add a small delay to ensure storage operations complete
         setTimeout(() => {
           if (isSuperAdmin) {
             window.location.href = "/super-admin";
@@ -139,7 +159,7 @@ const LoginForm: React.FC = () => {
           } else {
             window.location.href = "/dashboard";
           }
-        }, 100);
+        }, 200);
       } else {
         console.error('No current user found after login');
         // Fallback to simple redirect with window.location for guaranteed navigation

@@ -84,10 +84,10 @@ const UsersManagementPage: React.FC = () => {
     
     try {
       // Import our local storage module
-      const { getAllUsersLocally } = await import('@/lib/local-user-store');
+      const { getAllUsersFromLocalStorage } = await import('@/lib/local-user-store');
       
       // Get users from local storage first
-      const localUsers = getAllUsersLocally();
+      const localUsers = getAllUsersFromLocalStorage();
       
       // If we have local users, use them immediately
       if (localUsers && localUsers.length > 0) {

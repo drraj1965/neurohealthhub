@@ -1,53 +1,80 @@
 /**
- * Local user storage to handle Firestore connectivity issues
- * This provides a fallback when Firestore connections are failing
+ * Local user storage module
+ * 
+ * This module provides functionality for storing and retrieving user data
+ * in the browser's local storage as a fallback when Firestore is unreachable.
  */
 
 import { FirebaseUser } from '@shared/schema';
 
+// Key for storing users in localStorage
 const LOCAL_USERS_KEY = 'neurohealthhub_local_users';
+
+// Specialized key for super admins
 const LOCAL_SUPER_ADMINS_KEY = 'neurohealthhub_local_super_admins';
 
-// Hard-coded super admin emails for reference
+// Super admin emails for reference
 const SUPER_ADMIN_EMAILS = [
   "drphaniraj1965@gmail.com",
   "doctornerves@gmail.com",
   "g.rajshaker@gmail.com"
 ];
 
+// Check if an email is a super admin email
+function isSuperAdminEmail(email: string): boolean {
+  return SUPER_ADMIN_EMAILS.includes(email);
+}
+
 /**
- * Save a user to local storage
+ * Save a user to local storage for offline access
+ * @param user The user to save
  */
 export function saveUserLocally(user: FirebaseUser): void {
+  if (!user || !user.uid) {
+    console.error('Cannot save invalid user to local storage');
+    return;
+  }
+  
   try {
-    // Get existing users map
-    const existingUsersJson = localStorage.getItem(LOCAL_USERS_KEY) || '{}';
-    const users = JSON.parse(existingUsersJson);
+    // General users store
+    const existingUsersJson = localStorage.getItem(LOCAL_USERS_KEY);
+    let users: Record<string, FirebaseUser> = {};
     
-    // Save this user by uid
-    users[user.uid] = {
+    if (existingUsersJson) {
+      users = JSON.parse(existingUsersJson);
+    }
+    
+    // Add update timestamp
+    const userWithTimestamp: FirebaseUser = {
       ...user,
       updatedAt: new Date().toISOString()
     };
     
-    // Save back to localStorage
+    // Save to general users store
+    users[user.uid] = userWithTimestamp;
     localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
-    console.log('User saved to local storage:', user.uid);
     
-    // If this is a super admin, also save to a specialized store
-    if (user.email && SUPER_ADMIN_EMAILS.includes(user.email)) {
-      const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY) || '{}';
-      const superAdmins = JSON.parse(superAdminsJson);
+    // If super admin, also save to specialized super admin store
+    if (user.email && isSuperAdminEmail(user.email)) {
+      const existingSuperAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY);
+      let superAdmins: Record<string, FirebaseUser> = {};
       
-      superAdmins[user.uid] = {
-        ...user,
-        isAdmin: true,
-        updatedAt: new Date().toISOString()
+      if (existingSuperAdminsJson) {
+        superAdmins = JSON.parse(existingSuperAdminsJson);
+      }
+      
+      // Make sure isAdmin flag is set
+      const adminWithFlag: FirebaseUser = {
+        ...userWithTimestamp,
+        isAdmin: true
       };
       
+      superAdmins[user.uid] = adminWithFlag;
       localStorage.setItem(LOCAL_SUPER_ADMINS_KEY, JSON.stringify(superAdmins));
-      console.log('Super admin saved to specialized local storage:', user.uid);
+      console.log('Super admin saved to specialized storage:', user.email);
     }
+    
+    console.log('User saved to local storage:', user.uid);
   } catch (error) {
     console.error('Error saving user to local storage:', error);
   }
@@ -55,30 +82,32 @@ export function saveUserLocally(user: FirebaseUser): void {
 
 /**
  * Get a user from local storage by UID
+ * @param uid The user ID to look up
+ * @returns The user object if found, null otherwise
  */
-export function getUserByUidLocally(uid: string): FirebaseUser | null {
+export function getUserFromLocalStorage(uid: string): FirebaseUser | null {
+  if (!uid) return null;
+  
   try {
-    // First check super admins
+    // First check specialized super admin store
     const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY);
     if (superAdminsJson) {
       const superAdmins = JSON.parse(superAdminsJson);
       if (superAdmins[uid]) {
-        console.log('Found user in super admin local storage:', uid);
-        return superAdmins[uid] as FirebaseUser;
+        console.log('Found user in super admin specialized store:', uid);
+        return superAdmins[uid];
       }
     }
     
-    // Then check regular users
+    // Then check general users store
     const usersJson = localStorage.getItem(LOCAL_USERS_KEY);
     if (!usersJson) return null;
     
     const users = JSON.parse(usersJson);
-    if (users[uid]) {
-      console.log('Found user in local storage:', uid);
-      return users[uid] as FirebaseUser;
-    }
+    if (!users[uid]) return null;
     
-    return null;
+    console.log('Found user in local storage:', uid);
+    return users[uid];
   } catch (error) {
     console.error('Error getting user from local storage:', error);
     return null;
@@ -87,57 +116,60 @@ export function getUserByUidLocally(uid: string): FirebaseUser | null {
 
 /**
  * Get a user from local storage by email
+ * @param email The email to look up
+ * @returns The user object if found, null otherwise
  */
-export function getUserByEmailLocally(email: string): FirebaseUser | null {
+export function getUserByEmailFromLocalStorage(email: string): FirebaseUser | null {
+  if (!email) return null;
+  
   try {
-    // First check super admins
-    const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY);
-    if (superAdminsJson) {
-      const superAdmins = JSON.parse(superAdminsJson);
-      for (const uid in superAdmins) {
-        if (superAdmins[uid].email === email) {
-          console.log('Found user in super admin local storage by email:', email);
-          return superAdmins[uid] as FirebaseUser;
+    // First check specialized super admin store if it's a super admin email
+    if (isSuperAdminEmail(email)) {
+      const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY);
+      if (superAdminsJson) {
+        const superAdmins = JSON.parse(superAdminsJson);
+        // Find the first super admin with this email
+        for (const uid in superAdmins) {
+          if (superAdmins[uid].email === email) {
+            console.log('Found super admin by email in specialized store:', email);
+            return superAdmins[uid];
+          }
         }
       }
     }
     
-    // Then check regular users
+    // Then check general users store
     const usersJson = localStorage.getItem(LOCAL_USERS_KEY);
     if (!usersJson) return null;
     
     const users = JSON.parse(usersJson);
+    
+    // Find user by email
     for (const uid in users) {
       if (users[uid].email === email) {
-        console.log('Found user in local storage by email:', email);
-        return users[uid] as FirebaseUser;
+        console.log('Found user by email in local storage:', email);
+        return users[uid];
       }
     }
     
     return null;
   } catch (error) {
-    console.error('Error getting user from local storage by email:', error);
+    console.error('Error getting user by email from local storage:', error);
     return null;
   }
 }
 
 /**
- * Check if user is super admin by email
- */
-export function isSuperAdminEmail(email: string): boolean {
-  return SUPER_ADMIN_EMAILS.includes(email);
-}
-
-/**
  * Get all users from local storage
+ * @returns Array of user objects
  */
-export function getAllUsersLocally(): FirebaseUser[] {
+export function getAllUsersFromLocalStorage(): FirebaseUser[] {
   try {
     const usersJson = localStorage.getItem(LOCAL_USERS_KEY);
     if (!usersJson) return [];
     
     const users = JSON.parse(usersJson);
-    return Object.values(users) as FirebaseUser[];
+    return Object.values(users);
   } catch (error) {
     console.error('Error getting all users from local storage:', error);
     return [];
@@ -145,108 +177,82 @@ export function getAllUsersLocally(): FirebaseUser[] {
 }
 
 /**
- * Add a user to local storage (for admin operations)
+ * Remove a user from local storage
+ * @param uid The user ID to remove
  */
-export function addUserLocally(user: FirebaseUser): boolean {
+export function removeUserFromLocalStorage(uid: string): void {
+  if (!uid) return;
+  
   try {
-    // Get existing users
-    const existingUsersJson = localStorage.getItem(LOCAL_USERS_KEY) || '{}';
-    const users = JSON.parse(existingUsersJson);
-    
-    // Add this user
-    users[user.uid] = {
-      ...user,
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Save back to localStorage
-    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
-    console.log('User added to local storage:', user.uid);
-    return true;
-  } catch (error) {
-    console.error('Error adding user to local storage:', error);
-    return false;
-  }
-}
-
-/**
- * Update a user in local storage
- */
-export function updateUserLocally(uid: string, userData: Partial<FirebaseUser>): boolean {
-  try {
-    // Get existing users
-    const existingUsersJson = localStorage.getItem(LOCAL_USERS_KEY) || '{}';
-    const users = JSON.parse(existingUsersJson);
-    
-    // If user exists, update
-    if (users[uid]) {
-      users[uid] = {
-        ...users[uid],
-        ...userData,
-        updatedAt: new Date().toISOString()
-      };
-      
-      // Save back to localStorage
-      localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
-      console.log('User updated in local storage:', uid);
-      
-      // If this is a super admin, also update in specialized store
-      if (users[uid].email && SUPER_ADMIN_EMAILS.includes(users[uid].email)) {
-        const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY) || '{}';
-        const superAdmins = JSON.parse(superAdminsJson);
-        
-        superAdmins[uid] = {
-          ...superAdmins[uid],
-          ...userData,
-          isAdmin: true,
-          updatedAt: new Date().toISOString()
-        };
-        
-        localStorage.setItem(LOCAL_SUPER_ADMINS_KEY, JSON.stringify(superAdmins));
+    // Remove from general users store
+    const usersJson = localStorage.getItem(LOCAL_USERS_KEY);
+    if (usersJson) {
+      const users = JSON.parse(usersJson);
+      if (users[uid]) {
+        delete users[uid];
+        localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+        console.log('User removed from local storage:', uid);
       }
-      
-      return true;
     }
     
-    return false;
-  } catch (error) {
-    console.error('Error updating user in local storage:', error);
-    return false;
-  }
-}
-
-/**
- * Remove a user from local storage
- */
-export function removeUserLocally(uid: string): boolean {
-  try {
-    // Get existing users
-    const existingUsersJson = localStorage.getItem(LOCAL_USERS_KEY) || '{}';
-    const users = JSON.parse(existingUsersJson);
-    
-    // If user exists, remove
-    if (users[uid]) {
-      delete users[uid];
-      
-      // Save back to localStorage
-      localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
-      console.log('User removed from local storage:', uid);
-      
-      // Also check super admins
-      const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY) || '{}';
+    // Remove from specialized super admin store
+    const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY);
+    if (superAdminsJson) {
       const superAdmins = JSON.parse(superAdminsJson);
-      
       if (superAdmins[uid]) {
         delete superAdmins[uid];
         localStorage.setItem(LOCAL_SUPER_ADMINS_KEY, JSON.stringify(superAdmins));
+        console.log('User removed from super admin specialized store:', uid);
       }
-      
-      return true;
+    }
+  } catch (error) {
+    console.error('Error removing user from local storage:', error);
+  }
+}
+
+/**
+ * Clear all users from local storage
+ */
+export function clearLocalUserStorage(): void {
+  try {
+    localStorage.removeItem(LOCAL_USERS_KEY);
+    localStorage.removeItem(LOCAL_SUPER_ADMINS_KEY);
+    console.log('Local user storage cleared');
+  } catch (error) {
+    console.error('Error clearing local user storage:', error);
+  }
+}
+
+/**
+ * Check if we have a super admin in local storage
+ */
+export function hasSuperAdminInLocalStorage(): boolean {
+  try {
+    // Check specialized super admin store first
+    const superAdminsJson = localStorage.getItem(LOCAL_SUPER_ADMINS_KEY);
+    if (superAdminsJson) {
+      const superAdmins = JSON.parse(superAdminsJson);
+      if (Object.keys(superAdmins).length > 0) {
+        return true;
+      }
+    }
+    
+    // Then check general users store
+    const usersJson = localStorage.getItem(LOCAL_USERS_KEY);
+    if (!usersJson) return false;
+    
+    const users = JSON.parse(usersJson);
+    
+    // Check for users with super admin email
+    for (const uid in users) {
+      if (users[uid].email && isSuperAdminEmail(users[uid].email)) {
+        return true;
+      }
     }
     
     return false;
   } catch (error) {
-    console.error('Error removing user from local storage:', error);
+    console.error('Error checking for super admin in local storage:', error);
     return false;
   }
 }

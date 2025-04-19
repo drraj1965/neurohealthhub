@@ -73,6 +73,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log("AuthProvider initialized");
     
+    // Try to pre-authenticate a super admin from session storage
+    // This is a synchronous operation that happens immediately
+    try {
+      const { preAuthenticateAdmin } = require('@/lib/admin-preload');
+      const preAuthAdmin = preAuthenticateAdmin();
+      
+      if (preAuthAdmin) {
+        console.log("Pre-authenticated super admin:", preAuthAdmin.email);
+        setUser(preAuthAdmin);
+        setIsAdmin(true);
+        // Note: We don't set isLoading=false here because we still want the Firebase auth to complete
+      }
+    } catch (preAuthError) {
+      console.error("Error during pre-authentication:", preAuthError);
+    }
+    
     // Set up Firebase auth state listener
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       console.log("Auth state changed:", firebaseUser ? "User logged in" : "No user");
@@ -610,10 +626,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setUser(userProfile);
         
-        // Save admin profile to local storage for reliability
+        // Save admin profile to both local and session storage for reliability
         const { saveUserLocally } = await import('@/lib/local-user-store');
+        const { saveAdminToSession } = await import('@/lib/admin-preload');
+        
+        // Local storage for long-term persistence
         saveUserLocally(userProfile);
         console.log("Super admin profile saved to local storage during login");
+        
+        // Session storage for immediate access on page reloads
+        saveAdminToSession(userProfile);
+        console.log("Super admin profile saved to session storage for immediate access");
         
         // Ensure super admin is in Firestore
         try {
