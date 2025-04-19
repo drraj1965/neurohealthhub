@@ -27,12 +27,12 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // No auto-redirect for logged-in users
-  // This ensures user always stays on the login page initially
+  // If a user visits the login page directly while already logged in, we don't automatically redirect.
+  // This is intentional to make the login page always accessible at the root URL.
   useEffect(() => {
     if (user) {
       console.log("User is already logged in, but staying on login page as requested");
-      // No redirects - let user explicitly navigate away from login page
+      // We don't redirect automatically when user first arrives on the login page
     }
   }, [user]);
 
@@ -59,11 +59,32 @@ const LoginForm: React.FC = () => {
         description: "Welcome back to NeuroHealthHub!",
       });
       
-      // DO NOT redirect after login - stay on login page
-      console.log("Login successful - but NOT redirecting automatically");
+      // Redirect to the appropriate dashboard after successful login
+      console.log("Login successful - redirecting to appropriate dashboard");
       
-      // The user must explicitly navigate away from the login page
-      // No automatic redirects to ensure login page is always the default landing page
+      // Check if user should go to super admin or admin dashboard
+      const superAdminEmails = [
+        "drphaniraj1965@gmail.com",
+        "doctornerves@gmail.com",
+        "g.rajshaker@gmail.com"
+      ];
+                           
+      const isSuperAdmin = data.email && superAdminEmails.includes(data.email);
+      const isDoctor = data.email.endsWith("@doctor.com");
+      
+      // Wait a short time to ensure the auth state is fully processed
+      setTimeout(() => {
+        if (isSuperAdmin) {
+          console.log("Super admin user detected, redirecting to super admin");
+          setLocation("/super-admin");
+        } else if (isDoctor) {
+          console.log("Doctor user detected, redirecting to admin dashboard");
+          setLocation("/admin");
+        } else {
+          console.log("Regular user detected, redirecting to user dashboard");
+          setLocation("/dashboard");
+        }
+      }, 500);
     } catch (error) {
       console.error("Login error:", error);
       toast({
