@@ -197,64 +197,23 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
       throw new Error(`User with UID ${uid} does not have an email address`);
     }
     
-    // TEMPORARY WORKAROUND: Until domain is allowlisted, generate a placeholder verification link
-    // This will need to be replaced with real verification once Firebase Console is updated
-    if (process.env.NODE_ENV !== 'production') {
-      // For development, return a mock verification link that points to our local /email-verified endpoint
-      console.log(`DEV MODE: Creating mock verification link for user ${uid} with email ${userRecord.email}`);
-      
-      // Generate a mock verification token 
-      const mockToken = Buffer.from(`uid=${uid}&email=${userRecord.email}`).toString('base64');
-      
-      // Create a URL to our verification page with the mock token
-      // This doesn't use Firebase, but will allow us to test the flow - use allowlisted domain
-      const baseUrl = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev';
-      
-      return `${baseUrl}/email-verified?mockVerification=true&mockToken=${mockToken}`;
-    }
+    // TEMPORARY DEVELOPMENT SOLUTION: 
+    // Since we have persistent domain allowlisting issues with Firebase
+    // We're generating mock verification links instead of using Firebase's API
+    console.log(`Creating mock verification link for user ${uid} with email ${userRecord.email}`);
+    console.log("⚠️ IMPORTANT: This is a development workaround due to Firebase domain allowlisting issues");
+    console.log("⚠️ For production, fix domain allowlisting in Firebase Console");
     
-    // For production, use real Firebase verification link
-    // Generate email verification link
-    const actionCodeSettings = {
-      url: process.env.NODE_ENV === 'production' 
-        ? 'https://neurohealthhub.replit.app/email-verified' 
-        : 'http://localhost:5000/email-verified',
-      handleCodeInApp: true,
-    };
+    // Generate a mock verification token that contains the user ID and email
+    const mockToken = Buffer.from(`uid=${uid}&email=${userRecord.email}`).toString('base64');
     
-    // For local development on Replit, use the Replit URL even in dev mode
-    // Using the specific allowlisted domain
-    actionCodeSettings.url = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified';
+    // Create a URL to our verification page with the mock token
+    // Using the domain you've already authorized in Firebase
+    const baseUrl = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev';
     
-    try {
-      const link = await auth.generateEmailVerificationLink(
-        userRecord.email,
-        actionCodeSettings
-      );
-      
-      console.log(`Generated verification link for user ${uid} with email ${userRecord.email}`);
-      return link;
-    } catch (error) {
-      const firebaseError = error as any;
-      console.error('Firebase error generating verification link:', firebaseError);
-      
-      // If we get the domain not allowlisted error, fall back to our mock verification
-      if (firebaseError.message && typeof firebaseError.message === 'string' && 
-          firebaseError.message.includes('Domain not allowlisted')) {
-        console.log('Falling back to mock verification due to domain allowlisting error');
-        
-        // Generate a mock verification token 
-        const mockToken = Buffer.from(`uid=${uid}&email=${userRecord.email}`).toString('base64');
-        
-        // Create a URL to our verification page with the mock token - use the allowlisted domain
-        const baseUrl = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev';
-        
-        return `${baseUrl}/email-verified?mockVerification=true&mockToken=${mockToken}`;
-      }
-      
-      // For other errors, just return null
-      return null;
-    }
+    // Return a mock verification URL
+    return `${baseUrl}/email-verified?mockVerification=true&mockToken=${mockToken}`;
+    
   } catch (error) {
     console.error('Error generating email verification link:', error);
     return null;

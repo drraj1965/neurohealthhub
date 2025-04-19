@@ -1,0 +1,676 @@
+Firebase initialized with project: neurohealthhub-1965
+firebase.ts:31 Connecting to Firebase Firestore database
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:45.799Z]  @firebase/firestore: Firestore (11.6.0): enableIndexedDbPersistence() will be deprecated in the future, you can use `FirestoreSettings.cache` instead.
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+firebase.ts:56 Network monitor initialized, current online status: true
+firebase.ts:254 Auto-initializing sample data is disabled - using only real database data
+auth-context.tsx:74 AuthProvider initialized
+auth-context.tsx:78 Auth state changed: User logged in
+auth-context.tsx:96 ★★★ Super admin detected via email in auth state change, ALWAYS preserving super admin status
+login-form.tsx:34 User is already logged in, but staying on login page as requested
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=v-Us7iVtrmSUQ_DfHv3mRD1i851spJYaR7H82N3UoAk&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=3QkBgQosbXb2UpDIxIAm1w&AID=0&CI=0&TYPE=xmlhttp&zx=itavbay56wvd&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:46.981Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1040 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=3GTQsW-Ml4LonHWlA8eBL7pVnDxoo3tL6LNil5geQtU&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=HeqnjmOUnPS6SieQ6YkZAg&AID=0&CI=0&TYPE=xmlhttp&zx=aojo5zk9wlkl&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:47.255Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1041 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=-reddKLbtuhuSByK3UdSJpIGmPVfyK6Vwo1-F2eX4zA&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=gv3nV6gI3DspzgcT0uZXng&AID=0&CI=0&TYPE=xmlhttp&zx=9kng367m4yd8&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:48.273Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1042 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+login-form.tsx:51 Login attempt with: doctornerves@gmail.com
+auth-context.tsx:375 Attempting login with: doctornerves@gmail.com
+auth-context.tsx:385 Attempting Firebase login
+auth-context.tsx:387 Firebase login successful, user: doctornerves@gmail.com
+auth-context.tsx:440 Auth token has been refreshed
+auth-context.tsx:444 ★ ★ ★ Super admin user detected in login function: doctornerves@gmail.com
+auth-context.tsx:459 Super admin state set in login function: Object
+login-form.tsx:55 LOGIN SUCCESS - Firebase auth completed
+login-form.tsx:63 Login successful - redirecting to appropriate dashboard
+login-form.tsx:34 User is already logged in, but staying on login page as requested
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=BXlFGblK-f_FqFXSozmB2D33YXEaEid9brQuLwEKgIE&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=PLJlNcnWGc6qcCsjZmpcGQ&AID=0&CI=0&TYPE=xmlhttp&zx=317k2r66rd5h&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&gsessionid=BXlFGblK-f_FqFXSozmB2D33YXEaEid9brQuLwEKgIE&SID=PLJlNcnWGc6qcCsjZmpcGQ&RID=21279&TYPE=terminate&zx=u2hyewgyaboz:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=RUkmpbWJGYOtr9AD3tJ-_5AOfg_sOqGW8P8W2e4WIto&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=R8qfSxCk9zlVfH9oUtb28Q&AID=0&CI=0&TYPE=xmlhttp&zx=t64el2tntzgr&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&gsessionid=RUkmpbWJGYOtr9AD3tJ-_5AOfg_sOqGW8P8W2e4WIto&SID=R8qfSxCk9zlVfH9oUtb28Q&RID=63289&TYPE=terminate&zx=c9kypybjst0z:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=dgVbY3QKXXJUh-V7OeT8_k4MiOWOMMNPd1U_qf6e7Jo&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=aCYeRMLyVxhfWYGz_tVk_A&AID=0&CI=0&TYPE=xmlhttp&zx=2snuamtfsdb3&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:49.863Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1045 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+login-form.tsx:78 Super admin user detected, redirecting to super admin
+App.tsx:70 Super Admin access granted for: doctornerves@gmail.com
+super-admin.tsx:334 ====== SUPER ADMIN ACCESS CHECK ======
+super-admin.tsx:335 Current user: doctornerves@gmail.com
+super-admin.tsx:336 Is admin flag value: true
+super-admin.tsx:337 Super admin emails: Array(3)
+super-admin.tsx:338 Email match check: ✓ MATCH
+super-admin.tsx:342 Final super admin access decision: ✓ GRANTED
+super-admin.tsx:343 ======================================
+super-admin.tsx:347 Super admin access granted by email override
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=wvDw4c5oYmIZlVl5VA3X5oCYQKjYzX9tVByWaF-O2Io&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=QFDzPmqUBVWaOkGZJ_yJ_Q&AID=0&CI=0&TYPE=xmlhttp&zx=tnj3u6knrsut&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:50.138Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1046 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+super-admin.tsx:334 ====== SUPER ADMIN ACCESS CHECK ======
+super-admin.tsx:335 Current user: doctornerves@gmail.com
+super-admin.tsx:336 Is admin flag value: true
+super-admin.tsx:337 Super admin emails: Array(3)
+super-admin.tsx:338 Email match check: ✓ MATCH
+super-admin.tsx:342 Final super admin access decision: ✓ GRANTED
+super-admin.tsx:343 ======================================
+super-admin.tsx:347 Super admin access granted by email override
+super-admin.tsx:334 ====== SUPER ADMIN ACCESS CHECK ======
+super-admin.tsx:335 Current user: doctornerves@gmail.com
+super-admin.tsx:336 Is admin flag value: true
+super-admin.tsx:337 Super admin emails: Array(3)
+super-admin.tsx:338 Email match check: ✓ MATCH
+super-admin.tsx:342 Final super admin access decision: ✓ GRANTED
+super-admin.tsx:343 ======================================
+super-admin.tsx:347 Super admin access granted by email override
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=4KhYSkQN6bAKFLY_ydjuhAVxpCUjASD39QVJJwWEd4Y&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=UQgRqueXOt5udUcqlwqD8Q&AID=0&CI=0&TYPE=xmlhttp&zx=j7l14zdays3w&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:50.902Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1047 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=Cl7rKqN4NmhgBq1hn46gIITbfhlRC-Q1u9NDe8KVd-E&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=VD7NvuDF5y8pg8xC6sdu4Q&AID=0&CI=0&TYPE=xmlhttp&zx=7ml5zsqp5e0q&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:52.150Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1048 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+App.tsx:70 Super Admin access granted for: doctornerves@gmail.com
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=TeVXRLPP9FBJTRy9saj1c1y7sSeIWrR2yHyY3IF010I&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=Ei2kjnqpWiz85up8z3-U6g&AID=0&CI=0&TYPE=xmlhttp&zx=nwejnzxwkbv8&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:53.468Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a1049 transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+App.tsx:70 Super Admin access granted for: doctornerves@gmail.com
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=IhIZJay4m6uCzBxLBzkck74LUoFOOiBV5Kpd1p9Pe7Q&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=3KjeDG6I8FAKEC8x6FUAdw&AID=0&CI=0&TYPE=xmlhttp&zx=5eyz8i562co8&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:55:56.212Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a104a transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=yle8DCZy4PpsKkcTZEafsxbUDXZ7yAMEZ2_TqBpLmUM&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=HBeF07q54qGb7W4BWJu31g&AID=0&CI=0&TYPE=xmlhttp&zx=v4s095j1gmyv&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=yle8DCZy4PpsKkcTZEafsxbUDXZ7yAMEZ2_TqBpLmUM&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=HBeF07q54qGb7W4BWJu31g&AID=0&CI=1&TYPE=xmlhttp&zx=bvhrc5xx20l4&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:56:02.287Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a104b transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=A9u8-9gUUbynxeRYtF1gCOD9ryAUUKaRJvmzYQ1gaCs&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=krqcyKTxnA4rz6X4lCsZOQ&AID=0&CI=0&TYPE=xmlhttp&zx=8dc4ogitfae4&t=1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()Understand this error
+chunk-RH4CA3U7.js?v=8ff9a170:1066 [2025-04-19T06:56:07.003Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a104c transport errored: jd
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066Understand this warning
+2firebase.ts:67 Firebase connection test succeeded - connection is active
+users-management.tsx:106 Fetched users: 0
+users-management.tsx:107 Fetched doctors: 0
+users-management.tsx:112 About to fetch Firebase Auth users from server
+firebase-admin.ts:55 Fetching Firebase Auth users from server API
+users-management.tsx:106 Fetched users: 0
+users-management.tsx:107 Fetched doctors: 0
+users-management.tsx:112 About to fetch Firebase Auth users from server
+firebase-admin.ts:55 Fetching Firebase Auth users from server API
+firebase-admin.ts:66 Firebase Auth API raw response: [{"uid":"ddxsuXomFATlCLI0gRDNoifrOIt2","email":"drphaniraj1965@gmail.com","emailVerified":false,"disabled":false,"metadata":{"lastSignInTime":"Fri, 18 Apr 2025 17:02:27 GMT","creationTime":"Fri, 18 Apr 2025 06:27:10 GMT","lastRefreshTime":"Sat, 19 Apr 2025 04:30:43 GMT"},"passwordHash":"AInhVHVPXqmlHxHm7FB-wBf6QncaZtxrLbgNjGbW01PcVtkDYoSwq9HmbdmbzM-w1yBiLCijd7dJWOR0NN-ecg==","passwordSalt":"oHZYtJKu_I7SuA==","tokensValidAfterTime":"Fri, 18 Apr 2025 06:27:10 GMT","providerData":[{"uid":"drphaniraj1965@gmail.com","email":"drphaniraj1965@gmail.com","providerId":"password"}]},{"uid":"s0am7yH6MPSD0TLtJk2iWbPVfXB3","email":"doctornerves@gmail.com","emailVerified":false,"disabled":false,"metadata":{"lastSignInTime":"Sat, 19 Apr 2025 06:55:51 GMT","creationTime":"Fri, 18 Apr 2025 10:56:36 GMT","lastRefreshTime":"Sat, 19 Apr 2025 06:55:52 GMT"},"passwordHash":"vG3I4IbkPqde3cGYfx5GyQUkcOgmgbkXGt81n6N-D2FqMjnkgU69dElBDAnjRH27PIVesKEMtGemyUoTwwQgQg==","passwordSalt":"1_Po6aobHb3lBQ==","tokensValidAfterTime":"Fri, 18 Apr 2025 10:56:36 GMT","providerData":[{"uid":"doctornerves@gmail.com","email":"doctornerves@gmail.com","providerId":"password"}]}]
+firebase-admin.ts:72 Successfully fetched 2 Firebase Auth users: Array(2)
+users-management.tsx:115 Server returned Firebase Auth users data, length: 2
+users-management.tsx:120 Processing auth user: Object
+users-management.tsx:120 Processing auth user: Object
+users-management.tsx:133 Formatted Firebase Auth users: Array(2)
+firebase-admin.ts:66 Firebase Auth API raw response: [{"uid":"ddxsuXomFATlCLI0gRDNoifrOIt2","email":"drphaniraj1965@gmail.com","emailVerified":false,"disabled":false,"metadata":{"lastSignInTime":"Fri, 18 Apr 2025 17:02:27 GMT","creationTime":"Fri, 18 Apr 2025 06:27:10 GMT","lastRefreshTime":"Sat, 19 Apr 2025 04:30:43 GMT"},"passwordHash":"AInhVHVPXqmlHxHm7FB-wBf6QncaZtxrLbgNjGbW01PcVtkDYoSwq9HmbdmbzM-w1yBiLCijd7dJWOR0NN-ecg==","passwordSalt":"oHZYtJKu_I7SuA==","tokensValidAfterTime":"Fri, 18 Apr 2025 06:27:10 GMT","providerData":[{"uid":"drphaniraj1965@gmail.com","email":"drphaniraj1965@gmail.com","providerId":"password"}]},{"uid":"s0am7yH6MPSD0TLtJk2iWbPVfXB3","email":"doctornerves@gmail.com","emailVerified":false,"disabled":false,"metadata":{"lastSignInTime":"Sat, 19 Apr 2025 06:55:51 GMT","creationTime":"Fri, 18 Apr 2025 10:56:36 GMT","lastRefreshTime":"Sat, 19 Apr 2025 06:55:52 GMT"},"passwordHash":"vG3I4IbkPqde3cGYfx5GyQUkcOgmgbkXGt81n6N-D2FqMjnkgU69dElBDAnjRH27PIVesKEMtGemyUoTwwQgQg==","passwordSalt":"1_Po6aobHb3lBQ==","tokensValidAfterTime":"Fri, 18 Apr 2025 10:56:36 GMT","providerData":[{"uid":"doctornerves@gmail.com","email":"doctornerves@gmail.com","providerId":"password"}]}]
+firebase-admin.ts:72 Successfully fetched 2 Firebase Auth users: Array(2)
+users-management.tsx:115 Server returned Firebase Auth users data, length: 2
+users-management.tsx:120 Processing auth user: Object
+users-management.tsx:120 Processing auth user: Object
+users-management.tsx:133 Formatted Firebase Auth users: Array(2)
+users-management.tsx:411 Sending verification email to user with UID: ddxsuXomFATlCLI0gRDNoifrOIt2
+api/firebase-auth/users/ddxsuXomFATlCLI0gRDNoifrOIt2/send-verification-email:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+users-management.tsx:431 Error sending verification email: Error: Server returned 500: Internal Server Error
+    at sendVerificationEmail (users-management.tsx:418:15)
+sendVerificationEmail @ users-management.tsx:431Understand this error
+App.tsx:70 Super Admin access granted for: doctornerves@gmail.com
+firebase.ts:63 
+            
+            
+           GET https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=102rrYRmut1Uv9fXHNphw3KigI15yDMpqTYRo-ZUT68&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=W4wdtlVnanwAGQ42VvJc9A&AID=0&CI=0&TYPE=xmlhttp&zx=2cpsvmyvg3dj&t=1 400 (Bad Request)
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1203
+fd @ firebase_firestore.js?v=8ff9a170:2336
+h.Fa @ firebase_firestore.js?v=8ff9a170:2303
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+ec @ firebase_firestore.js?v=8ff9a170:2289
+Rb @ firebase_firestore.js?v=8ff9a170:1411
+M2.Y @ firebase_firestore.js?v=8ff9a170:1279
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1198
+Hb @ firebase_firestore.js?v=8ff9a170:1173
+h.Ga @ firebase_firestore.js?v=8ff9a170:2223
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+fc @ firebase_firestore.js?v=8ff9a170:2167
+h.connect @ firebase_firestore.js?v=8ff9a170:2127
+Y2.m @ firebase_firestore.js?v=8ff9a170:2483
+Fo @ firebase_firestore.js?v=8ff9a170:12377
+send @ firebase_firestore.js?v=8ff9a170:12275
+I_ @ firebase_firestore.js?v=8ff9a170:12565
+y_ @ firebase_firestore.js?v=8ff9a170:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=8ff9a170:12973
+__PRIVATE_remoteStoreListen @ firebase_firestore.js?v=8ff9a170:12956
+__PRIVATE_allocateTargetAndMaybeListen @ firebase_firestore.js?v=8ff9a170:13999
+await in __PRIVATE_allocateTargetAndMaybeListen
+__PRIVATE_syncEngineListen @ firebase_firestore.js?v=8ff9a170:13977
+__PRIVATE_eventManagerListen @ firebase_firestore.js?v=8ff9a170:13460
+__PRIVATE_executeQueryViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15181
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15182
+await in (anonymous)
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+__PRIVATE_firestoreClientGetDocumentsViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15171
+getDocs @ firebase_firestore.js?v=8ff9a170:17364
+testConnectivity @ firebase.ts:63Understand this error
+firebase.ts:63 [2025-04-19T06:56:46.977Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a104d transport errored: jd {type: 'c', target: Y2, g: Y2, defaultPrevented: false, status: 1}
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066
+warn @ chunk-RH4CA3U7.js?v=8ff9a170:1130
+__PRIVATE_logWarn @ firebase_firestore.js?v=8ff9a170:2627
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12396
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12383
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Z2.sa @ firebase_firestore.js?v=8ff9a170:2538
+R @ firebase_firestore.js?v=8ff9a170:2393
+Ub @ firebase_firestore.js?v=8ff9a170:2370
+Qb @ firebase_firestore.js?v=8ff9a170:1334
+M2.Y @ firebase_firestore.js?v=8ff9a170:1292
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1203
+fd @ firebase_firestore.js?v=8ff9a170:2336
+h.Fa @ firebase_firestore.js?v=8ff9a170:2303
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+ec @ firebase_firestore.js?v=8ff9a170:2289
+Rb @ firebase_firestore.js?v=8ff9a170:1411
+M2.Y @ firebase_firestore.js?v=8ff9a170:1279
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1198
+Hb @ firebase_firestore.js?v=8ff9a170:1173
+h.Ga @ firebase_firestore.js?v=8ff9a170:2223
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+fc @ firebase_firestore.js?v=8ff9a170:2167
+h.connect @ firebase_firestore.js?v=8ff9a170:2127
+Y2.m @ firebase_firestore.js?v=8ff9a170:2483
+Fo @ firebase_firestore.js?v=8ff9a170:12377
+send @ firebase_firestore.js?v=8ff9a170:12275
+I_ @ firebase_firestore.js?v=8ff9a170:12565
+y_ @ firebase_firestore.js?v=8ff9a170:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=8ff9a170:12973
+__PRIVATE_remoteStoreListen @ firebase_firestore.js?v=8ff9a170:12956
+__PRIVATE_allocateTargetAndMaybeListen @ firebase_firestore.js?v=8ff9a170:13999
+await in __PRIVATE_allocateTargetAndMaybeListen
+__PRIVATE_syncEngineListen @ firebase_firestore.js?v=8ff9a170:13977
+__PRIVATE_eventManagerListen @ firebase_firestore.js?v=8ff9a170:13460
+__PRIVATE_executeQueryViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15181
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15182
+await in (anonymous)
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+__PRIVATE_firestoreClientGetDocumentsViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15171
+getDocs @ firebase_firestore.js?v=8ff9a170:17364
+testConnectivity @ firebase.ts:63Understand this warning
+firebase.ts:63 
+            
+            
+           GET https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel?gsessionid=U6-iqaHQVG9qTb98TtdEIDx0yFynk-QPPr_813YFt74&VER=8&database=projects%2Fneurohealthhub-1965%2Fdatabases%2F(default)&RID=rpc&SID=evJp7S1o_21oUXD4xx4z8A&AID=0&CI=0&TYPE=xmlhttp&zx=61agu8xvocsj&t=1 400 (Bad Request)
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1203
+fd @ firebase_firestore.js?v=8ff9a170:2336
+h.Fa @ firebase_firestore.js?v=8ff9a170:2303
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+ec @ firebase_firestore.js?v=8ff9a170:2289
+Rb @ firebase_firestore.js?v=8ff9a170:1411
+M2.Y @ firebase_firestore.js?v=8ff9a170:1279
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1198
+Hb @ firebase_firestore.js?v=8ff9a170:1173
+h.Ga @ firebase_firestore.js?v=8ff9a170:2223
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+fc @ firebase_firestore.js?v=8ff9a170:2167
+h.connect @ firebase_firestore.js?v=8ff9a170:2127
+Y2.m @ firebase_firestore.js?v=8ff9a170:2483
+Fo @ firebase_firestore.js?v=8ff9a170:12377
+send @ firebase_firestore.js?v=8ff9a170:12275
+I_ @ firebase_firestore.js?v=8ff9a170:12565
+y_ @ firebase_firestore.js?v=8ff9a170:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=8ff9a170:12973
+(anonymous) @ firebase_firestore.js?v=8ff9a170:13002
+__PRIVATE_onWatchStreamOpen @ firebase_firestore.js?v=8ff9a170:13001
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12643
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12643
+$o @ firebase_firestore.js?v=8ff9a170:12281
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12425
+setTimeout
+Wo @ firebase_firestore.js?v=8ff9a170:12424
+f_ @ firebase_firestore.js?v=8ff9a170:12676
+V_ @ firebase_firestore.js?v=8ff9a170:12640
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12630
+Promise.then
+auth @ firebase_firestore.js?v=8ff9a170:12626
+start @ firebase_firestore.js?v=8ff9a170:12525
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12652
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12472
+(anonymous) @ firebase_firestore.js?v=8ff9a170:13263
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+handleDelayElapsed @ firebase_firestore.js?v=8ff9a170:13263
+(anonymous) @ firebase_firestore.js?v=8ff9a170:13243
+setTimeout
+start @ firebase_firestore.js?v=8ff9a170:13243
+createAndSchedule @ firebase_firestore.js?v=8ff9a170:13236
+enqueueAfterDelay @ firebase_firestore.js?v=8ff9a170:15742
+Xo @ firebase_firestore.js?v=8ff9a170:12472
+l_ @ firebase_firestore.js?v=8ff9a170:12651
+start @ firebase_firestore.js?v=8ff9a170:12525
+__PRIVATE_startWatchStream @ firebase_firestore.js?v=8ff9a170:12983
+__PRIVATE_onWatchStreamClose @ firebase_firestore.js?v=8ff9a170:13007
+close @ firebase_firestore.js?v=8ff9a170:12615
+m_ @ firebase_firestore.js?v=8ff9a170:12657
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12645
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12645
+Uo @ firebase_firestore.js?v=8ff9a170:12284
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12396
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12383
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Z2.sa @ firebase_firestore.js?v=8ff9a170:2538
+R @ firebase_firestore.js?v=8ff9a170:2393
+Ub @ firebase_firestore.js?v=8ff9a170:2370
+Qb @ firebase_firestore.js?v=8ff9a170:1334
+M2.Y @ firebase_firestore.js?v=8ff9a170:1292
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1203
+fd @ firebase_firestore.js?v=8ff9a170:2336
+h.Fa @ firebase_firestore.js?v=8ff9a170:2303
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+ec @ firebase_firestore.js?v=8ff9a170:2289
+Rb @ firebase_firestore.js?v=8ff9a170:1411
+M2.Y @ firebase_firestore.js?v=8ff9a170:1279
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1198
+Hb @ firebase_firestore.js?v=8ff9a170:1173
+h.Ga @ firebase_firestore.js?v=8ff9a170:2223
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+fc @ firebase_firestore.js?v=8ff9a170:2167
+h.connect @ firebase_firestore.js?v=8ff9a170:2127
+Y2.m @ firebase_firestore.js?v=8ff9a170:2483
+Fo @ firebase_firestore.js?v=8ff9a170:12377
+send @ firebase_firestore.js?v=8ff9a170:12275
+I_ @ firebase_firestore.js?v=8ff9a170:12565
+y_ @ firebase_firestore.js?v=8ff9a170:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=8ff9a170:12973
+__PRIVATE_remoteStoreListen @ firebase_firestore.js?v=8ff9a170:12956
+__PRIVATE_allocateTargetAndMaybeListen @ firebase_firestore.js?v=8ff9a170:13999
+await in __PRIVATE_allocateTargetAndMaybeListen
+__PRIVATE_syncEngineListen @ firebase_firestore.js?v=8ff9a170:13977
+__PRIVATE_eventManagerListen @ firebase_firestore.js?v=8ff9a170:13460
+__PRIVATE_executeQueryViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15181
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15182
+await in (anonymous)
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+__PRIVATE_firestoreClientGetDocumentsViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15171
+getDocs @ firebase_firestore.js?v=8ff9a170:17364
+testConnectivity @ firebase.ts:63Understand this error
+firebase.ts:63 [2025-04-19T06:56:47.255Z]  @firebase/firestore: Firestore (11.6.0): WebChannelConnection RPC 'Listen' stream 0x8f8a104e transport errored: jd {type: 'c', target: Y2, g: Y2, defaultPrevented: false, status: 1}
+defaultLogHandler @ chunk-RH4CA3U7.js?v=8ff9a170:1066
+warn @ chunk-RH4CA3U7.js?v=8ff9a170:1130
+__PRIVATE_logWarn @ firebase_firestore.js?v=8ff9a170:2627
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12396
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12383
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Z2.sa @ firebase_firestore.js?v=8ff9a170:2538
+R @ firebase_firestore.js?v=8ff9a170:2393
+Ub @ firebase_firestore.js?v=8ff9a170:2370
+Qb @ firebase_firestore.js?v=8ff9a170:1334
+M2.Y @ firebase_firestore.js?v=8ff9a170:1292
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1203
+fd @ firebase_firestore.js?v=8ff9a170:2336
+h.Fa @ firebase_firestore.js?v=8ff9a170:2303
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+ec @ firebase_firestore.js?v=8ff9a170:2289
+Rb @ firebase_firestore.js?v=8ff9a170:1411
+M2.Y @ firebase_firestore.js?v=8ff9a170:1279
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1198
+Hb @ firebase_firestore.js?v=8ff9a170:1173
+h.Ga @ firebase_firestore.js?v=8ff9a170:2223
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+fc @ firebase_firestore.js?v=8ff9a170:2167
+h.connect @ firebase_firestore.js?v=8ff9a170:2127
+Y2.m @ firebase_firestore.js?v=8ff9a170:2483
+Fo @ firebase_firestore.js?v=8ff9a170:12377
+send @ firebase_firestore.js?v=8ff9a170:12275
+I_ @ firebase_firestore.js?v=8ff9a170:12565
+y_ @ firebase_firestore.js?v=8ff9a170:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=8ff9a170:12973
+(anonymous) @ firebase_firestore.js?v=8ff9a170:13002
+__PRIVATE_onWatchStreamOpen @ firebase_firestore.js?v=8ff9a170:13001
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12643
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12643
+$o @ firebase_firestore.js?v=8ff9a170:12281
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12425
+setTimeout
+Wo @ firebase_firestore.js?v=8ff9a170:12424
+f_ @ firebase_firestore.js?v=8ff9a170:12676
+V_ @ firebase_firestore.js?v=8ff9a170:12640
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12630
+Promise.then
+auth @ firebase_firestore.js?v=8ff9a170:12626
+start @ firebase_firestore.js?v=8ff9a170:12525
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12652
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12472
+(anonymous) @ firebase_firestore.js?v=8ff9a170:13263
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+handleDelayElapsed @ firebase_firestore.js?v=8ff9a170:13263
+(anonymous) @ firebase_firestore.js?v=8ff9a170:13243
+setTimeout
+start @ firebase_firestore.js?v=8ff9a170:13243
+createAndSchedule @ firebase_firestore.js?v=8ff9a170:13236
+enqueueAfterDelay @ firebase_firestore.js?v=8ff9a170:15742
+Xo @ firebase_firestore.js?v=8ff9a170:12472
+l_ @ firebase_firestore.js?v=8ff9a170:12651
+start @ firebase_firestore.js?v=8ff9a170:12525
+__PRIVATE_startWatchStream @ firebase_firestore.js?v=8ff9a170:12983
+__PRIVATE_onWatchStreamClose @ firebase_firestore.js?v=8ff9a170:13007
+close @ firebase_firestore.js?v=8ff9a170:12615
+m_ @ firebase_firestore.js?v=8ff9a170:12657
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12645
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12667
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12645
+Uo @ firebase_firestore.js?v=8ff9a170:12284
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12396
+(anonymous) @ firebase_firestore.js?v=8ff9a170:12383
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Z2.sa @ firebase_firestore.js?v=8ff9a170:2538
+R @ firebase_firestore.js?v=8ff9a170:2393
+Ub @ firebase_firestore.js?v=8ff9a170:2370
+Qb @ firebase_firestore.js?v=8ff9a170:1334
+M2.Y @ firebase_firestore.js?v=8ff9a170:1292
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1203
+fd @ firebase_firestore.js?v=8ff9a170:2336
+h.Fa @ firebase_firestore.js?v=8ff9a170:2303
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+ec @ firebase_firestore.js?v=8ff9a170:2289
+Rb @ firebase_firestore.js?v=8ff9a170:1411
+M2.Y @ firebase_firestore.js?v=8ff9a170:1279
+M2.ca @ firebase_firestore.js?v=8ff9a170:1210
+ab @ firebase_firestore.js?v=8ff9a170:945
+F2 @ firebase_firestore.js?v=8ff9a170:915
+Wc @ firebase_firestore.js?v=8ff9a170:1949
+h.bb @ firebase_firestore.js?v=8ff9a170:1944
+h.Ea @ firebase_firestore.js?v=8ff9a170:1941
+Lc @ firebase_firestore.js?v=8ff9a170:1841
+h.Pa @ firebase_firestore.js?v=8ff9a170:1808
+Promise.then
+Nc @ firebase_firestore.js?v=8ff9a170:1799
+h.Sa @ firebase_firestore.js?v=8ff9a170:1795
+Promise.then
+h.send @ firebase_firestore.js?v=8ff9a170:1776
+h.ea @ firebase_firestore.js?v=8ff9a170:1917
+Jb @ firebase_firestore.js?v=8ff9a170:1198
+Hb @ firebase_firestore.js?v=8ff9a170:1173
+h.Ga @ firebase_firestore.js?v=8ff9a170:2223
+Da @ firebase_firestore.js?v=8ff9a170:664
+Promise.then
+x2 @ firebase_firestore.js?v=8ff9a170:658
+fc @ firebase_firestore.js?v=8ff9a170:2167
+h.connect @ firebase_firestore.js?v=8ff9a170:2127
+Y2.m @ firebase_firestore.js?v=8ff9a170:2483
+Fo @ firebase_firestore.js?v=8ff9a170:12377
+send @ firebase_firestore.js?v=8ff9a170:12275
+I_ @ firebase_firestore.js?v=8ff9a170:12565
+y_ @ firebase_firestore.js?v=8ff9a170:12717
+__PRIVATE_sendWatchRequest @ firebase_firestore.js?v=8ff9a170:12973
+__PRIVATE_remoteStoreListen @ firebase_firestore.js?v=8ff9a170:12956
+__PRIVATE_allocateTargetAndMaybeListen @ firebase_firestore.js?v=8ff9a170:13999
+await in __PRIVATE_allocateTargetAndMaybeListen
+__PRIVATE_syncEngineListen @ firebase_firestore.js?v=8ff9a170:13977
+__PRIVATE_eventManagerListen @ firebase_firestore.js?v=8ff9a170:13460
+__PRIVATE_executeQueryViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15181
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15182
+await in (anonymous)
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15690
+(anonymous) @ firebase_firestore.js?v=8ff9a170:15721
+Promise.then
+vu @ firebase_firestore.js?v=8ff9a170:15721
+enqueue @ firebase_firestore.js?v=8ff9a170:15690
+enqueueAndForget @ firebase_firestore.js?v=8ff9a170:15672
+__PRIVATE_firestoreClientGetDocumentsViaSnapshotListener @ firebase_firestore.js?v=8ff9a170:15171
+getDocs @ firebase_firestore.js?v=8ff9a170:17364
+testConnectivity @ firebase.ts:63Understand this warning
