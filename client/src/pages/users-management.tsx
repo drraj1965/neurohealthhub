@@ -429,9 +429,10 @@ const UsersManagementPage: React.FC = () => {
       await fetchUsersAndDoctors();
     } catch (error) {
       console.error("Error sending verification email:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Failed to Send Email",
-        description: `Error: ${error.message}`,
+        description: `Error: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {

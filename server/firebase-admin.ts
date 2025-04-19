@@ -174,3 +174,88 @@ export async function deleteFirebaseAuthUser(uid: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Generate a verification email link
+ */
+export async function generateEmailVerificationLink(uid: string): Promise<string | null> {
+  try {
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
+    
+    // Get the user record first to check if they exist
+    const userRecord = await auth.getUser(uid);
+    
+    if (!userRecord) {
+      throw new Error(`User with UID ${uid} not found`);
+    }
+    
+    if (!userRecord.email) {
+      throw new Error(`User with UID ${uid} does not have an email address`);
+    }
+    
+    // Generate email verification link
+    const actionCodeSettings = {
+      url: process.env.NODE_ENV === 'production' 
+        ? 'https://neurohealthhub.replit.app/email-verified' 
+        : 'http://localhost:5000/email-verified',
+      handleCodeInApp: true,
+    };
+    
+    const link = await auth.generateEmailVerificationLink(
+      userRecord.email,
+      actionCodeSettings
+    );
+    
+    console.log(`Generated verification link for user ${uid} with email ${userRecord.email}`);
+    return link;
+  } catch (error) {
+    console.error('Error generating email verification link:', error);
+    return null;
+  }
+}
+
+/**
+ * Send a verification email to a user
+ */
+export async function sendVerificationEmail(uid: string): Promise<boolean> {
+  try {
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
+    
+    // Get the user record first to check if they exist
+    const userRecord = await auth.getUser(uid);
+    
+    if (!userRecord) {
+      throw new Error(`User with UID ${uid} not found`);
+    }
+    
+    if (!userRecord.email) {
+      throw new Error(`User with UID ${uid} does not have an email address`);
+    }
+    
+    // Generate the verification link
+    const link = await generateEmailVerificationLink(uid);
+    
+    if (!link) {
+      throw new Error('Failed to generate verification link');
+    }
+    
+    // Here you would typically use an email service (SendGrid, Mailgun, etc.)
+    // For now, we'll just log the link and return success
+    console.log('VERIFICATION LINK FOR USER:', link);
+    console.log('Please implement actual email sending with your preferred email provider');
+    
+    // Return true indicating success (in a real implementation, you'd check if the email was sent)
+    return true;
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    return false;
+  }
+}

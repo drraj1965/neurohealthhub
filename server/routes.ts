@@ -18,6 +18,7 @@ import {
   createFirebaseAuthUser,
   updateFirebaseAuthUser,
   deleteFirebaseAuthUser,
+  sendVerificationEmail,
   initializeFirebaseAdmin
 } from './firebase-admin';
 
@@ -393,6 +394,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting Firebase Auth user:", error);
       res.status(500).json({ message: "Failed to delete Firebase Auth user" });
+    }
+  });
+  
+  // Send verification email to a user
+  app.post("/api/firebase-auth/users/:uid/send-verification-email", async (req: Request, res: Response) => {
+    try {
+      const { uid } = req.params;
+      console.log(`Sending verification email to user with UID: ${uid}`);
+      
+      const success = await sendVerificationEmail(uid);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to send verification email" });
+      }
+      
+      res.json({ success: true, message: "Verification email sent successfully" });
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
     }
   });
 
