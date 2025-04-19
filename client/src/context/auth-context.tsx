@@ -410,6 +410,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
           setIsAdmin(false);
           setIsLoading(false);
+          
+          // Redirect to the verification page
+          window.location.href = `/verify-email?email=${encodeURIComponent(email)}`;
           return;
         } catch (verificationError) {
           console.error("Error sending verification email:", verificationError);
@@ -425,6 +428,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
           setIsAdmin(false);
           setIsLoading(false);
+          
+          // Redirect to the verification page
+          window.location.href = `/verify-email?email=${encodeURIComponent(email)}`;
           return;
         }
       }
@@ -526,6 +532,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Please check your email to verify your account before logging in.",
         duration: 8000,
       });
+      
+      // Redirect to the verification page
+      window.location.href = `/verify-email?email=${encodeURIComponent(userData.email)}`;
     } catch (error) {
       console.error("Registration error:", error);
       toast({
