@@ -386,6 +386,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Firebase login successful, user:", userCredential.user?.email);
       
+      // Check if the user's email is verified
+      if (!userCredential.user.emailVerified && !superAdminEmails.includes(email)) {
+        console.log("User's email is not verified:", email);
+        
+        try {
+          // Import the function directly to avoid circular dependencies
+          const { sendEmailVerification } = await import("firebase/auth");
+          
+          // Send a verification email
+          await sendEmailVerification(userCredential.user);
+          console.log("Verification email sent to:", email);
+          
+          // Show toast message
+          toast({
+            title: "Email Verification Required",
+            description: "Please check your email and verify your account before logging in.",
+            duration: 6000,
+          });
+          
+          // Sign out the user since they can't access the app yet
+          await signOut(auth);
+          setUser(null);
+          setIsAdmin(false);
+          setIsLoading(false);
+          return;
+        } catch (verificationError) {
+          console.error("Error sending verification email:", verificationError);
+          toast({
+            title: "Verification Required",
+            description: "Your email is not verified. Please check your inbox or contact support.",
+            variant: "destructive",
+            duration: 6000,
+          });
+          
+          // Sign out the user
+          await signOut(auth);
+          setUser(null);
+          setIsAdmin(false);
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       // Force token refresh to ensure tokens are valid before any Firestore operations
       const idToken = await userCredential.user.getIdToken(true);
       console.log("Auth token has been refreshed");
@@ -455,22 +498,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         displayName: `${userData.firstName} ${userData.lastName}`
       });
       
-      // Store additional user data in Firestore
-      await setDoc(doc(db, "users", currentUser.uid), {
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        mobile: userData.mobile || "",
-        isAdmin: false,
-        username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`,
-        createdAt: new Date()
-      });
+      // Import the function directly to avoid circular dependencies
+      const { sendEmailVerification } = await import("firebase/auth");
       
-      console.log("User profile created in Firestore");
+      // Send verification email
+      await sendEmailVerification(currentUser);
+      console.log("Verification email sent to:", userData.email);
+      
+      // Store temporary user metadata in localStorage to use after verification
+      try {
+        localStorage.setItem(`user_pending_${currentUser.uid}`, JSON.stringify({
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          mobile: userData.mobile || "",
+          username: `${userData.firstName.toLowerCase()}${userData.lastName.toLowerCase()}`
+        }));
+      } catch (e) {
+        console.warn('Could not save temporary user data to localStorage:', e);
+      }
+      
+      // Sign out the user so they need to verify email first
+      await signOut(auth);
       
       toast({
         title: "Registration Successful",
-        description: "Your account has been created",
+        description: "Please check your email to verify your account before logging in.",
+        duration: 8000,
       });
     } catch (error) {
       console.error("Registration error:", error);
