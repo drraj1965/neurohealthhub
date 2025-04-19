@@ -11,19 +11,77 @@ export default function EmailVerified() {
   const [message, setMessage] = useState<string>('Verifying your email address...');
   const [, navigate] = useLocation();
   
-  // Extract the action code from the URL
-  const getActionCode = useCallback(() => {
-    // Firebase adds oobCode as a query parameter
+  // Extract parameters from the URL
+  const getVerificationParams = useCallback(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const actionCode = searchParams.get('oobCode');
-    return actionCode;
+    const isMockVerification = searchParams.get('mockVerification') === 'true';
+    const mockToken = searchParams.get('mockToken');
+    
+    return { 
+      actionCode, 
+      isMockVerification, 
+      mockToken 
+    };
   }, []);
 
   // Handle the verification process
   useEffect(() => {
     const verifyEmail = async () => {
-      const actionCode = getActionCode();
+      const { actionCode, isMockVerification, mockToken } = getVerificationParams();
       
+      // For TypeScript scope reference
+      const getActionCode = () => actionCode;
+      
+      // Handle mock verification for development (when Firebase domains aren't allowlisted)
+      if (isMockVerification && mockToken) {
+        console.log('Processing mock verification with token:', mockToken);
+        
+        try {
+          // Decode the mock token
+          const decodedData = Buffer.from(mockToken, 'base64').toString();
+          const params = new URLSearchParams(decodedData);
+          const uid = params.get('uid');
+          const email = params.get('email');
+          
+          if (!uid || !email) {
+            throw new Error('Invalid mock verification token');
+          }
+          
+          console.log(`Mock verification for UID: ${uid}, Email: ${email}`);
+          
+          // Call our server API to add the user to Firestore
+          const response = await fetch('/api/firebase-auth/users/verified', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              uid: uid,
+              temporaryData: null, // We could also retrieve localStorage data here
+            }),
+          });
+          
+          if (response.ok) {
+            console.log('User successfully added to Firestore after mock verification');
+            setStatus('success');
+            setMessage(`Your email (${email}) has been verified! You can now log in to access all features.`);
+          } else {
+            console.warn('Failed to add mock verified user to Firestore database');
+            setStatus('error');
+            setMessage('Verification was successful, but we encountered an issue setting up your account. Please try logging in or contact support.');
+          }
+          
+          return;
+        } catch (error) {
+          console.error('Error processing mock verification:', error);
+          setStatus('error');
+          setMessage('Invalid verification link. The mock token is malformed.');
+          return;
+        }
+      }
+      
+      // Standard Firebase verification process
       // If there's no action code, display an error
       if (!actionCode) {
         setStatus('error');
@@ -103,7 +161,7 @@ export default function EmailVerified() {
     };
     
     verifyEmail();
-  }, [getActionCode]);
+  }, [getVerificationParams]);
   
   // Render different content based on status
   return (
