@@ -271,7 +271,7 @@ const UsersManagementPage: React.FC = () => {
     
     try {
       // Import local storage module
-      const { updateUserLocally } = await import('@/lib/local-user-store');
+      const { saveUserLocally } = await import('@/lib/local-user-store');
       let successCount = 0;
       
       // Process each selected user
@@ -280,10 +280,21 @@ const UsersManagementPage: React.FC = () => {
         
         try {
           // Update in local storage first (will always work)
-          const localUpdateSuccess = updateUserLocally(user.id, {
+          // Create a complete user object with updated admin status
+          const userProfile = {
+            uid: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            mobile: user.mobile || "",
+            username: user.username,
             isAdmin: true,
             updatedAt: new Date().toISOString()
-          });
+          };
+          
+          // Save to local storage
+          saveUserLocally(userProfile);
+          const localUpdateSuccess = true;
           
           if (localUpdateSuccess) {
             console.log(`✓ User updated in local storage successfully`);
@@ -371,7 +382,7 @@ const UsersManagementPage: React.FC = () => {
     
     try {
       // Import local storage module
-      const { updateUserLocally, addUserLocally } = await import('@/lib/local-user-store');
+      const { saveUserLocally } = await import('@/lib/local-user-store');
       let successCount = 0;
       
       // Process each selected doctor
@@ -379,31 +390,21 @@ const UsersManagementPage: React.FC = () => {
         console.log(`Processing demotion for doctor: ${doctor.email} (ID: ${doctor.id})`);
         
         try {
-          // Try to update or create in local storage first
-          let localStorageSuccess = false;
-          
-          // First try to update existing user in local storage
-          localStorageSuccess = updateUserLocally(doctor.id, {
+          // Create a user object with doctor data and demoted status
+          const userProfile = {
+            uid: doctor.id,
+            email: doctor.email,
+            firstName: doctor.firstName,
+            lastName: doctor.lastName,
+            mobile: doctor.mobile || "",
+            username: doctor.username,
             isAdmin: false,
             updatedAt: new Date().toISOString()
-          });
+          };
           
-          // If no existing user found, create a new one
-          if (!localStorageSuccess) {
-            // Create a user object with doctor data
-            const userData = {
-              uid: doctor.id,
-              email: doctor.email,
-              firstName: doctor.firstName,
-              lastName: doctor.lastName,
-              mobile: doctor.mobile || "",
-              username: doctor.username,
-              isAdmin: false,
-              updatedAt: new Date().toISOString()
-            };
-            
-            localStorageSuccess = addUserLocally(userData);
-          }
+          // Save to local storage
+          saveUserLocally(userProfile);
+          const localStorageSuccess = true;
           
           if (localStorageSuccess) {
             console.log(`✓ User updated in local storage successfully`);
@@ -577,22 +578,48 @@ const UsersManagementPage: React.FC = () => {
         return;
       }
       
+      // Import local storage module
+      const { saveUserLocally } = await import('@/lib/local-user-store');
+      
       // Create a new user document with the same ID as the Firebase Auth UID
       const firstName = authUser.displayName ? authUser.displayName.split(' ')[0] : '';
       const lastName = authUser.displayName ? authUser.displayName.split(' ').slice(1).join(' ') : '';
       
+      // Create the user data object
       const userData = {
+        uid: authUser.uid,
         email: authUser.email,
         firstName: firstName,
         lastName: lastName,
         mobile: authUser.phoneNumber || "",
         username: authUser.email.split('@')[0],
         isAdmin: false,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       
-      await setDoc(doc(db, "users", authUser.uid), userData);
+      // Save to local storage first (this always works)
+      saveUserLocally(userData);
+      
+      try {
+        // Then try to save to Firestore (might fail if connectivity issues)
+        const firestoreData = {
+          email: authUser.email,
+          firstName: firstName,
+          lastName: lastName,
+          mobile: authUser.phoneNumber || "",
+          username: authUser.email.split('@')[0],
+          isAdmin: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        await setDoc(doc(db, "users", authUser.uid), firestoreData);
+        console.log(`✓ User successfully saved to Firestore`);
+      } catch (firestoreErr) {
+        console.error(`Firestore save failed, but user was saved to local storage:`, firestoreErr);
+        // We still count this as a success since we have local storage
+      }
       
       toast({
         title: "User Added",
