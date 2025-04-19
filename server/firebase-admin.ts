@@ -2,6 +2,8 @@ import { initializeApp, App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { UserRecord } from 'firebase-admin/auth';
 import { cert } from 'firebase-admin/app';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { sendEmail } from './notifications';
 
 let firebaseAdminApp: App | null = null;
 
@@ -255,11 +257,8 @@ export async function sendVerificationEmail(uid: string): Promise<boolean> {
     // Log the verification link for debugging purposes
     console.log(`Verification link generated for user ${uid}: ${link}`);
     
-    // Send the verification email using the built-in notifications module
+    // Send the verification email using the imported sendEmail function
     try {
-      // Import the email sending function - use relative path to avoid circular dependencies
-      const { sendEmail } = require('./notifications');
-      
       // Format a nice HTML email with the verification link
       const userDisplayName = userRecord.displayName || userRecord.email.split('@')[0];
       const emailHtml = `
