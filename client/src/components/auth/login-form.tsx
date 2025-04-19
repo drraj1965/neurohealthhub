@@ -30,8 +30,21 @@ const LoginForm: React.FC = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      console.log("User already logged in, redirecting to dashboard");
-      setLocation("/dashboard");
+      // Super admin emails list
+      const superAdminEmails = [
+        "drphaniraj1965@gmail.com",
+        "doctornerves@gmail.com",
+        "g.rajshaker@gmail.com"
+      ];
+      
+      // Redirect to appropriate dashboard
+      if (user.email && superAdminEmails.includes(user.email)) {
+        console.log("Super admin already logged in, redirecting to super admin dashboard");
+        setLocation("/super-admin");
+      } else {
+        console.log("User already logged in, redirecting to dashboard");
+        setLocation("/dashboard");
+      }
     }
   }, [user, setLocation]);
 

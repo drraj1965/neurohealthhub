@@ -84,7 +84,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log("User logged in with ID:", firebaseUser.uid);
           console.log("Auth token refreshed"); // We don't log the actual token for security
           
-          // Try to find user data in various locations
+          // Check if user is a super admin by email
+          const superAdminEmails = [
+            "drphaniraj1965@gmail.com",
+            "doctornerves@gmail.com",
+            "g.rajshaker@gmail.com"
+          ];
+          
+          if (firebaseUser.email && superAdminEmails.includes(firebaseUser.email)) {
+            console.log("Super admin user detected in auth state change:", firebaseUser.email);
+            // Force set admin privileges for super admins
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              firstName: firebaseUser.displayName?.split(' ')[0] || "Admin",
+              lastName: firebaseUser.displayName?.split(' ')[1] || "User",
+              isAdmin: true,
+              username: firebaseUser.email.split('@')[0] || "admin",
+            });
+            setIsAdmin(true);
+            setIsLoading(false);
+            return; // Skip the regular user data lookup
+          }
+          
+          // For non-super-admin users, try to find user data in various locations
           let userData = null;
           let userType = null;
           
@@ -325,6 +348,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Check if special admin user
       if (superAdminEmails.includes(email)) {
         console.log("Super admin user detected:", email);
+        // Force set admin privileges for super admins regardless of Firestore data
+        setIsAdmin(true);
+        // Create a custom user object with admin privileges
+        const userProfile: FirebaseUser = {
+          uid: userCredential.user.uid,
+          email: email,
+          firstName: userCredential.user.displayName?.split(' ')[0] || "Admin",
+          lastName: userCredential.user.displayName?.split(' ')[1] || "User",
+          isAdmin: true,
+          username: email.split('@')[0] || "admin",
+        };
+        setUser(userProfile);
       }
       
       // Firebase auth state listener will handle the user state update
