@@ -81,18 +81,18 @@ const LoginForm: React.FC = () => {
       // Redirect to appropriate dashboard based on email
       if (superAdminEmails.includes(data.email)) {
         console.log("Super admin detected, redirecting to super admin page");
-        // Add a slight delay to ensure auth state is fully updated
+        // Increase the delay to ensure auth state is fully updated and super admin status is set
         setTimeout(() => {
           console.log("EXECUTING REDIRECT to /super-admin now");
           setLocation("/super-admin");
-        }, 500);
+        }, 1000);
       } else {
         console.log("Redirecting to regular dashboard");
         // Add a slight delay to ensure auth state is fully updated
         setTimeout(() => {
           console.log("EXECUTING REDIRECT to /dashboard now");
           setLocation("/dashboard");
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       console.error("Login error:", error);

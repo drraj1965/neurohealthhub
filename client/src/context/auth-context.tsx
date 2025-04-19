@@ -77,6 +77,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       console.log("Auth state changed:", firebaseUser ? "User logged in" : "No user");
       
+      // If we have a previously set super admin in our state, don't run the lookup
+      // This prevents overwriting our super admin status after a manual login
+      if (user && isAdmin && firebaseUser && user.uid === firebaseUser.uid) {
+        console.log("Auth state change detected, but preserving existing super admin status");
+        setIsLoading(false);
+        return;
+      }
+      
       if (firebaseUser) {
         try {
           // Validate the current user has a valid token
@@ -91,8 +99,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             "g.rajshaker@gmail.com"
           ];
           
+          // Log detailed info for debugging
+          console.log("Auth email check:", {
+            email: firebaseUser.email,
+            isSuperAdmin: firebaseUser.email ? superAdminEmails.includes(firebaseUser.email) : false
+          });
+          
           if (firebaseUser.email && superAdminEmails.includes(firebaseUser.email)) {
-            console.log("Super admin user detected in auth state change:", firebaseUser.email);
+            console.log("★ ★ ★ Super admin user detected in auth state change:", firebaseUser.email);
             // Force set admin privileges for super admins
             setUser({
               uid: firebaseUser.uid,
@@ -347,7 +361,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Check if special admin user
       if (superAdminEmails.includes(email)) {
-        console.log("Super admin user detected:", email);
+        console.log("★ ★ ★ Super admin user detected in login function:", email);
         // Force set admin privileges for super admins regardless of Firestore data
         setIsAdmin(true);
         // Create a custom user object with admin privileges
@@ -360,6 +374,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           username: email.split('@')[0] || "admin",
         };
         setUser(userProfile);
+        
+        // Log the state we've set
+        console.log("Super admin state set in login function:", {
+          user: userProfile,
+          isAdmin: true
+        });
+        return; // Skip any further Firestore checks to prevent overriding our super admin status
       }
       
       // Firebase auth state listener will handle the user state update

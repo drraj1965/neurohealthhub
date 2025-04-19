@@ -53,8 +53,19 @@ const SuperAdminPage: React.FC = () => {
     // Allow access if the user is an admin OR has one of the super admin emails
     const isSuperAdmin = isAdmin || (user && user.email && superAdminEmails.includes(user.email));
     
+    console.log("Super Admin access check (useEffect):", { 
+      userExists: !!user,
+      userEmail: user?.email, 
+      isAdmin, 
+      isSuperAdmin,
+      isSuperAdminByEmail: user?.email ? superAdminEmails.includes(user.email) : false
+    });
+    
     if (!user || !isSuperAdmin) {
+      console.log("Access denied in useEffect, redirecting to home");
       setLocation("/");
+    } else {
+      console.log("Super Admin access granted in useEffect");
     }
   }, [user, isAdmin, setLocation]);
   

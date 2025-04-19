@@ -180,18 +180,37 @@ const UsersManagementPage: React.FC = () => {
     try {
       // Process each selected user
       for (const user of selectedUsers) {
-        // 1. Update the user document in users collection to set isAdmin to true
-        await updateDoc(doc(db, "users", user.id), {
-          isAdmin: true
-        });
+        console.log(`Processing promotion for user: ${user.email} (ID: ${user.id})`);
         
-        // 2. Create a new document in doctors collection with the same ID
-        // Note: We keep the original user document to maintain app history and data integrity
-        await setDoc(doc(db, "doctors", user.id), {
-          ...user,
-          isAdmin: true,
-          updatedAt: new Date()
-        });
+        try {
+          // 1. Update the user document in users collection to set isAdmin to true
+          console.log(`Updating user document in 'users' collection (ID: ${user.id})`);
+          await updateDoc(doc(db, "users", user.id), {
+            isAdmin: true,
+            updatedAt: new Date()
+          });
+          console.log(`✓ User document updated successfully`);
+          
+          // 2. Create a clean object without any client-side properties
+          const doctorData = {
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            mobile: user.mobile || "",
+            username: user.username,
+            isAdmin: true, // Always true for doctors
+            createdAt: user.createdAt || new Date(),
+            updatedAt: new Date()
+          };
+          
+          // 3. Create a new document in doctors collection with the same ID
+          console.log(`Creating doctor document in 'doctors' collection (ID: ${user.id})`);
+          await setDoc(doc(db, "doctors", user.id), doctorData);
+          console.log(`✓ Doctor document created successfully (ID: ${user.id})`);
+        } catch (userErr) {
+          console.error(`Error processing user ${user.email}:`, userErr);
+          // Continue with next user instead of failing the entire operation
+        }
       }
       
       // Refresh the lists
