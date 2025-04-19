@@ -1,10 +1,12 @@
 // Notification service for sending emails and WhatsApp messages
-import { MailService } from '@sendgrid/mail';
+import sgMail from '@sendgrid/mail';
 
 // Initialize SendGrid
-const mailService = new MailService();
 if (process.env.SENDGRID_API_KEY) {
-  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log('SendGrid API initialized successfully');
+} else {
+  console.warn('SendGrid API key not found in environment variables');
 }
 
 interface EmailParams {
@@ -37,7 +39,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       html: params.html || params.text || '',
     };
     
-    await mailService.send(msg);
+    await sgMail.send(msg);
     console.log('Email sent successfully to:', params.to);
     return true;
   } catch (error) {
