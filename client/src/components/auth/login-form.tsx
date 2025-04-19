@@ -27,26 +27,14 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect if already logged in
+  // No auto-redirect for logged-in users
+  // This ensures user always stays on the login page initially
   useEffect(() => {
     if (user) {
-      // Super admin emails list
-      const superAdminEmails = [
-        "drphaniraj1965@gmail.com",
-        "doctornerves@gmail.com",
-        "g.rajshaker@gmail.com"
-      ];
-      
-      // Redirect to appropriate dashboard
-      if (user.email && superAdminEmails.includes(user.email)) {
-        console.log("Super admin already logged in, redirecting to super admin dashboard");
-        setLocation("/super-admin");
-      } else {
-        console.log("User already logged in, redirecting to dashboard");
-        setLocation("/dashboard");
-      }
+      console.log("User is already logged in, but staying on login page as requested");
+      // No redirects - let user explicitly navigate away from login page
     }
-  }, [user, setLocation]);
+  }, [user]);
 
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
@@ -71,26 +59,11 @@ const LoginForm: React.FC = () => {
         description: "Welcome back to NeuroHealthHub!",
       });
       
-      // Redirect to dashboard after successful login
-      console.log("Login successful - redirecting to dashboard");
+      // DO NOT redirect after login - stay on login page
+      console.log("Login successful - but NOT redirecting automatically");
       
-      // Need to use a longer timeout to ensure auth state is loaded
-      setTimeout(() => {
-        // Check if user should go to admin dashboard
-        const isSuperAdmin = data.email === "doctornerves@gmail.com" || 
-                             data.email === "drphaniraj1965@gmail.com" || 
-                             data.email === "g.rajshaker@gmail.com";
-                             
-        const isDoctor = data.email.endsWith("@doctor.com");
-        
-        if (isSuperAdmin || isDoctor) {
-          console.log("Admin user detected, redirecting to admin dashboard");
-          setLocation("/admin");
-        } else {
-          console.log("Regular user detected, redirecting to user dashboard");
-          setLocation("/dashboard");
-        }
-      }, 1000);
+      // The user must explicitly navigate away from the login page
+      // No automatic redirects to ensure login page is always the default landing page
     } catch (error) {
       console.error("Login error:", error);
       toast({
