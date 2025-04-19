@@ -104,10 +104,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             lastName: firebaseUser!.displayName?.split(' ')[1] || "User",
             isAdmin: true,
             username: (firebaseUser!.email || "").split('@')[0] || "admin",
+            emailVerified: true,
+            updatedAt: new Date().toISOString()
           };
           
           setUser(userProfile);
           setIsAdmin(true);
+          
+          // Also save this to local storage as a fallback
+          const localStorageModule = import('@/lib/local-user-store');
+          localStorageModule.then(module => {
+            module.saveUserLocally(userProfile);
+            console.log("Super admin saved to local storage during auth state change");
+          }).catch(err => {
+            console.error("Failed to save super admin to local storage:", err);
+          });
         } else {
           console.log("Auth state change detected, but preserving existing super admin status");
         }
@@ -147,11 +158,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               lastName: firebaseUser.displayName?.split(' ')[1] || "User",
               isAdmin: true,
               username: firebaseUser.email.split('@')[0] || "admin",
+              emailVerified: true,
+              updatedAt: new Date().toISOString()
             };
             
             // Force set admin privileges for super admins
             setUser(userProfile);
             setIsAdmin(true);
+            
+            // Save to local storage for reliability
+            const localStorageModule = import('@/lib/local-user-store');
+            localStorageModule.then(module => {
+              module.saveUserLocally(userProfile);
+              console.log("Super admin saved to local storage from secondary check");
+            }).catch(err => {
+              console.error("Failed to save super admin to local storage:", err);
+            });
             
             // Ensure super admin is properly stored in Firestore
             try {
@@ -325,7 +347,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (userData) {
             if (userType === 'doctor') {
               console.log("Setting doctor profile");
-              setUser({
+              const doctorProfile: FirebaseUser = {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email || userData.email || "",
                 firstName: userData.firstName || "",
@@ -333,11 +355,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 mobile: userData.mobile || "",
                 isAdmin: true,
                 username: userData.username || "",
-              });
+                emailVerified: firebaseUser.emailVerified,
+                updatedAt: new Date().toISOString()
+              };
+              setUser(doctorProfile);
               setIsAdmin(true);
+              
+              // Save to local storage for reliability
+              const localStorageModule = import('@/lib/local-user-store');
+              localStorageModule.then(module => {
+                module.saveUserLocally(doctorProfile);
+                console.log("Doctor profile saved to local storage");
+              }).catch(err => {
+                console.error("Failed to save doctor profile to local storage:", err);
+              });
             } else {
               console.log("Setting regular user profile");
-              setUser({
+              const userProfile: FirebaseUser = {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email || userData.email || "",
                 firstName: userData.firstName || "",
@@ -345,21 +379,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 mobile: userData.mobile || "",
                 isAdmin: userData.isAdmin || false,
                 username: userData.username || "",
-              });
+                emailVerified: firebaseUser.emailVerified,
+                updatedAt: new Date().toISOString()
+              };
+              setUser(userProfile);
               setIsAdmin(userData.isAdmin || false);
+              
+              // Save to local storage for reliability
+              const localStorageModule = import('@/lib/local-user-store');
+              localStorageModule.then(module => {
+                module.saveUserLocally(userProfile);
+                console.log("User profile saved to local storage");
+              }).catch(err => {
+                console.error("Failed to save user profile to local storage:", err);
+              });
             }
           } else {
             console.log("No user profile found in Firestore, using Firebase data");
-            // No data in database, use Firebase user data
-            setUser({
+            // No data in database, use Firebase user data + local storage
+            const newUserProfile: FirebaseUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email || "",
               firstName: firebaseUser.displayName?.split(' ')[0] || "User",
               lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
               isAdmin: false,
               username: firebaseUser.email?.split('@')[0] || "user",
-            });
+              emailVerified: firebaseUser.emailVerified,
+              updatedAt: new Date().toISOString()
+            };
+            setUser(newUserProfile);
             setIsAdmin(false);
+            
+            // Save this to local storage for fallback
+            const localStorageModule = import('@/lib/local-user-store');
+            localStorageModule.then(module => {
+              module.saveUserLocally(newUserProfile);
+              console.log("New user profile saved to local storage");
+            }).catch(err => {
+              console.error("Failed to save new user profile to local storage:", err);
+            });
             
             // Create user profile in Firestore
             if (firebaseUser.email && firebaseUser.emailVerified) {
@@ -547,8 +605,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           lastName: userCredential.user.displayName?.split(' ')[1] || "User",
           isAdmin: true,
           username: email.split('@')[0] || "admin",
+          emailVerified: true,
+          updatedAt: new Date().toISOString()
         };
         setUser(userProfile);
+        
+        // Save admin profile to local storage for reliability
+        const { saveUserLocally } = await import('@/lib/local-user-store');
+        saveUserLocally(userProfile);
+        console.log("Super admin profile saved to local storage during login");
         
         // Ensure super admin is in Firestore
         try {

@@ -93,6 +93,9 @@ export const firebaseUserSchema = z.object({
   mobile: z.string().optional(),
   isAdmin: z.boolean().default(false),
   username: z.string(),
+  emailVerified: z.boolean().optional(),
+  updatedAt: z.string().optional(), // ISO string for date
+  createdAt: z.string().optional(), // ISO string for date
 });
 
 export type FirebaseUser = z.infer<typeof firebaseUserSchema>;
