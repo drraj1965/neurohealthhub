@@ -50,7 +50,20 @@ export default function VerifyEmailMessage({ email, onResendClick }: VerifyEmail
     if (auth.currentUser) {
       setIsResending(true);
       try {
-        await sendEmailVerification(auth.currentUser);
+        // Get the current Replit URL for the redirect
+        const baseUrl = window.location.origin;
+        console.log(`Using base URL for resend verification: ${baseUrl}`);
+        
+        // Configure action code settings for email verification
+        const actionCodeSettings = {
+          // URL you want to redirect back to after email verification
+          url: `${baseUrl}/email-verified`,
+          // This must be true for mobile apps
+          handleCodeInApp: false,
+        };
+        
+        // Send verification email with custom redirect
+        await sendEmailVerification(auth.currentUser, actionCodeSettings);
         toast({
           title: "Verification Email Sent",
           description: "Please check your inbox for the verification link.",
@@ -99,7 +112,15 @@ export default function VerifyEmailMessage({ email, onResendClick }: VerifyEmail
           <div className="space-y-2 text-sm text-gray-600">
             <p>1. Check your email inbox (and spam folder)</p>
             <p>2. Click the verification link in the email</p>
-            <p>3. Return to this page to log in</p>
+            <p>3. Your account will be automatically activated</p>
+            <p>4. Return to the login page to sign in</p>
+          </div>
+          
+          <div className="bg-blue-50 p-4 rounded-md">
+            <h4 className="font-medium text-blue-700 mb-1">Automatic Verification Process:</h4>
+            <p className="text-sm text-blue-600">
+              Our system has been upgraded to automatically process your verification. As soon as you click the link in your email, your account will be fully activated - no additional steps required!
+            </p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-3">

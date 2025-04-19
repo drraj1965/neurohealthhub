@@ -268,9 +268,21 @@ export async function registerUser(email: string, password: string, firstName: s
       displayName: `${firstName} ${lastName}`
     });
     
-    // Send email verification to the user
-    await sendEmailVerification(user);
-    console.log(`Verification email sent to ${email}`);
+    // Get the current Replit URL for the redirect
+    const baseUrl = window.location.origin;
+    console.log(`Using base URL for email verification: ${baseUrl}`);
+    
+    // Configure action code settings for email verification
+    const actionCodeSettings = {
+      // URL you want to redirect back to after email verification
+      url: `${baseUrl}/email-verified`,
+      // This must be true for mobile apps
+      handleCodeInApp: false,
+    };
+    
+    // Send email verification to the user with custom redirect
+    await sendEmailVerification(user, actionCodeSettings);
+    console.log(`Verification email sent to ${email} with redirect to ${baseUrl}/email-verified`);
     
     // We no longer store the user data in Firestore immediately - 
     // user data will only be stored after email verification
@@ -308,8 +320,21 @@ export async function loginUser(email: string, password: string) {
     if (!userCredential.user.emailVerified) {
       console.log("User's email is not verified. Sending verification email.");
       try {
-        // Send a verification email
-        await sendEmailVerification(userCredential.user);
+        // Get the current Replit URL for the redirect
+        const baseUrl = window.location.origin;
+        console.log(`Using base URL for login verification: ${baseUrl}`);
+        
+        // Configure action code settings for email verification
+        const actionCodeSettings = {
+          // URL you want to redirect back to after email verification
+          url: `${baseUrl}/email-verified`,
+          // This must be true for mobile apps
+          handleCodeInApp: false,
+        };
+        
+        // Send a verification email with custom redirect
+        await sendEmailVerification(userCredential.user, actionCodeSettings);
+        console.log(`Verification email sent to ${userCredential.user.email} with redirect to ${baseUrl}/email-verified`);
         
         // Return special object indicating verification required
         return {
