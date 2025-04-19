@@ -465,6 +465,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Send verification email to a user by email address
+  app.post("/api/firebase-auth/users/email/:email/send-verification", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.params;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email address is required" });
+      }
+      
+      console.log(`Attempting to send verification email to address: ${email}`);
+      
+      // Find the user by email
+      const userRecord = await getFirebaseAuthUserByEmail(email);
+      
+      if (!userRecord) {
+        return res.status(404).json({ error: "User not found with this email address" });
+      }
+      
+      // Get the link directly from generateEmailVerificationLink function
+      const verificationLink = await generateEmailVerificationLink(userRecord.uid);
+      
+      if (!verificationLink) {
+        return res.status(500).json({ success: false, message: "Failed to generate verification link" });
+      }
+      
+      // Format a nice HTML email with the verification link
+      const userDisplayName = userRecord.displayName || email.split('@')[0];
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4a5568;">NeuroHealthHub Email Verification</h2>
+          <p>Hello ${userDisplayName},</p>
+          <p>Thank you for registering with NeuroHealthHub. Please verify your email address by clicking the button below:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationLink}" style="background-color: #3182ce; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Email</a>
+          </div>
+          <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; color: #4a5568;"><a href="${verificationLink}">${verificationLink}</a></p>
+          <p>This link will expire in 24 hours.</p>
+          <p>If you did not create an account with NeuroHealthHub, you can safely ignore this email.</p>
+          <p>Best regards,<br>The NeuroHealthHub Team</p>
+        </div>
+      `;
+      
+      // Send the email
+      try {
+        await sendEmail({
+          to: email,
+          subject: 'Verify Your NeuroHealthHub Email Address',
+          text: `Hello ${userDisplayName}, please verify your email by clicking this link: ${verificationLink}`,
+          html: emailHtml
+        });
+        
+        console.log(`Verification email sent to ${email}`);
+        
+        return res.json({ 
+          success: true, 
+          message: "Verification email sent successfully",
+          verificationLink: verificationLink // Include the link for testing
+        });
+      } catch (emailError) {
+        console.error('Error sending verification email:', emailError);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Failed to send verification email, but link was generated",
+          verificationLink: verificationLink // Include the link so client can use it anyway
+        });
+      }
+    } catch (error) {
+      console.error("Error processing verification request:", error);
+      return res.status(500).json({ success: false, message: "Failed to process verification request" });
+    }
+  });
+
   // Special endpoint to handle custom email verification and adding verified users to Firestore database
   app.post("/api/firebase-auth/users/verified", async (req: Request, res: Response) => {
     try {
