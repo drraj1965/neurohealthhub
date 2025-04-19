@@ -18,10 +18,24 @@ import FirebaseAccountCheck from "@/pages/firebase-account-check";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 
+// Super Admin email check function (consistent with other places)
+const isSuperAdminEmail = (email: string | null | undefined): boolean => {
+  if (!email) return false;
+  
+  const superAdminEmails = [
+    "drphaniraj1965@gmail.com",
+    "doctornerves@gmail.com",
+    "g.rajshaker@gmail.com"
+  ];
+  
+  return superAdminEmails.includes(email);
+};
+
 // Protected route component that requires authentication
-const ProtectedRoute = ({ component: Component, admin = false, ...rest }: { 
+const ProtectedRoute = ({ component: Component, admin = false, superAdmin = false, ...rest }: { 
   component: React.ComponentType<any>;
-  admin?: boolean; 
+  admin?: boolean;
+  superAdmin?: boolean;
   path?: string;
 }) => {
   const { user, isLoading, isAdmin } = useAuth();
@@ -40,7 +54,21 @@ const ProtectedRoute = ({ component: Component, admin = false, ...rest }: {
     return <Redirect to="/login" />;
   }
 
-  if (admin && !isAdmin) {
+  // Special check for super admin pages
+  if (superAdmin) {
+    // Allow access only if user is in the superAdminEmails list OR has isAdmin flag
+    const hasSuperAdminAccess = isSuperAdminEmail(user.email) || isAdmin;
+    
+    if (!hasSuperAdminAccess) {
+      console.log("Super Admin access denied:", user.email);
+      return <Redirect to="/dashboard" />;
+    }
+    
+    console.log("Super Admin access granted for:", user.email);
+    // Continue to the component if they have super admin access
+  } 
+  // Standard admin check for regular admin pages
+  else if (admin && !isAdmin) {
     // Redirect to regular dashboard if trying to access admin page without admin rights
     return <Redirect to="/dashboard" />;
   }
@@ -69,10 +97,10 @@ function AppRoutes() {
         {() => <ProtectedRoute component={MyQuestions} />}
       </Route>
       <Route path="/super-admin">
-        {() => <ProtectedRoute component={SuperAdmin} admin={true} />}
+        {() => <ProtectedRoute component={SuperAdmin} superAdmin={true} />}
       </Route>
       <Route path="/users-management">
-        {() => <ProtectedRoute component={UsersManagement} admin={true} />}
+        {() => <ProtectedRoute component={UsersManagement} superAdmin={true} />}
       </Route>
       <Route component={NotFound} />
     </Switch>

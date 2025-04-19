@@ -43,6 +43,9 @@ const SuperAdminPage: React.FC = () => {
   const [_, setLocation] = useLocation();
 
   // Grant super admin access based on both Firebase Auth UID and email
+  // We're disabling this redirect effect as it's causing issues with login flow
+  // The access check will still happen below when rendering
+  /*
   React.useEffect(() => {
     const superAdminEmails = [
       "drphaniraj1965@gmail.com",
@@ -68,6 +71,7 @@ const SuperAdminPage: React.FC = () => {
       console.log("Super Admin access granted in useEffect");
     }
   }, [user, isAdmin, setLocation]);
+  */
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -327,12 +331,16 @@ const SuperAdminPage: React.FC = () => {
     "g.rajshaker@gmail.com"
   ];
   
-  console.log("Super Admin Page - Current user:", user?.email);
+  console.log("====== SUPER ADMIN ACCESS CHECK ======");
+  console.log("Current user:", user?.email);
   console.log("Is admin flag value:", isAdmin);
+  console.log("Super admin emails:", superAdminEmails);
+  console.log("Email match check:", user?.email ? (superAdminEmails.includes(user.email) ? "✓ MATCH" : "✗ NO MATCH") : "No email");
   
   // Allow access if user is super admin by email or has isAdmin flag
   const isSuperAdmin = isAdmin || (user && user.email && superAdminEmails.includes(user.email));
-  console.log("Is super admin?", isSuperAdmin);
+  console.log("Final super admin access decision:", isSuperAdmin ? "✓ GRANTED" : "✗ DENIED");
+  console.log("======================================");
   
   // Override for specific emails - always allow access
   if (user && user.email && superAdminEmails.includes(user.email)) {

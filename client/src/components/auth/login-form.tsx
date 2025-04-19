@@ -82,13 +82,16 @@ const LoginForm: React.FC = () => {
       if (superAdminEmails.includes(data.email)) {
         console.log("Super admin detected, redirecting to super admin page");
         // Increase the delay to ensure auth state is fully updated and super admin status is set
+        // Also store the destination in sessionStorage to handle potential page refresh issues
+        window.sessionStorage.setItem("redirect_after_login", "/super-admin");
         setTimeout(() => {
           console.log("EXECUTING REDIRECT to /super-admin now");
           setLocation("/super-admin");
-        }, 1000);
+        }, 1500); // Increased delay for super admin
       } else {
         console.log("Redirecting to regular dashboard");
         // Add a slight delay to ensure auth state is fully updated
+        window.sessionStorage.setItem("redirect_after_login", "/dashboard");
         setTimeout(() => {
           console.log("EXECUTING REDIRECT to /dashboard now");
           setLocation("/dashboard");

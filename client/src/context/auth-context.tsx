@@ -77,10 +77,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       console.log("Auth state changed:", firebaseUser ? "User logged in" : "No user");
       
-      // If we have a previously set super admin in our state, don't run the lookup
-      // This prevents overwriting our super admin status after a manual login
-      if (user && isAdmin && firebaseUser && user.uid === firebaseUser.uid) {
-        console.log("Auth state change detected, but preserving existing super admin status");
+      // We need to preserve super admin status in two cases:
+      // 1. If we already have a super admin in our state with matching UID
+      // 2. If the current user email is in our super admin list
+      const superAdminEmails = [
+        "drphaniraj1965@gmail.com",
+        "doctornerves@gmail.com",
+        "g.rajshaker@gmail.com"
+      ];
+      
+      // Check if current Firebase user is a super admin
+      const isSuperAdminByEmail = firebaseUser?.email ? superAdminEmails.includes(firebaseUser.email) : false;
+    
+      if ((user && isAdmin && firebaseUser && user.uid === firebaseUser.uid) || isSuperAdminByEmail) {
+        // If existing user is super admin, don't override their status
+        // OR if current firebaseUser is a super admin by email
+        if (isSuperAdminByEmail) {
+          console.log("★★★ Super admin detected via email in auth state change, ALWAYS preserving super admin status");
+          
+          // Force set super admin user data in case it doesn't exist
+          // Safely handle the potentially null firebaseUser (though we've already checked it above)
+          const userProfile: FirebaseUser = {
+            uid: firebaseUser!.uid,
+            email: firebaseUser!.email || "",
+            firstName: firebaseUser!.displayName?.split(' ')[0] || "Admin",
+            lastName: firebaseUser!.displayName?.split(' ')[1] || "User",
+            isAdmin: true,
+            username: (firebaseUser!.email || "").split('@')[0] || "admin",
+          };
+          
+          setUser(userProfile);
+          setIsAdmin(true);
+        } else {
+          console.log("Auth state change detected, but preserving existing super admin status");
+        }
+        
         setIsLoading(false);
         return;
       }

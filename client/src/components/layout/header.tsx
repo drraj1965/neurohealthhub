@@ -48,6 +48,16 @@ const Header: React.FC = () => {
               <h1 className="text-2xl font-bold text-primary-600 cursor-pointer">NeuroHealthHub</h1>
             </Link>
             
+            {/* Super Admin Direct Access - Only visible during development for testing */}
+            {import.meta.env.DEV && user?.email && (
+              <div className="ml-4 text-xs text-gray-400 flex items-center">
+                <span>Debug:</span>
+                <Link href="/super-admin">
+                  <span className="ml-1 underline hover:text-primary">Super Admin</span>
+                </Link>
+              </div>
+            )}
+            
             {isAdmin && (
               <span className="ml-3 px-2 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-800">
                 Admin

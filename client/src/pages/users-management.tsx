@@ -255,30 +255,54 @@ const UsersManagementPage: React.FC = () => {
     try {
       // Process each selected doctor
       for (const doctor of selectedDoctors) {
-        // Update the user document in users collection to set isAdmin to false
-        // First check if the user document exists
-        const usersRef = collection(db, "users");
-        const userQuery = query(usersRef, where("email", "==", doctor.email));
-        const userSnapshot = await getDocs(userQuery);
+        console.log(`Processing demotion for doctor: ${doctor.email} (ID: ${doctor.id})`);
         
-        if (!userSnapshot.empty) {
-          // Update existing user document
-          await updateDoc(doc(db, "users", userSnapshot.docs[0].id), {
-            isAdmin: false
-          });
-        } else {
-          // If no user record exists, create one from the doctor record
-          await setDoc(doc(db, "users", doctor.id), {
-            ...doctor,
+        try {
+          // 1. Update the user document in users collection to set isAdmin to false (or create if it doesn't exist)
+          const usersRef = collection(db, "users");
+          const userQuery = query(usersRef, where("email", "==", doctor.email));
+          const userSnapshot = await getDocs(userQuery);
+          
+          if (!userSnapshot.empty) {
+            // Update existing user document
+            console.log(`Updating existing user document in 'users' collection (ID: ${userSnapshot.docs[0].id})`);
+            await updateDoc(doc(db, "users", userSnapshot.docs[0].id), {
+              isAdmin: false,
+              updatedAt: new Date()
+            });
+            console.log(`✓ User document updated successfully`);
+          } else {
+            // If no user record exists, create a clean one from the doctor record
+            console.log(`No user document found, creating new user document with ID: ${doctor.id}`);
+            
+            // Create a clean object without any client-side properties
+            const userData = {
+              email: doctor.email,
+              firstName: doctor.firstName,
+              lastName: doctor.lastName,
+              mobile: doctor.mobile || "",
+              username: doctor.username,
+              isAdmin: false, // Always false for demoted doctors
+              createdAt: doctor.createdAt || new Date(),
+              updatedAt: new Date()
+            };
+            
+            await setDoc(doc(db, "users", doctor.id), userData);
+            console.log(`✓ User document created successfully`);
+          }
+          
+          // 2. Update the doctor document in the doctors collection to maintain data consistency
+          console.log(`Updating doctor document in 'doctors' collection (ID: ${doctor.id})`);
+          await updateDoc(doc(db, "doctors", doctor.id), {
             isAdmin: false,
             updatedAt: new Date()
           });
+          console.log(`✓ Doctor document updated successfully`);
+          
+        } catch (doctorErr) {
+          console.error(`Error processing doctor ${doctor.email}:`, doctorErr);
+          // Continue with next doctor instead of failing the entire operation
         }
-        
-        // Also update the doctor document in the doctors collection
-        await updateDoc(doc(db, "doctors", doctor.id), {
-          isAdmin: false
-        });
       }
       
       // Refresh the lists
