@@ -197,23 +197,25 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
       throw new Error(`User with UID ${uid} does not have an email address`);
     }
     
-    // TEMPORARY DEVELOPMENT SOLUTION: 
-    // Since we have persistent domain allowlisting issues with Firebase
-    // We're generating mock verification links instead of using Firebase's API
-    console.log(`Creating mock verification link for user ${uid} with email ${userRecord.email}`);
-    console.log("⚠️ IMPORTANT: This is a development workaround due to Firebase domain allowlisting issues");
-    console.log("⚠️ For production, fix domain allowlisting in Firebase Console");
+    // Generate email verification link
+    const actionCodeSettings = {
+      // Firebase will automatically append mode=verifyEmail and oobCode to this URL
+      url: 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified',
+      handleCodeInApp: false,  // For automated handling by Firebase Auth
+    };
     
-    // Generate a mock verification token that contains the user ID and email
-    const mockToken = Buffer.from(`uid=${uid}&email=${userRecord.email}`).toString('base64');
-    
-    // Create a URL to our verification page with the mock token
-    // Using the domain you've already authorized in Firebase
-    const baseUrl = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev';
-    
-    // Return a mock verification URL
-    return `${baseUrl}/email-verified?mockVerification=true&mockToken=${mockToken}`;
-    
+    try {
+      const link = await auth.generateEmailVerificationLink(
+        userRecord.email,
+        actionCodeSettings
+      );
+      
+      console.log(`Generated verification link for user ${uid} with email ${userRecord.email}`);
+      return link;
+    } catch (error) {
+      console.error('Firebase error generating verification link:', error);
+      return null;
+    }
   } catch (error) {
     console.error('Error generating email verification link:', error);
     return null;
@@ -249,17 +251,8 @@ export async function sendVerificationEmail(uid: string): Promise<boolean> {
       throw new Error('Failed to generate verification link');
     }
     
-    // Check if this is a mock verification link
-    const isMockLink = link.includes('mockVerification=true');
-    
-    if (isMockLink) {
-      console.log('MOCK VERIFICATION LINK GENERATED FOR DEVELOPMENT:', link);
-      console.log('⚠️ IMPORTANT: In production, you need to add your domain to Firebase authorized domains.');
-      console.log('⚠️ For now, use the link above for testing. Copy and paste it in a browser to verify.');
-      
-      // In dev mode with mock links, we'll consider this a success without actually sending an email
-      return true;
-    }
+    // Log the verification link for debugging purposes
+    console.log(`Verification link generated for user ${uid}: ${link}`);
     
     // Send the verification email using the built-in notifications module
     try {
