@@ -201,24 +201,43 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
       throw new Error(`User with UID ${uid} does not have an email address`);
     }
     
-    // Create a secure verification token
-    // This contains the UID and a timestamp for expiration
-    const tokenData = {
-      uid: uid,
-      email: userRecord.email,
-      timestamp: Date.now(),
-      // Add an expiration time (24 hours from now)
-      expires: Date.now() + (24 * 60 * 60 * 1000)
-    };
-    
-    // Create a secure token by encoding the data
-    const token = Buffer.from(JSON.stringify(tokenData)).toString('base64');
-    
-    // Create our custom verification URL with the token
-    const verificationUrl = `https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified?token=${token}`;
-    
-    console.log(`Generated custom verification link for user ${uid} with email ${userRecord.email}`);
-    return verificationUrl;
+    // Generate a Firebase verification link using the Admin SDK
+    try {
+      // Generate an action code (verification link) for the user
+      const actionCodeSettings = {
+        url: 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified',
+        handleCodeInApp: false,
+      };
+      
+      // Get a verification link for the user
+      const link = await auth.generateEmailVerificationLink(
+        userRecord.email,
+        actionCodeSettings
+      );
+      
+      console.log(`Generated Firebase verification link for user ${uid} with email ${userRecord.email}`);
+      return link;
+    } catch (firebaseError) {
+      console.error('Firebase error generating verification link:', firebaseError);
+      
+      // Fallback to custom token if Firebase link generation fails
+      const tokenData = {
+        uid: uid,
+        email: userRecord.email,
+        timestamp: Date.now(),
+        // Add an expiration time (24 hours from now)
+        expires: Date.now() + (24 * 60 * 60 * 1000)
+      };
+      
+      // Create a secure token by encoding the data
+      const token = Buffer.from(JSON.stringify(tokenData)).toString('base64');
+      
+      // Create our custom verification URL with the token
+      const customVerificationUrl = `https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified?token=${token}`;
+      
+      console.log(`Generated fallback custom verification link for user ${uid}`);
+      return customVerificationUrl;
+    }
   } catch (error) {
     console.error('Error generating email verification link:', error);
     return null;

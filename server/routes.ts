@@ -440,16 +440,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Update the user's email verification status in Firebase Auth
-      try {
-        await auth.updateUser(uid, {
-          emailVerified: true
-        });
-        console.log(`Updated user ${uid} email verification status to true in Firebase Auth`);
-      } catch (updateError) {
-        console.error('Error updating user verification status:', updateError);
-        return res.status(500).json({ error: "Failed to update user verification status" });
+      // Check if the user's email is already verified - if not, we won't continue
+      if (!userRecord.emailVerified) {
+        console.log(`Email not verified for user ${uid}, not adding to Firestore yet`);
+        return res.status(400).json({ error: "Email not verified" });
       }
+      
+      console.log(`User ${uid} email is verified, proceeding to add to Firestore if needed`);
       
       // Get Firestore instance
       const firestore = getFirestore();
