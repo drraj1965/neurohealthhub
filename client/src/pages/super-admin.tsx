@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { User, Shield, UserPlus, Loader2, UserCheck, AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
+import { User, Shield, UserPlus, Loader2, UserCheck, AlertTriangle, RefreshCw, Trash2, Link as LinkIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/context/auth-context";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 interface FormData {
   email: string;
@@ -369,7 +369,14 @@ const SuperAdminPage: React.FC = () => {
       <div className="container mx-auto py-10">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-primary mb-2">Super Admin Panel</h1>
-          <p className="text-muted-foreground mb-8">Create authenticated users and doctor accounts</p>
+          <p className="text-muted-foreground mb-4">Create authenticated users and doctor accounts</p>
+          
+          <div className="flex gap-4 mb-8">
+            <Button variant="outline" onClick={() => window.location.href = "/users-management"}>
+              <User className="h-4 w-4 mr-2" />
+              Manage Users & Doctors
+            </Button>
+          </div>
           
           <Tabs defaultValue="createUser" className="mb-8">
             <TabsList className="grid grid-cols-2 mb-6">
