@@ -21,6 +21,8 @@ import {
   sendVerificationEmail,
   initializeFirebaseAdmin
 } from './firebase-admin';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Firebase Admin SDK
@@ -413,6 +415,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending verification email:", error);
       res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+  
+  // Special endpoint to handle adding verified users to Firestore database
+  app.post("/api/firebase-auth/users/verified", async (req: Request, res: Response) => {
+    try {
+      const { uid } = req.body;
+      
+      if (!uid) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      console.log(`Processing verified user with UID: ${uid}`);
+      
+      // Initialize Firebase Admin
+      initializeFirebaseAdmin();
+      const auth = getAuth();
+      
+      // Get user record to check if email is verified
+      const userRecord = await auth.getUser(uid);
+      
+      if (!userRecord) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Only proceed if email is verified
+      if (!userRecord.emailVerified) {
+        return res.status(400).json({ 
+          error: "Email not verified", 
+          message: "User's email must be verified before adding to Firestore"
+        });
+      }
+      
+      // Get Firestore instance
+      const firestore = getFirestore();
+      
+      // Check if user already exists in Firestore
+      const userDoc = await firestore.collection('users').doc(uid).get();
+      
+      if (userDoc.exists) {
+        return res.status(200).json({ 
+          message: "User already exists in Firestore",
+          status: "existing"
+        });
+      }
+      
+      // Add user to Firestore
+      await firestore.collection('users').doc(uid).set({
+        uid: userRecord.uid,
+        email: userRecord.email,
+        displayName: userRecord.displayName || null,
+        firstName: userRecord.displayName ? userRecord.displayName.split(' ')[0] : null,
+        lastName: userRecord.displayName ? 
+          userRecord.displayName.split(' ').slice(1).join(' ') : null,
+        photoURL: userRecord.photoURL || null,
+        phoneNumber: userRecord.phoneNumber || null,
+        isAdmin: false, // New users are not admins by default
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        emailVerified: true, // We only add verified users
+      });
+      
+      console.log(`User ${uid} successfully added to Firestore after email verification`);
+      
+      return res.status(201).json({
+        message: "User successfully added to Firestore",
+        status: "created"
+      });
+      
+    } catch (error) {
+      console.error("Error adding verified user to Firestore:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   });
 

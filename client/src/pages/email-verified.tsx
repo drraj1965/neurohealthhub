@@ -1,192 +1,139 @@
-import React, { useEffect, useState } from "react";
-import { useLocation } from "wouter";
-import { Helmet } from "react-helmet";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAuth, applyActionCode, signInWithEmailLink } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation, useRoute } from 'wouter';
+import { auth } from '@/lib/firebase';
+import { applyActionCode, getAuth } from 'firebase/auth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
-const EmailVerifiedPage: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
-  const [email, setEmail] = useState<string | null>(null);
-  const [_, setLocation] = useLocation();
+export default function EmailVerified() {
+  const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const [message, setMessage] = useState<string>('Verifying your email address...');
+  const [, navigate] = useLocation();
+  
+  // Extract the action code from the URL
+  const getActionCode = useCallback(() => {
+    // Firebase adds oobCode as a query parameter
+    const searchParams = new URLSearchParams(window.location.search);
+    const actionCode = searchParams.get('oobCode');
+    return actionCode;
+  }, []);
 
+  // Handle the verification process
   useEffect(() => {
-    const processEmailVerification = async () => {
+    const verifyEmail = async () => {
+      const actionCode = getActionCode();
+      
+      // If there's no action code, display an error
+      if (!actionCode) {
+        setStatus('error');
+        setMessage('Invalid verification link. The link may be malformed or has expired.');
+        return;
+      }
+      
       try {
-        setLoading(true);
-        
-        // Get the URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const mode = urlParams.get('mode');
-        const oobCode = urlParams.get('oobCode');
-        const apiKey = urlParams.get('apiKey');
-        const continueUrl = urlParams.get('continueUrl');
-        const lang = urlParams.get('lang') || 'en';
-        
-        console.log("Email verification parameters:", { mode, oobCode, apiKey, continueUrl, lang });
-        
-        if (!oobCode) {
-          throw new Error('No action code found in URL');
-        }
-        
-        // Get the Firebase Auth instance
-        const auth = getAuth();
-        
         // Apply the action code to verify the email
-        await applyActionCode(auth, oobCode);
+        await applyActionCode(auth, actionCode);
         
-        // If we have a user already, get their details
-        const user = auth.currentUser;
-        console.log("Current user after verification:", user);
+        // Check if we need to add the user to Firestore database
+        const currentUser = auth.currentUser;
         
-        if (user) {
-          setEmail(user.email);
-          
-          // Check if user already exists in Firestore
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (!userDoc.exists()) {
-            // Create a new user document in Firestore
-            console.log("Creating new user document in Firestore for verified user:", user.email);
+        // Add the verified user to the database via server API
+        if (currentUser) {
+          try {
+            // Force refresh the token to include the updated emailVerified claim
+            await currentUser.getIdToken(true);
             
-            // Extract first name and last name from display name
-            const firstName = user.displayName ? user.displayName.split(' ')[0] : '';
-            const lastName = user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '';
+            // Call our server-side API to handle adding user to Firestore
+            const response = await fetch('/api/firebase-auth/users/verified', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                uid: currentUser.uid,
+              }),
+            });
             
-            const userData = {
-              email: user.email,
-              firstName: firstName,
-              lastName: lastName,
-              mobile: user.phoneNumber || "",
-              username: user.email ? user.email.split('@')[0] : 'user' + Date.now(),
-              isAdmin: false,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            };
-            
-            await setDoc(userDocRef, userData);
-            console.log("New user document created successfully");
-          } else {
-            console.log("User already exists in Firestore");
+            if (response.ok) {
+              console.log('User successfully added to Firestore after verification');
+            } else {
+              console.warn('Failed to add verified user to Firestore database');
+            }
+          } catch (dbError) {
+            console.error('Error adding verified user to database:', dbError);
+            // We don't change status to error as the email verification itself succeeded
           }
-        } else {
-          console.log("No user is currently signed in");
-          // We don't have a user logged in - this is still a successful verification
-          // but we need to handle differently (user will need to log in)
         }
         
-        setSuccess(true);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error processing email verification:", error);
-        setError(error instanceof Error ? error.message : 'An unknown error occurred');
-        setSuccess(false);
-        setLoading(false);
+        // Set success status
+        setStatus('success');
+        setMessage('Your email has been successfully verified! You can now log in to access all features.');
+      } catch (error: any) {
+        console.error('Error verifying email:', error);
+        setStatus('error');
+        
+        // Provide specific error messages based on the error code
+        if (error.code === 'auth/invalid-action-code') {
+          setMessage('The verification link has expired or already been used. Please request a new verification email.');
+        } else if (error.code === 'auth/user-not-found') {
+          setMessage('User account not found. The account may have been deleted.');
+        } else {
+          setMessage(`Verification failed: ${error.message || 'Unknown error occurred'}`);
+        }
       }
     };
     
-    processEmailVerification();
-  }, []);
+    verifyEmail();
+  }, [getActionCode]);
   
-  const handleContinue = () => {
-    setLocation("/login");
-  };
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Helmet>
-          <title>Verifying Email | NeuroHealthHub</title>
-        </Helmet>
-        <Card className="w-[400px]">
-          <CardHeader>
-            <CardTitle className="text-center">Verifying Email</CardTitle>
-            <CardDescription className="text-center">
-              Please wait while we verify your email...
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center py-10">
-            <Loader2 className="h-16 w-16 animate-spin text-primary" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Helmet>
-          <title>Verification Failed | NeuroHealthHub</title>
-        </Helmet>
-        <Card className="w-[400px]">
-          <CardHeader>
-            <CardTitle className="text-center text-destructive flex items-center justify-center">
-              <XCircle className="h-8 w-8 mr-2 text-destructive" />
-              Verification Failed
-            </CardTitle>
-            <CardDescription className="text-center mt-4">
-              We couldn't verify your email address.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center py-4">
-            <p className="mb-4">Error: {error}</p>
-            <p>This might be because:</p>
-            <ul className="list-disc list-inside text-left mt-2">
-              <li>The verification link has expired</li>
-              <li>The link has already been used</li>
-              <li>There was a problem with the verification process</li>
-            </ul>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button onClick={handleContinue}>
-              Return to Login
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
-  
+  // Render different content based on status
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Helmet>
-        <title>Email Verified | NeuroHealthHub</title>
-      </Helmet>
-      <Card className="w-[400px]">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-center text-green-600 flex items-center justify-center">
-            <CheckCircle className="h-8 w-8 mr-2 text-green-600" />
-            Email Verified
+          <CardTitle className="text-2xl font-bold text-center">
+            Email Verification
           </CardTitle>
-          <CardDescription className="text-center mt-4">
-            Your email has been successfully verified!
+          <CardDescription className="text-center">
+            NeuroHealthHub Account Verification
           </CardDescription>
         </CardHeader>
-        <CardContent className="text-center py-4">
-          {email ? (
-            <p>Thank you for verifying your email address: <strong>{email}</strong></p>
-          ) : (
-            <p>Thank you for verifying your email address.</p>
+        
+        <CardContent className="flex flex-col items-center justify-center pt-4 pb-6">
+          {status === 'processing' && (
+            <>
+              <Loader2 className="h-16 w-16 text-primary animate-spin mb-4" />
+              <p className="text-center text-muted-foreground">{message}</p>
+            </>
           )}
-          <p className="mt-4">
-            You can now log in to access your account and start using NeuroHealthHub.
-          </p>
+          
+          {status === 'success' && (
+            <>
+              <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+              <p className="text-center text-muted-foreground">{message}</p>
+            </>
+          )}
+          
+          {status === 'error' && (
+            <>
+              <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+              <p className="text-center text-muted-foreground">{message}</p>
+            </>
+          )}
         </CardContent>
+        
         <CardFooter className="flex justify-center">
-          <Button onClick={handleContinue}>
-            Continue to Login
-          </Button>
+          {status !== 'processing' && (
+            <Button
+              onClick={() => navigate('/login')}
+              className="w-full sm:w-auto"
+            >
+              Go to Login
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>
   );
-};
-
-export default EmailVerifiedPage;
+}

@@ -268,17 +268,31 @@ export async function registerUser(email: string, password: string, firstName: s
       displayName: `${firstName} ${lastName}`
     });
     
-    // Store additional user data in Firestore
-    await setDoc(doc(db, "users", user.uid), {
-      email,
-      firstName,
-      lastName,
-      mobile: mobile || "",
-      isAdmin: false,
-      username
-    });
+    // Send email verification to the user
+    await sendEmailVerification(user);
+    console.log(`Verification email sent to ${email}`);
     
-    return user;
+    // We no longer store the user data in Firestore immediately - 
+    // user data will only be stored after email verification
+    // This is handled by the email-verified.tsx page
+    
+    // Store temporary user metadata in localStorage to use after verification
+    try {
+      localStorage.setItem(`user_pending_${user.uid}`, JSON.stringify({
+        email,
+        firstName,
+        lastName,
+        mobile: mobile || "",
+        username
+      }));
+    } catch (e) {
+      console.warn('Could not save temporary user data to localStorage:', e);
+    }
+    
+    return {
+      ...user,
+      pendingVerification: true
+    };
   } catch (error) {
     console.error("Registration error:", error);
     throw error;
