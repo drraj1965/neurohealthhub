@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { collection, getDocs, doc, updateDoc, where, query, setDoc } from "firebase/firestore";
+import { getAuth, User as FirebaseAuthUser } from "firebase/auth";
 import { db } from "@/lib/firebase";
+import { getFirebaseAdminApp, getFirebaseUsers, UserRecord } from "../lib/firebase-admin";
 import { useAuth } from "@/context/auth-context";
 import { useLocation, Link } from "wouter";
 import {
@@ -34,9 +36,22 @@ interface UserData {
   createdAt?: any;
 }
 
+interface FirebaseAuthUserData {
+  uid: string;
+  email: string;
+  displayName?: string;
+  emailVerified: boolean;
+  creationTime?: string;
+  lastSignInTime?: string;
+  phoneNumber?: string;
+  providerData?: any[];
+}
+
 const UsersManagementPage: React.FC = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [doctors, setDoctors] = useState<UserData[]>([]);
+  const [firebaseAuthUsers, setFirebaseAuthUsers] = useState<FirebaseAuthUserData[]>([]);
+  const [loadingAuth, setLoadingAuth] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -90,6 +105,32 @@ const UsersManagementPage: React.FC = () => {
       setDoctors(doctorsData);
       console.log("Fetched users:", usersData.length);
       console.log("Fetched doctors:", doctorsData.length);
+      
+      // Attempt to fetch Firebase Auth users (client-side function that would normally be server-side)
+      try {
+        setLoadingAuth(true);
+        const authUsers = await getFirebaseUsers();
+        console.log("Fetched Firebase Auth users:", authUsers.length);
+        
+        // Convert to our FirebaseAuthUserData format
+        const formattedAuthUsers = authUsers.map(authUser => ({
+          uid: authUser.uid,
+          email: authUser.email || "",
+          displayName: authUser.displayName || "",
+          emailVerified: authUser.emailVerified,
+          creationTime: authUser.metadata?.creationTime,
+          lastSignInTime: authUser.metadata?.lastSignInTime,
+          phoneNumber: authUser.phoneNumber || "",
+          providerData: authUser.providerData
+        }));
+        
+        setFirebaseAuthUsers(formattedAuthUsers);
+      } catch (authErr) {
+        console.error("Error fetching Firebase Auth users:", authErr);
+        // Don't fail the entire operation if this part fails
+      } finally {
+        setLoadingAuth(false);
+      }
     } catch (err) {
       console.error("Error fetching users and doctors:", err);
       setError("Failed to load users and doctors");
