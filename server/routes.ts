@@ -421,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Special endpoint to handle adding verified users to Firestore database
   app.post("/api/firebase-auth/users/verified", async (req: Request, res: Response) => {
     try {
-      const { uid } = req.body;
+      const { uid, temporaryData } = req.body;
       
       if (!uid) {
         return res.status(400).json({ error: "User ID is required" });
@@ -461,21 +461,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Add user to Firestore
-      await firestore.collection('users').doc(uid).set({
+      // Prepare user data with information from both user record and temporary data
+      const userData = {
         uid: userRecord.uid,
         email: userRecord.email,
         displayName: userRecord.displayName || null,
-        firstName: userRecord.displayName ? userRecord.displayName.split(' ')[0] : null,
-        lastName: userRecord.displayName ? 
-          userRecord.displayName.split(' ').slice(1).join(' ') : null,
+        firstName: temporaryData?.firstName || 
+          (userRecord.displayName ? userRecord.displayName.split(' ')[0] : null),
+        lastName: temporaryData?.lastName || 
+          (userRecord.displayName ? userRecord.displayName.split(' ').slice(1).join(' ') : null),
+        username: temporaryData?.username || 
+          (userRecord.email ? userRecord.email.split('@')[0] : null),
+        mobile: temporaryData?.mobile || null,
         photoURL: userRecord.photoURL || null,
         phoneNumber: userRecord.phoneNumber || null,
         isAdmin: false, // New users are not admins by default
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
         emailVerified: true, // We only add verified users
-      });
+      };
+      
+      // Add user to Firestore
+      await firestore.collection('users').doc(uid).set(userData);
       
       console.log(`User ${uid} successfully added to Firestore after email verification`);
       

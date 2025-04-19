@@ -44,6 +44,23 @@ export default function EmailVerified() {
             // Force refresh the token to include the updated emailVerified claim
             await currentUser.getIdToken(true);
             
+            // Try to get any temporary user data from localStorage
+            let temporaryData = null;
+            try {
+              const pendingUserKey = `user_pending_${currentUser.uid}`;
+              const storedData = localStorage.getItem(pendingUserKey);
+              
+              if (storedData) {
+                temporaryData = JSON.parse(storedData);
+                console.log('Found temporary user data:', temporaryData);
+                
+                // Clean up the localStorage entry
+                localStorage.removeItem(pendingUserKey);
+              }
+            } catch (e) {
+              console.warn('Error retrieving temporary user data from localStorage:', e);
+            }
+            
             // Call our server-side API to handle adding user to Firestore
             const response = await fetch('/api/firebase-auth/users/verified', {
               method: 'POST',
@@ -52,6 +69,7 @@ export default function EmailVerified() {
               },
               body: JSON.stringify({
                 uid: currentUser.uid,
+                temporaryData: temporaryData
               }),
             });
             
