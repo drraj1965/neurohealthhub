@@ -16,6 +16,7 @@ import FirebaseTest from "@/pages/firebase-test";
 import SuperAdmin from "@/pages/super-admin";
 import UsersManagement from "@/pages/users-management";
 import FirebaseAccountCheck from "@/pages/firebase-account-check";
+import EmailVerified from "@/pages/email-verified";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 
@@ -86,6 +87,7 @@ function AppRoutes() {
       <Route path="/register" component={Register} />
       <Route path="/firebase-test" component={FirebaseTest} />
       <Route path="/firebase-account-check" component={FirebaseAccountCheck} />
+      <Route path="/email-verified" component={EmailVerified} />
       <Route path="/dashboard">
         {() => <ProtectedRoute component={UserDashboard} />}
       </Route>

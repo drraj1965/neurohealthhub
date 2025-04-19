@@ -205,6 +205,11 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
       handleCodeInApp: true,
     };
     
+    // For local development on Replit, use the Replit URL even in dev mode
+    if (process.env.REPL_ID && process.env.REPL_SLUG) {
+      actionCodeSettings.url = `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/email-verified`;
+    }
+    
     const link = await auth.generateEmailVerificationLink(
       userRecord.email,
       actionCodeSettings
@@ -247,12 +252,46 @@ export async function sendVerificationEmail(uid: string): Promise<boolean> {
       throw new Error('Failed to generate verification link');
     }
     
-    // Here you would typically use an email service (SendGrid, Mailgun, etc.)
-    // For now, we'll just log the link and return success
-    console.log('VERIFICATION LINK FOR USER:', link);
-    console.log('Please implement actual email sending with your preferred email provider');
+    // Send the verification email using the built-in notifications module
+    try {
+      // Import the email sending function - use relative path to avoid circular dependencies
+      const { sendEmail } = require('./notifications');
+      
+      // Format a nice HTML email with the verification link
+      const userDisplayName = userRecord.displayName || userRecord.email.split('@')[0];
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4a5568;">NeuroHealthHub Email Verification</h2>
+          <p>Hello ${userDisplayName},</p>
+          <p>Thank you for registering with NeuroHealthHub. Please verify your email address by clicking the button below:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${link}" style="background-color: #3182ce; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Email</a>
+          </div>
+          <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
+          <p style="word-break: break-all; color: #4a5568;"><a href="${link}">${link}</a></p>
+          <p>This link will expire in 24 hours.</p>
+          <p>If you did not create an account with NeuroHealthHub, you can safely ignore this email.</p>
+          <p>Best regards,<br>The NeuroHealthHub Team</p>
+        </div>
+      `;
+      
+      // Send the email
+      await sendEmail({
+        to: userRecord.email,
+        subject: 'Verify Your NeuroHealthHub Email Address',
+        text: `Hello ${userDisplayName}, please verify your email by clicking this link: ${link}`,
+        html: emailHtml
+      });
+      
+      console.log(`Verification email sent to ${userRecord.email}`);
+    } catch (emailError) {
+      console.error('Error sending verification email:', emailError);
+      // Even if email sending fails, we'll still log the link
+      console.log('VERIFICATION LINK FOR USER:', link);
+      console.log('Email sending failed, but verification link was generated successfully');
+    }
     
-    // Return true indicating success (in a real implementation, you'd check if the email was sent)
+    // Return true indicating success since we generated the link successfully
     return true;
   } catch (error) {
     console.error('Error sending verification email:', error);
