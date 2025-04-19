@@ -320,37 +320,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsAdmin(false);
             
             // Create user profile in Firestore
-            if (firebaseUser.email) {
+            if (firebaseUser.email && firebaseUser.emailVerified) {
+              // Use server API first (more reliable)
               try {
-                // Try to create in standard users collection
-                await setDoc(doc(db, "users", firebaseUser.uid), {
-                  email: firebaseUser.email,
-                  firstName: firebaseUser.displayName?.split(' ')[0] || "User",
-                  lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
-                  isAdmin: false,
-                  username: firebaseUser.email.split('@')[0] || "user",
-                  createdAt: new Date()
+                console.log("Attempting to create user profile via server API...");
+                const response = await fetch('/api/firebase-auth/users/verified', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email
+                  }),
                 });
-                console.log("Created new user profile in Firestore users collection");
-              } catch (error) {
-                console.error("Error creating user profile in users collection:", error);
                 
-                // Try creating in neurohealthhub collection as fallback
-                try {
-                  await setDoc(doc(db, "neurohealthhub", firebaseUser.uid), {
-                    email: firebaseUser.email,
-                    firstName: firebaseUser.displayName?.split(' ')[0] || "User",
-                    lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
-                    isAdmin: false,
-                    username: firebaseUser.email.split('@')[0] || "user",
-                    type: "user",
-                    createdAt: new Date()
-                  });
-                  console.log("Created new user profile in Firestore neurohealthhub collection");
-                } catch (fallbackError) {
-                  console.error("Error creating user profile in neurohealthhub collection:", fallbackError);
+                if (response.ok) {
+                  console.log("Created user profile via server API");
+                } else {
+                  // Server API failed, fall back to client-side
+                  throw new Error("Server API failed, trying client-side");
                 }
+              } catch (serverError) {
+                console.error("Error creating user profile via server API:", serverError);
+                
+                // Attempt client-side Firestore creation with retry mechanism
+                const createUserInFirestore = async (attempt = 1, maxAttempts = 3) => {
+                  try {
+                    console.log(`Client-side attempt ${attempt} to create user in Firestore...`);
+                    // Try to create in standard users collection
+                    await setDoc(doc(db, "users", firebaseUser.uid), {
+                      uid: firebaseUser.uid,
+                      email: firebaseUser.email,
+                      firstName: firebaseUser.displayName?.split(' ')[0] || "User",
+                      lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
+                      isAdmin: false,
+                      username: firebaseUser.email.split('@')[0] || "user",
+                      createdAt: new Date(),
+                      emailVerified: true
+                    });
+                    console.log(`Created new user profile in Firestore users collection (attempt ${attempt})`);
+                    return true;
+                  } catch (error) {
+                    console.error(`Error in attempt ${attempt} to create user profile:`, error);
+                    
+                    if (attempt < maxAttempts) {
+                      console.log(`Retrying in ${attempt * 1000}ms...`);
+                      // Wait longer between each retry
+                      await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+                      return createUserInFirestore(attempt + 1, maxAttempts);
+                    } else {
+                      // Last attempt, try neurohealthhub collection as fallback
+                      try {
+                        await setDoc(doc(db, "neurohealthhub", firebaseUser.uid), {
+                          uid: firebaseUser.uid,
+                          email: firebaseUser.email,
+                          firstName: firebaseUser.displayName?.split(' ')[0] || "User",
+                          lastName: firebaseUser.displayName?.split(' ')[1] || firebaseUser.uid.substring(0, 5),
+                          isAdmin: false,
+                          username: firebaseUser.email.split('@')[0] || "user",
+                          type: "user",
+                          createdAt: new Date(),
+                          emailVerified: true
+                        });
+                        console.log("Created new user profile in Firestore neurohealthhub collection");
+                        return true;
+                      } catch (fallbackError) {
+                        console.error("Error creating user profile in neurohealthhub collection:", fallbackError);
+                        return false;
+                      }
+                    }
+                  }
+                };
+                
+                // Start the creation process
+                createUserInFirestore();
               }
+            } else if (firebaseUser.email && !firebaseUser.emailVerified) {
+              console.log("Not creating Firestore profile for unverified user:", firebaseUser.email);
             }
           }
         } catch (error) {

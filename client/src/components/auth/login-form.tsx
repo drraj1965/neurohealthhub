@@ -88,18 +88,42 @@ const LoginForm: React.FC = () => {
       const isDoctor = data.email.endsWith("@doctor.com");
       
       // Wait a short time to ensure the auth state is fully processed
-      setTimeout(() => {
-        if (isSuperAdmin) {
-          console.log("Super admin user detected, redirecting to super admin");
-          setLocation("/super-admin");
-        } else if (isDoctor) {
-          console.log("Doctor user detected, redirecting to admin dashboard");
-          setLocation("/admin");
-        } else {
-          console.log("Regular user detected, redirecting to user dashboard");
-          setLocation("/dashboard");
+      // Also add manual retry logic to handle Firestore connection issues
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      const attemptRedirect = () => {
+        retryCount++;
+        console.log(`Attempt ${retryCount} to redirect user after login...`);
+
+        try {
+          if (isSuperAdmin) {
+            console.log("Super admin user detected, redirecting to super admin");
+            setLocation("/super-admin");
+          } else if (isDoctor) {
+            console.log("Doctor user detected, redirecting to admin dashboard");
+            setLocation("/admin");
+          } else {
+            console.log("Regular user detected, redirecting to user dashboard");
+            setLocation("/dashboard");
+          }
+        } catch (redirectError) {
+          console.error(`Error redirecting on attempt ${retryCount}:`, redirectError);
+          
+          // If we haven't exceeded max retries, try again
+          if (retryCount < maxRetries) {
+            setTimeout(attemptRedirect, 1000); // Wait longer with each retry
+          } else {
+            // Force reload as last resort
+            console.log("Max redirect attempts reached, forcing page reload");
+            window.location.href = isSuperAdmin ? "/super-admin" : 
+                                   isDoctor ? "/admin" : "/dashboard";
+          }
         }
-      }, 500);
+      };
+      
+      // Start the redirect process
+      setTimeout(attemptRedirect, 500);
     } catch (error: any) {
       console.error("Login error:", error);
       

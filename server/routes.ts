@@ -538,6 +538,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual endpoint to create a user record in Firestore
+  app.post("/api/firebase-auth/manual-create-user", async (req: Request, res: Response) => {
+    try {
+      const { uid, email, firstName, lastName } = req.body;
+      
+      if (!uid || !email) {
+        return res.status(400).json({ error: "User ID and email are required" });
+      }
+      
+      console.log(`Manual request to create user in Firestore: ${uid} (${email})`);
+      
+      // Import the helper function
+      const { createFirestoreUserRecord } = await import('./manualUserCreation');
+      
+      // Call the function to create the user
+      const result = await createFirestoreUserRecord(uid, email, firstName, lastName);
+      
+      if (result.success) {
+        return res.status(result.status === 'created' ? 201 : 200).json(result);
+      } else {
+        return res.status(500).json(result);
+      }
+    } catch (error) {
+      console.error("Error in manual user creation endpoint:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Server error during manual user creation",
+        error: error.message
+      });
+    }
+  });
+  
   // Special endpoint to handle custom email verification and adding verified users to Firestore database
   app.post("/api/firebase-auth/users/verified", async (req: Request, res: Response) => {
     try {
