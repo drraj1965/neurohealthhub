@@ -19,6 +19,7 @@ import {
   updateFirebaseAuthUser,
   deleteFirebaseAuthUser,
   sendVerificationEmail,
+  generateEmailVerificationLink,
   initializeFirebaseAdmin
 } from './firebase-admin';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';

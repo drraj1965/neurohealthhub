@@ -203,9 +203,16 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
     
     // Generate a Firebase verification link using the Admin SDK
     try {
+      // Get the current Replit URL for the redirect
+      const replitUrl = process.env.REPLIT_SLUG 
+        ? `https://${process.env.REPLIT_SLUG}.${process.env.REPLIT_OWNER}.repl.co/email-verified`
+        : 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified';
+      
+      console.log('Using verification redirect URL:', replitUrl);
+      
       // Generate an action code (verification link) for the user
       const actionCodeSettings = {
-        url: 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified',
+        url: replitUrl,
         handleCodeInApp: false,
       };
       
@@ -232,8 +239,13 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
       // Create a secure token by encoding the data
       const token = Buffer.from(JSON.stringify(tokenData)).toString('base64');
       
+      // Use the same Replit URL for our custom fallback
+      const replitUrl = process.env.REPLIT_SLUG 
+        ? `https://${process.env.REPLIT_SLUG}.${process.env.REPLIT_OWNER}.repl.co/email-verified`
+        : 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified';
+      
       // Create our custom verification URL with the token
-      const customVerificationUrl = `https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified?token=${token}`;
+      const customVerificationUrl = `${replitUrl}?token=${token}`;
       
       console.log(`Generated fallback custom verification link for user ${uid}`);
       return customVerificationUrl;
