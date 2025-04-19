@@ -49,26 +49,21 @@ export interface UserRecord {
   providerData?: any[];
 }
 
-// List all Firebase users (simplified for client-side)
-// Note: In production, this should be done server-side with Firebase Admin SDK
+// List all Firebase users by connecting to our server API endpoints
 export const getFirebaseUsers = async (): Promise<UserRecord[]> => {
   try {
-    const adminApp = getFirebaseAdminApp();
-    const auth = getAuth(adminApp);
+    console.log("Fetching Firebase Auth users from server API");
     
-    // We would use admin.auth().listUsers() in a real server implementation
-    // For client-side, we're creating a placeholder that returns empty array
-    // as this functionality is only available in the Admin SDK
+    const response = await fetch('/api/firebase-auth/users');
     
-    // Mock implementation for demonstration
-    console.log("Attempting to fetch Firebase Auth users (client-side mock)");
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
     
-    // In a real implementation with proper backend:
-    // const { users } = await auth.listUsers(1000);
-    // return users;
+    const users = await response.json();
+    console.log(`Successfully fetched ${users.length} Firebase Auth users`);
     
-    // For now, return an empty array with a message to implement server-side
-    return [];
+    return users;
   } catch (error) {
     console.error("Error listing Firebase users:", error);
     return [];
@@ -78,10 +73,21 @@ export const getFirebaseUsers = async (): Promise<UserRecord[]> => {
 // Get user details from Firebase Auth by UID
 export const getFirebaseUserByUid = async (uid: string): Promise<UserRecord | null> => {
   try {
-    // This would use admin.auth().getUser(uid) in a real implementation
-    // For client-side, we're returning null
-    console.log(`Attempting to fetch Firebase Auth user by UID: ${uid} (client-side mock)`);
-    return null;
+    console.log(`Fetching Firebase Auth user by UID: ${uid} from server API`);
+    
+    const response = await fetch(`/api/firebase-auth/users/${uid}`);
+    
+    if (response.status === 404) {
+      console.log(`User with UID ${uid} not found`);
+      return null;
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+    
+    const user = await response.json();
+    return user;
   } catch (error) {
     console.error(`Error getting Firebase user by UID ${uid}:`, error);
     return null;
@@ -91,10 +97,21 @@ export const getFirebaseUserByUid = async (uid: string): Promise<UserRecord | nu
 // Get user details from Firebase Auth by email
 export const getFirebaseUserByEmail = async (email: string): Promise<UserRecord | null> => {
   try {
-    // This would use admin.auth().getUserByEmail(email) in a real implementation
-    // For client-side, we're returning null
-    console.log(`Attempting to fetch Firebase Auth user by email: ${email} (client-side mock)`);
-    return null;
+    console.log(`Fetching Firebase Auth user by email: ${email} from server API`);
+    
+    const response = await fetch(`/api/firebase-auth/users/email/${email}`);
+    
+    if (response.status === 404) {
+      console.log(`User with email ${email} not found`);
+      return null;
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+    }
+    
+    const user = await response.json();
+    return user;
   } catch (error) {
     console.error(`Error getting Firebase user by email ${email}:`, error);
     return null;

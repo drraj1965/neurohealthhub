@@ -1,7 +1,9 @@
-import * as admin from 'firebase-admin';
+import { initializeApp, App } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { UserRecord } from 'firebase-admin/auth';
+import { cert } from 'firebase-admin/app';
 
-let firebaseAdminApp: admin.app.App | null = null;
+let firebaseAdminApp: App | null = null;
 
 /**
  * Initialize the Firebase Admin SDK from environment variables
@@ -17,9 +19,9 @@ export function initializeFirebaseAdmin() {
     
     console.log('Initializing Firebase Admin SDK with project:', serviceAccount.project_id);
     
-    // Initialize the app
-    firebaseAdminApp = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+    // Initialize the app using the imported initializeApp function
+    firebaseAdminApp = initializeApp({
+      credential: cert(serviceAccount)
     });
     
     console.log('Firebase Admin SDK initialized successfully');
@@ -36,8 +38,11 @@ export function initializeFirebaseAdmin() {
  */
 export async function getFirebaseAuthUsers(maxResults = 1000): Promise<UserRecord[]> {
   try {
-    const app = initializeFirebaseAdmin();
-    const auth = app.auth();
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
     
     console.log('Fetching Firebase Auth users...');
     
@@ -58,8 +63,11 @@ export async function getFirebaseAuthUsers(maxResults = 1000): Promise<UserRecor
  */
 export async function getFirebaseAuthUserByUid(uid: string): Promise<UserRecord | null> {
   try {
-    const app = initializeFirebaseAdmin();
-    const auth = app.auth();
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
     
     const userRecord = await auth.getUser(uid);
     return userRecord;
@@ -74,8 +82,11 @@ export async function getFirebaseAuthUserByUid(uid: string): Promise<UserRecord 
  */
 export async function getFirebaseAuthUserByEmail(email: string): Promise<UserRecord | null> {
   try {
-    const app = initializeFirebaseAdmin();
-    const auth = app.auth();
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
     
     const userRecord = await auth.getUserByEmail(email);
     return userRecord;
@@ -95,8 +106,11 @@ export async function createFirebaseAuthUser(userData: {
   phoneNumber?: string;
 }): Promise<UserRecord | null> {
   try {
-    const app = initializeFirebaseAdmin();
-    const auth = app.auth();
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
     
     const userRecord = await auth.createUser({
       email: userData.email,
@@ -124,8 +138,11 @@ export async function updateFirebaseAuthUser(uid: string, userData: {
   disabled?: boolean;
 }): Promise<UserRecord | null> {
   try {
-    const app = initializeFirebaseAdmin();
-    const auth = app.auth();
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
     
     const userRecord = await auth.updateUser(uid, userData);
     
@@ -142,8 +159,11 @@ export async function updateFirebaseAuthUser(uid: string, userData: {
  */
 export async function deleteFirebaseAuthUser(uid: string): Promise<boolean> {
   try {
-    const app = initializeFirebaseAdmin();
-    const auth = app.auth();
+    // Initialize the app
+    initializeFirebaseAdmin();
+    
+    // Get Auth instance using the imported getAuth function
+    const auth = getAuth();
     
     await auth.deleteUser(uid);
     

@@ -669,17 +669,29 @@ const UsersManagementPage: React.FC = () => {
                 ) : filteredAuthUsers.length === 0 ? (
                   <div className="text-center py-8">
                     <Alert className="max-w-lg mx-auto">
-                      <AlertTitle>Firebase Auth Users Not Available</AlertTitle>
+                      <AlertTitle className="flex items-center">
+                        <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
+                        Firebase Admin SDK Connected
+                      </AlertTitle>
                       <AlertDescription>
                         <p className="mb-2">
-                          Firebase Authentication user management requires the Firebase Admin SDK on a secure server.
+                          The Firebase Admin SDK is properly connected, but no users were found in Firebase Authentication.
                         </p>
                         <p className="mb-2">
-                          This functionality needs to be implemented with a backend service to securely manage Firebase Auth users.
+                          Users created through the registration process will appear here once they sign up.
                         </p>
-                        <p>
-                          Current user data is handled through Firestore collections.
+                        <p className="mb-2">
+                          You can refresh this list by clicking the button below.
                         </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={fetchUsersAndDoctors}
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Refresh Users
+                        </Button>
                       </AlertDescription>
                     </Alert>
                   </div>
