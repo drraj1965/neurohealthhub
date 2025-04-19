@@ -207,10 +207,8 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
       const mockToken = Buffer.from(`uid=${uid}&email=${userRecord.email}`).toString('base64');
       
       // Create a URL to our verification page with the mock token
-      // This doesn't use Firebase, but will allow us to test the flow
-      const baseUrl = process.env.REPL_ID 
-        ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` 
-        : 'http://localhost:5000';
+      // This doesn't use Firebase, but will allow us to test the flow - use allowlisted domain
+      const baseUrl = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev';
       
       return `${baseUrl}/email-verified?mockVerification=true&mockToken=${mockToken}`;
     }
@@ -225,9 +223,8 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
     };
     
     // For local development on Replit, use the Replit URL even in dev mode
-    if (process.env.REPL_ID && process.env.REPL_SLUG) {
-      actionCodeSettings.url = `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/email-verified`;
-    }
+    // Using the specific allowlisted domain
+    actionCodeSettings.url = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified';
     
     try {
       const link = await auth.generateEmailVerificationLink(
@@ -249,10 +246,8 @@ export async function generateEmailVerificationLink(uid: string): Promise<string
         // Generate a mock verification token 
         const mockToken = Buffer.from(`uid=${uid}&email=${userRecord.email}`).toString('base64');
         
-        // Create a URL to our verification page with the mock token
-        const baseUrl = process.env.REPL_ID 
-          ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` 
-          : 'http://localhost:5000';
+        // Create a URL to our verification page with the mock token - use the allowlisted domain
+        const baseUrl = 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev';
         
         return `${baseUrl}/email-verified?mockVerification=true&mockToken=${mockToken}`;
       }
