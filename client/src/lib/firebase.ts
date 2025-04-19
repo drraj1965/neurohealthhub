@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, connectAuthEmulator } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, connectAuthEmulator, sendEmailVerification } from "firebase/auth";
 import { 
   getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, updateDoc, query, where, orderBy,
   connectFirestoreEmulator, enableIndexedDbPersistence, Timestamp, serverTimestamp
@@ -303,6 +303,25 @@ export async function loginUser(email: string, password: string) {
   try {
     console.log("Attempting Firebase login with:", email);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Check if the user's email is verified
+    if (!userCredential.user.emailVerified) {
+      console.log("User's email is not verified. Sending verification email.");
+      try {
+        // Send a verification email
+        await sendEmailVerification(userCredential.user);
+        
+        // Return special object indicating verification required
+        return {
+          ...userCredential.user,
+          needsVerification: true,
+          firebaseUser: userCredential.user,
+        };
+      } catch (verificationError) {
+        console.error("Error sending verification email:", verificationError);
+        throw new Error("Email verification required. Please check your email or request a new verification link.");
+      }
+    }
     
     // Force token refresh to ensure valid auth state
     const idToken = await userCredential.user.getIdToken(true);
