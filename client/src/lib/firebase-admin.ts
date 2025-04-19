@@ -57,11 +57,23 @@ export const getFirebaseUsers = async (): Promise<UserRecord[]> => {
     const response = await fetch('/api/firebase-auth/users');
     
     if (!response.ok) {
+      console.error(`Server returned ${response.status}: ${response.statusText}`);
       throw new Error(`Server returned ${response.status}: ${response.statusText}`);
     }
     
-    const users = await response.json();
-    console.log(`Successfully fetched ${users.length} Firebase Auth users`);
+    // Log the raw response text for debugging
+    const responseText = await response.text();
+    console.log("Firebase Auth API raw response:", responseText);
+    
+    // Parse the response if it's valid JSON
+    let users: UserRecord[] = [];
+    try {
+      users = JSON.parse(responseText);
+      console.log(`Successfully fetched ${users.length} Firebase Auth users:`, users);
+    } catch (parseError) {
+      console.error("Failed to parse API response as JSON:", parseError);
+      return [];
+    }
     
     return users;
   } catch (error) {

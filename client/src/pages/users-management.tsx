@@ -106,28 +106,40 @@ const UsersManagementPage: React.FC = () => {
       console.log("Fetched users:", usersData.length);
       console.log("Fetched doctors:", doctorsData.length);
       
-      // Attempt to fetch Firebase Auth users (client-side function that would normally be server-side)
+      // Fetch Firebase Auth users using our new server API
       try {
         setLoadingAuth(true);
+        console.log("About to fetch Firebase Auth users from server");
+        
         const authUsers = await getFirebaseUsers();
-        console.log("Fetched Firebase Auth users:", authUsers.length);
+        console.log("Server returned Firebase Auth users data, length:", Array.isArray(authUsers) ? authUsers.length : "not an array");
         
-        // Convert to our FirebaseAuthUserData format
-        const formattedAuthUsers = authUsers.map(authUser => ({
-          uid: authUser.uid,
-          email: authUser.email || "",
-          displayName: authUser.displayName || "",
-          emailVerified: authUser.emailVerified,
-          creationTime: authUser.metadata?.creationTime,
-          lastSignInTime: authUser.metadata?.lastSignInTime,
-          phoneNumber: authUser.phoneNumber || "",
-          providerData: authUser.providerData
-        }));
-        
-        setFirebaseAuthUsers(formattedAuthUsers);
+        if (Array.isArray(authUsers) && authUsers.length > 0) {
+          // Convert to our FirebaseAuthUserData format
+          const formattedAuthUsers = authUsers.map(authUser => {
+            console.log("Processing auth user:", authUser);
+            return {
+              uid: authUser.uid || "",
+              email: authUser.email || "",
+              displayName: authUser.displayName || "",
+              emailVerified: Boolean(authUser.emailVerified),
+              creationTime: authUser.metadata?.creationTime || "",
+              lastSignInTime: authUser.metadata?.lastSignInTime || "",
+              phoneNumber: authUser.phoneNumber || "",
+              providerData: authUser.providerData || []
+            };
+          });
+          
+          console.log("Formatted Firebase Auth users:", formattedAuthUsers);
+          setFirebaseAuthUsers(formattedAuthUsers);
+        } else {
+          console.warn("No Firebase Auth users found or invalid response format");
+          setFirebaseAuthUsers([]);
+        }
       } catch (authErr) {
         console.error("Error fetching Firebase Auth users:", authErr);
         // Don't fail the entire operation if this part fails
+        setFirebaseAuthUsers([]);
       } finally {
         setLoadingAuth(false);
       }
