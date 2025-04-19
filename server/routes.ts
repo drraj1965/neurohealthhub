@@ -560,12 +560,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         return res.status(500).json(result);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in manual user creation endpoint:", error);
       return res.status(500).json({ 
         success: false, 
         message: "Server error during manual user creation",
-        error: error.message
+        error: error.message || "Unknown error"
       });
     }
   });

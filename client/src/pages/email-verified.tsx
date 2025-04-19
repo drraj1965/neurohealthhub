@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { auth } from '@/lib/firebase';
 import { applyActionCode, getAuth } from 'firebase/auth';
+import { ensureUserInFirestore } from '@/lib/firestore-helpers';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
@@ -64,33 +65,55 @@ export default function EmailVerified() {
                 console.error('Error retrieving temporary data from localStorage:', localStorageError);
               }
               
-              // Try server API first
+              // Use our new helper function to ensure user is in Firestore
               try {
-                console.log('Attempting to add verified user to Firestore via server API...');
-                // Call our server-side API to handle adding user to Firestore (more reliable)
-                const response = await fetch('/api/firebase-auth/users/verified', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    uid: currentUser.uid,
-                    temporaryData: temporaryData
-                  }),
-                });
+                console.log('Using ensureUserInFirestore helper to add user to database...');
                 
-                if (response.ok) {
-                  console.log('User successfully added to Firestore via server API after verification');
+                // Get first/last name from temporary data or display name
+                const firstName = temporaryData?.firstName || 
+                  (currentUser.displayName ? currentUser.displayName.split(' ')[0] : undefined);
+                
+                const lastName = temporaryData?.lastName || 
+                  (currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : undefined);
+                
+                // Call our helper function (which will try API endpoint first)
+                const result = await ensureUserInFirestore(
+                  currentUser.uid, 
+                  currentUser.email || '',
+                  firstName,
+                  lastName
+                );
+                
+                if (result) {
+                  console.log('User successfully added to Firestore after verification');
                 } else {
-                  console.warn('Server API failed to add verified user to Firestore, trying client-side fallback');
-                  throw new Error('Server API failed');
+                  console.warn('Failed to add user to Firestore with helper, trying direct approach');
+                  
+                  // Direct API call as fallback
+                  const response = await fetch('/api/firebase-auth/users/verified', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      uid: currentUser.uid,
+                      temporaryData: temporaryData
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    console.log('User successfully added to Firestore via direct API call');
+                  } else {
+                    console.warn('All server approaches failed, trying client-side fallback');
+                    throw new Error('All server approaches failed');
+                  }
                 }
               } catch (serverApiError) {
-                console.error('Error using server API to add user to Firestore:', serverApiError);
+                console.error('All server approaches failed:', serverApiError);
                 
-                // Fallback to client-side Firestore (less reliable but may work if server is unreachable)
+                // Last resort: client-side Firestore approach
                 try {
-                  console.log('Attempting client-side fallback to add user to Firestore...');
+                  console.log('Attempting last-resort client-side approach to add user to Firestore...');
                   
                   // Import Firestore functions directly for client-side
                   const { getFirestore, doc, setDoc } = await import('firebase/firestore');
@@ -115,9 +138,9 @@ export default function EmailVerified() {
                   
                   // Try to add to users collection
                   await setDoc(doc(db, 'users', currentUser.uid), userData);
-                  console.log('User successfully added to Firestore via client-side fallback');
+                  console.log('User successfully added to Firestore via last-resort client-side approach');
                 } catch (clientFallbackError) {
-                  console.error('Error in client-side fallback to add user to Firestore:', clientFallbackError);
+                  console.error('All approaches to add user to Firestore failed:', clientFallbackError);
                 }
               }
             } catch (dbError) {
@@ -172,8 +195,31 @@ export default function EmailVerified() {
             console.error('Error retrieving temporary data from localStorage:', localStorageError);
           }
           
-          // Try to add the user to Firestore using server API
-          console.log('Attempting to add verified user to Firestore via server API (custom token)...');
+          // Use our helper function to ensure user is in Firestore
+          console.log('Using ensureUserInFirestore helper for custom token verification...');
+          
+          // Get first/last name from temporary data
+          const firstName = temporaryData?.firstName || tokenData.email.split('@')[0];
+          const lastName = temporaryData?.lastName || '';
+          
+          // Call our helper function
+          const result = await ensureUserInFirestore(
+            tokenData.uid,
+            tokenData.email,
+            firstName,
+            lastName
+          );
+          
+          if (result) {
+            // Set success status
+            setStatus('success');
+            setMessage(`Your email (${tokenData.email}) has been successfully verified! You can now log in to access all features.`);
+            console.log('User successfully verified and added to Firestore with helper');
+            return;
+          }
+          
+          // If helper function failed, try direct server API
+          console.log('Helper function failed, trying direct server API...');
           const response = await fetch('/api/firebase-auth/users/verified', {
             method: 'POST',
             headers: {
@@ -190,12 +236,12 @@ export default function EmailVerified() {
             // Set success status
             setStatus('success');
             setMessage(`Your email (${tokenData.email}) has been successfully verified! You can now log in to access all features.`);
-            console.log('User successfully verified and added to Firestore');
+            console.log('User successfully verified and added to Firestore via direct API');
             return;
           } 
           
           // If server API failed, try client-side fallback
-          console.warn('Server API failed to add verified user to Firestore, trying client-side fallback');
+          console.warn('All server approaches failed, trying client-side fallback');
           
           // Import Firestore functions directly for client-side
           const { getFirestore, doc, setDoc } = await import('firebase/firestore');

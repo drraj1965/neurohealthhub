@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { loginSchema, type LoginData } from "@shared/schema";
+import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/auth-context";
 
 const LoginForm: React.FC = () => {
@@ -87,43 +88,39 @@ const LoginForm: React.FC = () => {
       const isSuperAdmin = data.email && superAdminEmails.includes(data.email);
       const isDoctor = data.email.endsWith("@doctor.com");
       
-      // Wait a short time to ensure the auth state is fully processed
-      // Also add manual retry logic to handle Firestore connection issues
-      let retryCount = 0;
-      const maxRetries = 3;
-      
-      const attemptRedirect = () => {
-        retryCount++;
-        console.log(`Attempt ${retryCount} to redirect user after login...`);
-
-        try {
+      // Import our custom helper for handling redirects after login
+      import('@/lib/firestore-helpers').then(({ handleLoginRedirect }) => {
+        // Get the current user's UID from Firebase Auth
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          // This will ensure the user exists in Firestore before redirecting
+          handleLoginRedirect(data.email, currentUser.uid);
+        } else {
+          console.error('No current user found after login');
+          // Fallback to simple redirect
+          setTimeout(() => {
+            if (isSuperAdmin) {
+              setLocation("/super-admin");
+            } else if (isDoctor) {
+              setLocation("/admin");
+            } else {
+              setLocation("/dashboard");
+            }
+          }, 500);
+        }
+      }).catch(error => {
+        console.error('Error importing firestore helpers:', error);
+        // Fallback to simple redirect
+        setTimeout(() => {
           if (isSuperAdmin) {
-            console.log("Super admin user detected, redirecting to super admin");
             setLocation("/super-admin");
           } else if (isDoctor) {
-            console.log("Doctor user detected, redirecting to admin dashboard");
             setLocation("/admin");
           } else {
-            console.log("Regular user detected, redirecting to user dashboard");
             setLocation("/dashboard");
           }
-        } catch (redirectError) {
-          console.error(`Error redirecting on attempt ${retryCount}:`, redirectError);
-          
-          // If we haven't exceeded max retries, try again
-          if (retryCount < maxRetries) {
-            setTimeout(attemptRedirect, 1000); // Wait longer with each retry
-          } else {
-            // Force reload as last resort
-            console.log("Max redirect attempts reached, forcing page reload");
-            window.location.href = isSuperAdmin ? "/super-admin" : 
-                                   isDoctor ? "/admin" : "/dashboard";
-          }
-        }
-      };
-      
-      // Start the redirect process
-      setTimeout(attemptRedirect, 500);
+        }, 500);
+      });
     } catch (error: any) {
       console.error("Login error:", error);
       
