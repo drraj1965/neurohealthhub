@@ -27,23 +27,11 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       return false;
     }
     
-    // Log the email instead of actually sending
-    console.log('Would send email:', {
-      to: params.to,
-      from: 'no-reply@neurohealthhub.com',
-      subject: params.subject,
-      text: params.text || '',
-      html: params.html || params.text || '',
-    });
+    console.log('Sending email to:', params.to);
     
-    // For now, just return success instead of actually sending the email
-    // This allows development to proceed without SendGrid validation errors
-    return true;
-    
-    /* Uncomment this when ready to send real emails
     const msg = {
       to: params.to,
-      from: 'no-reply@neurohealthhub.com', // Replace with your verified sender email
+      from: 'neurohealthhub@gmail.com', // Using Gmail - replace with your verified sender
       subject: params.subject,
       text: params.text || '',
       html: params.html || params.text || '',
@@ -52,7 +40,6 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     await mailService.send(msg);
     console.log('Email sent successfully to:', params.to);
     return true;
-    */
   } catch (error) {
     console.error('Failed to send email:', error);
     return false;

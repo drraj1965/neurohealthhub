@@ -11,104 +11,75 @@ export default function EmailVerified() {
   const [message, setMessage] = useState<string>('Verifying your email address...');
   const [, navigate] = useLocation();
   
-  // Extract the action code from the URL
-  const getActionCode = useCallback(() => {
-    // Firebase adds oobCode as a query parameter
+  // Extract the custom token from the URL
+  const getVerificationToken = useCallback(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const actionCode = searchParams.get('oobCode');
-    const mode = searchParams.get('mode');
+    
+    // Check for our custom token parameter first
+    const token = searchParams.get('token');
     
     // Log for debugging
-    console.log(`Verification Parameters - Mode: ${mode}, OobCode: ${actionCode ? 'present' : 'missing'}`);
+    console.log(`Verification Token: ${token ? 'present' : 'missing'}`);
     
-    return actionCode;
+    return token;
   }, []);
 
   // Handle the verification process
   useEffect(() => {
     const verifyEmail = async () => {
-      const actionCode = getActionCode();
+      const token = getVerificationToken();
       
-      // If there's no action code, display an error
-      if (!actionCode) {
+      // If there's no token, display an error
+      if (!token) {
         setStatus('error');
         setMessage('Invalid verification link. The link may be malformed or has expired.');
         return;
       }
       
       try {
-        // Apply the action code to verify the email
-        await applyActionCode(auth, actionCode);
+        // Decode the token
+        const tokenData = JSON.parse(Buffer.from(token, 'base64').toString());
+        console.log('Token data:', tokenData);
         
-        // Check if we need to add the user to Firestore database
-        const currentUser = auth.currentUser;
-        
-        // Add the verified user to the database via server API
-        if (currentUser) {
-          try {
-            // Force refresh the token to include the updated emailVerified claim
-            await currentUser.getIdToken(true);
-            
-            // Try to get any temporary user data from localStorage
-            let temporaryData = null;
-            try {
-              const pendingUserKey = `user_pending_${currentUser.uid}`;
-              const storedData = localStorage.getItem(pendingUserKey);
-              
-              if (storedData) {
-                temporaryData = JSON.parse(storedData);
-                console.log('Found temporary user data:', temporaryData);
-                
-                // Clean up the localStorage entry
-                localStorage.removeItem(pendingUserKey);
-              }
-            } catch (e) {
-              console.warn('Error retrieving temporary user data from localStorage:', e);
-            }
-            
-            // Call our server-side API to handle adding user to Firestore
-            const response = await fetch('/api/firebase-auth/users/verified', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                uid: currentUser.uid,
-                temporaryData: temporaryData
-              }),
-            });
-            
-            if (response.ok) {
-              console.log('User successfully added to Firestore after verification');
-            } else {
-              console.warn('Failed to add verified user to Firestore database');
-            }
-          } catch (dbError) {
-            console.error('Error adding verified user to database:', dbError);
-            // We don't change status to error as the email verification itself succeeded
-          }
+        // Check if the token is expired
+        if (tokenData.expires && tokenData.expires < Date.now()) {
+          setStatus('error');
+          setMessage('This verification link has expired. Please request a new verification email.');
+          return;
         }
         
-        // Set success status
-        setStatus('success');
-        setMessage('Your email has been successfully verified! You can now log in to access all features.');
+        // Call our server API to verify the email and update the user's status
+        const response = await fetch('/api/firebase-auth/users/verified', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uid: tokenData.uid,
+            email: tokenData.email,
+            temporaryData: null // We could retrieve from localStorage if needed
+          }),
+        });
+        
+        if (response.ok) {
+          // Set success status
+          setStatus('success');
+          setMessage(`Your email (${tokenData.email}) has been successfully verified! You can now log in to access all features.`);
+          console.log('User successfully verified and added to Firestore');
+        } else {
+          setStatus('error');
+          setMessage('Verification failed. Please try again or contact support.');
+          console.warn('Failed to verify user with server');
+        }
       } catch (error: any) {
         console.error('Error verifying email:', error);
         setStatus('error');
-        
-        // Provide specific error messages based on the error code
-        if (error.code === 'auth/invalid-action-code') {
-          setMessage('The verification link has expired or already been used. Please request a new verification email.');
-        } else if (error.code === 'auth/user-not-found') {
-          setMessage('User account not found. The account may have been deleted.');
-        } else {
-          setMessage(`Verification failed: ${error.message || 'Unknown error occurred'}`);
-        }
+        setMessage('Invalid verification link. The token may be corrupted or expired.');
       }
     };
     
     verifyEmail();
-  }, [getActionCode]);
+  }, [getVerificationToken]);
   
   // Render different content based on status
   return (
