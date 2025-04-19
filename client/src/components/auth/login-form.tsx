@@ -71,28 +71,25 @@ const LoginForm: React.FC = () => {
         description: "Welcome back to NeuroHealthHub!",
       });
       
-      // Super admin emails list (should match the one in auth-context.tsx)
-      const superAdminEmails = [
-        "drphaniraj1965@gmail.com",
-        "doctornerves@gmail.com",
-        "g.rajshaker@gmail.com"
-      ];
+      // Redirect to dashboard after successful login
+      console.log("Login successful - redirecting to dashboard");
       
-      // For Super Admin login, we now redirect to the welcome page instead
-      // This allows them to see all navigation options and access the right section
-      console.log("Login successful - redirecting to welcome page");
-      
-      // Show success toast
-      toast({
-        title: "Login Successful",
-        description: "You are now logged in. Use the navigation menu to access your dashboard.",
-        duration: 5000, // Show for 5 seconds
-      });
-      
-      // Redirect to welcome page where they can see all navigation options
+      // Need to use a longer timeout to ensure auth state is loaded
       setTimeout(() => {
-        console.log("EXECUTING REDIRECT to welcome page");
-        setLocation("/");
+        // Check if user should go to admin dashboard
+        const isSuperAdmin = data.email === "doctornerves@gmail.com" || 
+                             data.email === "drphaniraj1965@gmail.com" || 
+                             data.email === "g.rajshaker@gmail.com";
+                             
+        const isDoctor = data.email.endsWith("@doctor.com");
+        
+        if (isSuperAdmin || isDoctor) {
+          console.log("Admin user detected, redirecting to admin dashboard");
+          setLocation("/admin");
+        } else {
+          console.log("Regular user detected, redirecting to user dashboard");
+          setLocation("/dashboard");
+        }
       }, 1000);
     } catch (error) {
       console.error("Login error:", error);

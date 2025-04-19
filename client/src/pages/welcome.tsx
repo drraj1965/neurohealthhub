@@ -26,41 +26,12 @@ const Welcome: React.FC = () => {
               <h1 className="text-2xl font-bold text-primary-600 cursor-pointer">NeuroHealthHub</h1>
             </div>
             <div className="flex items-center space-x-4">
-              {!user ? (
-                // Show login/register buttons if not logged in
-                <>
-                  <Link href="/login">
-                    <Button variant="outline">Login</Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button>Register</Button>
-                  </Link>
-                </>
-              ) : (
-                // Show dashboard buttons if logged in
-                <>
-                  <Link href="/dashboard">
-                    <Button variant="outline">User Dashboard</Button>
-                  </Link>
-                  
-                  {isAdmin && (
-                    <Link href="/admin">
-                      <Button variant="outline">Admin Dashboard</Button>
-                    </Link>
-                  )}
-                  
-                  {/* Super Admin link for super admin emails */}
-                  {user.email && [
-                    "drphaniraj1965@gmail.com",
-                    "doctornerves@gmail.com",
-                    "g.rajshaker@gmail.com"
-                  ].includes(user.email) && (
-                    <Link href="/super-admin">
-                      <Button>Super Admin</Button>
-                    </Link>
-                  )}
-                </>
-              )}
+              <Link href="/login">
+                <Button variant="outline">Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button>Register</Button>
+              </Link>
             </div>
           </div>
         </div>
