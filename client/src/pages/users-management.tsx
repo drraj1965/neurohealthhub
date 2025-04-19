@@ -819,8 +819,21 @@ const UsersManagementPage: React.FC = () => {
                     </span>
                   </div>
                 </CardTitle>
-                <CardDescription>
-                  View users registered in Firebase Authentication. Note: These operations require the Firebase Admin SDK on a secure server and cannot be performed from the client-side.
+                <CardDescription className="space-y-2">
+                  <p>View users registered in Firebase Authentication. Note: These operations require the Firebase Admin SDK on a secure server and cannot be performed from the client-side.</p>
+                  
+                  <div className="bg-green-50 border border-green-100 rounded-md p-3 mt-2">
+                    <p className="text-green-800 text-xs font-medium">✅ AUTOMATED EMAIL VERIFICATION SYSTEM</p>
+                    <p className="text-green-700 text-xs mt-1">
+                      The system now automatically handles the entire verification flow:
+                    </p>
+                    <ol className="text-green-700 text-xs mt-1 list-decimal pl-5">
+                      <li>When users register, verification emails are sent automatically</li>
+                      <li>When users click the verification link, their email is marked as verified</li>
+                      <li>Verified users are automatically added to the Firestore database</li>
+                      <li>No admin intervention is required for normal verification flow</li>
+                    </ol>
+                  </div>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -886,9 +899,10 @@ const UsersManagementPage: React.FC = () => {
                                   variant="outline" 
                                   size="sm"
                                   onClick={() => sendVerificationEmail(authUser.uid)}
+                                  title="Use this only if the automatic verification email was not received"
                                 >
                                   <Mail className="h-4 w-4 mr-1" />
-                                  Send Verification
+                                  Resend Verification
                                 </Button>
                               )}
                               {authUser.emailVerified && !userExistsInFirestore(authUser.uid) && (
@@ -896,9 +910,10 @@ const UsersManagementPage: React.FC = () => {
                                   variant="outline" 
                                   size="sm"
                                   onClick={() => addVerifiedUserToFirestore(authUser)}
+                                  title="Manual fallback if automatic database entry failed"
                                 >
                                   <Plus className="h-4 w-4 mr-1" />
-                                  Add to Users
+                                  Manual Add to DB
                                 </Button>
                               )}
                             </div>
