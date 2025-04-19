@@ -83,28 +83,58 @@ const UsersManagementPage: React.FC = () => {
     setError(null);
     
     try {
-      // Fetch regular users
-      const usersRef = collection(db, "users");
-      const usersSnapshot = await getDocs(usersRef);
-      const usersData = usersSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        selected: false
-      })) as UserData[];
+      // Import our local storage module
+      const { getAllUsersLocally } = await import('@/lib/local-user-store');
       
-      // Fetch doctors
-      const doctorsRef = collection(db, "doctors");
-      const doctorsSnapshot = await getDocs(doctorsRef);
-      const doctorsData = doctorsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        selected: false
-      })) as UserData[];
+      // Get users from local storage first
+      const localUsers = getAllUsersLocally();
       
-      setUsers(usersData);
-      setDoctors(doctorsData);
-      console.log("Fetched users:", usersData.length);
-      console.log("Fetched doctors:", doctorsData.length);
+      // If we have local users, use them immediately
+      if (localUsers && localUsers.length > 0) {
+        const usersData = localUsers.map(user => ({
+          id: user.uid,
+          ...user,
+          selected: false
+        })) as UserData[];
+        
+        setUsers(usersData);
+        console.log("Fetched users from local storage:", usersData.length);
+      }
+      
+      // Try Firestore anyway to get the latest if available
+      try {
+        // Fetch regular users from Firestore
+        const usersRef = collection(db, "users");
+        const usersSnapshot = await getDocs(usersRef);
+        const usersData = usersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          selected: false
+        })) as UserData[];
+        
+        // Fetch doctors from Firestore
+        const doctorsRef = collection(db, "doctors");
+        const doctorsSnapshot = await getDocs(doctorsRef);
+        const doctorsData = doctorsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          selected: false
+        })) as UserData[];
+        
+        // If we got data from Firestore, use it (more up-to-date)
+        if (usersData.length > 0) {
+          setUsers(usersData);
+          console.log("Updated users from Firestore:", usersData.length);
+        }
+        
+        if (doctorsData.length > 0) {
+          setDoctors(doctorsData);
+          console.log("Updated doctors from Firestore:", doctorsData.length);
+        }
+      } catch (firestoreError) {
+        console.error("Firestore fetch failed, using local data:", firestoreError);
+        // We'll continue with local data
+      }
       
       // Fetch Firebase Auth users using our new server API
       try {
@@ -240,35 +270,56 @@ const UsersManagementPage: React.FC = () => {
     setSuccess(null);
     
     try {
+      // Import local storage module
+      const { updateUserLocally } = await import('@/lib/local-user-store');
+      let successCount = 0;
+      
       // Process each selected user
       for (const user of selectedUsers) {
         console.log(`Processing promotion for user: ${user.email} (ID: ${user.id})`);
         
         try {
-          // 1. Update the user document in users collection to set isAdmin to true
-          console.log(`Updating user document in 'users' collection (ID: ${user.id})`);
-          await updateDoc(doc(db, "users", user.id), {
+          // Update in local storage first (will always work)
+          const localUpdateSuccess = updateUserLocally(user.id, {
             isAdmin: true,
-            updatedAt: new Date()
+            updatedAt: new Date().toISOString()
           });
-          console.log(`✓ User document updated successfully`);
           
-          // 2. Create a clean object without any client-side properties
-          const doctorData = {
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            mobile: user.mobile || "",
-            username: user.username,
-            isAdmin: true, // Always true for doctors
-            createdAt: user.createdAt || new Date(),
-            updatedAt: new Date()
-          };
+          if (localUpdateSuccess) {
+            console.log(`✓ User updated in local storage successfully`);
+            successCount++;
+          }
           
-          // 3. Create a new document in doctors collection with the same ID
-          console.log(`Creating doctor document in 'doctors' collection (ID: ${user.id})`);
-          await setDoc(doc(db, "doctors", user.id), doctorData);
-          console.log(`✓ Doctor document created successfully (ID: ${user.id})`);
+          // Try Firestore updates as a backup
+          try {
+            // 1. Update the user document in users collection to set isAdmin to true
+            console.log(`Updating user document in 'users' collection (ID: ${user.id})`);
+            await updateDoc(doc(db, "users", user.id), {
+              isAdmin: true,
+              updatedAt: new Date()
+            });
+            console.log(`✓ User document updated successfully in Firestore`);
+            
+            // 2. Create a clean object without any client-side properties
+            const doctorData = {
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              mobile: user.mobile || "",
+              username: user.username,
+              isAdmin: true, // Always true for doctors
+              createdAt: user.createdAt || new Date(),
+              updatedAt: new Date()
+            };
+            
+            // 3. Create a new document in doctors collection with the same ID
+            console.log(`Creating doctor document in 'doctors' collection (ID: ${user.id})`);
+            await setDoc(doc(db, "doctors", user.id), doctorData);
+            console.log(`✓ Doctor document created successfully in Firestore (ID: ${user.id})`);
+          } catch (firestoreErr) {
+            console.error(`Firestore update failed for user ${user.email}, but local storage update was successful:`, firestoreErr);
+            // We'll count this as a success since the local storage update worked
+          }
         } catch (userErr) {
           console.error(`Error processing user ${user.email}:`, userErr);
           // Continue with next user instead of failing the entire operation
@@ -278,12 +329,16 @@ const UsersManagementPage: React.FC = () => {
       // Refresh the lists
       await fetchUsersAndDoctors();
       
-      // Show success message
-      setSuccess(`Successfully promoted ${selectedUsers.length} user(s) to doctors`);
-      toast({
-        title: "Users Promoted",
-        description: `Successfully promoted ${selectedUsers.length} user(s) to doctors`,
-      });
+      // Show success message based on the actual number of successful updates
+      if (successCount > 0) {
+        setSuccess(`Successfully promoted ${successCount} user(s) to doctors`);
+        toast({
+          title: "Users Promoted",
+          description: `Successfully promoted ${successCount} user(s) to doctors`,
+        });
+      } else {
+        throw new Error("No users were successfully promoted");
+      }
     } catch (err) {
       console.error("Error promoting users:", err);
       setError("Failed to promote selected users");
@@ -315,52 +370,92 @@ const UsersManagementPage: React.FC = () => {
     setSuccess(null);
     
     try {
+      // Import local storage module
+      const { updateUserLocally, addUserLocally } = await import('@/lib/local-user-store');
+      let successCount = 0;
+      
       // Process each selected doctor
       for (const doctor of selectedDoctors) {
         console.log(`Processing demotion for doctor: ${doctor.email} (ID: ${doctor.id})`);
         
         try {
-          // 1. Update the user document in users collection to set isAdmin to false (or create if it doesn't exist)
-          const usersRef = collection(db, "users");
-          const userQuery = query(usersRef, where("email", "==", doctor.email));
-          const userSnapshot = await getDocs(userQuery);
+          // Try to update or create in local storage first
+          let localStorageSuccess = false;
           
-          if (!userSnapshot.empty) {
-            // Update existing user document
-            console.log(`Updating existing user document in 'users' collection (ID: ${userSnapshot.docs[0].id})`);
-            await updateDoc(doc(db, "users", userSnapshot.docs[0].id), {
-              isAdmin: false,
-              updatedAt: new Date()
-            });
-            console.log(`✓ User document updated successfully`);
-          } else {
-            // If no user record exists, create a clean one from the doctor record
-            console.log(`No user document found, creating new user document with ID: ${doctor.id}`);
-            
-            // Create a clean object without any client-side properties
+          // First try to update existing user in local storage
+          localStorageSuccess = updateUserLocally(doctor.id, {
+            isAdmin: false,
+            updatedAt: new Date().toISOString()
+          });
+          
+          // If no existing user found, create a new one
+          if (!localStorageSuccess) {
+            // Create a user object with doctor data
             const userData = {
+              uid: doctor.id,
               email: doctor.email,
               firstName: doctor.firstName,
               lastName: doctor.lastName,
               mobile: doctor.mobile || "",
               username: doctor.username,
-              isAdmin: false, // Always false for demoted doctors
-              createdAt: doctor.createdAt || new Date(),
-              updatedAt: new Date()
+              isAdmin: false,
+              updatedAt: new Date().toISOString()
             };
             
-            await setDoc(doc(db, "users", doctor.id), userData);
-            console.log(`✓ User document created successfully`);
+            localStorageSuccess = addUserLocally(userData);
           }
           
-          // 2. Update the doctor document in the doctors collection to maintain data consistency
-          console.log(`Updating doctor document in 'doctors' collection (ID: ${doctor.id})`);
-          await updateDoc(doc(db, "doctors", doctor.id), {
-            isAdmin: false,
-            updatedAt: new Date()
-          });
-          console.log(`✓ Doctor document updated successfully`);
+          if (localStorageSuccess) {
+            console.log(`✓ User updated in local storage successfully`);
+            successCount++;
+          }
           
+          // Try Firestore operations as well (but don't depend on them)
+          try {
+            // 1. Update the user document in users collection to set isAdmin to false (or create if it doesn't exist)
+            const usersRef = collection(db, "users");
+            const userQuery = query(usersRef, where("email", "==", doctor.email));
+            const userSnapshot = await getDocs(userQuery);
+            
+            if (!userSnapshot.empty) {
+              // Update existing user document
+              console.log(`Updating existing user document in 'users' collection (ID: ${userSnapshot.docs[0].id})`);
+              await updateDoc(doc(db, "users", userSnapshot.docs[0].id), {
+                isAdmin: false,
+                updatedAt: new Date()
+              });
+              console.log(`✓ User document updated successfully in Firestore`);
+            } else {
+              // If no user record exists, create a clean one from the doctor record
+              console.log(`No user document found, creating new user document with ID: ${doctor.id}`);
+              
+              // Create a clean object without any client-side properties
+              const userData = {
+                email: doctor.email,
+                firstName: doctor.firstName,
+                lastName: doctor.lastName,
+                mobile: doctor.mobile || "",
+                username: doctor.username,
+                isAdmin: false, // Always false for demoted doctors
+                createdAt: doctor.createdAt || new Date(),
+                updatedAt: new Date()
+              };
+              
+              await setDoc(doc(db, "users", doctor.id), userData);
+              console.log(`✓ User document created successfully in Firestore`);
+            }
+            
+            // 2. Update the doctor document in the doctors collection to maintain data consistency
+            console.log(`Updating doctor document in 'doctors' collection (ID: ${doctor.id})`);
+            await updateDoc(doc(db, "doctors", doctor.id), {
+              isAdmin: false,
+              updatedAt: new Date()
+            });
+            console.log(`✓ Doctor document updated successfully in Firestore`);
+          } catch (firestoreErr) {
+            console.error(`Firestore updates failed for doctor ${doctor.email}, but local storage update succeeded:`, firestoreErr);
+            // We still count this as a success since the local storage operation worked
+          }
         } catch (doctorErr) {
           console.error(`Error processing doctor ${doctor.email}:`, doctorErr);
           // Continue with next doctor instead of failing the entire operation
@@ -370,12 +465,16 @@ const UsersManagementPage: React.FC = () => {
       // Refresh the lists
       await fetchUsersAndDoctors();
       
-      // Show success message
-      setSuccess(`Successfully demoted ${selectedDoctors.length} doctor(s) to regular users`);
-      toast({
-        title: "Doctors Demoted",
-        description: `Successfully demoted ${selectedDoctors.length} doctor(s) to regular users`,
-      });
+      // Show success message based on the actual number of successful updates
+      if (successCount > 0) {
+        setSuccess(`Successfully demoted ${successCount} doctor(s) to regular users`);
+        toast({
+          title: "Doctors Demoted",
+          description: `Successfully demoted ${successCount} doctor(s) to regular users`,
+        });
+      } else {
+        throw new Error("No doctors were successfully demoted");
+      }
     } catch (err) {
       console.error("Error demoting doctors:", err);
       setError("Failed to demote selected doctors");

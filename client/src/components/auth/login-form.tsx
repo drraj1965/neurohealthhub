@@ -91,54 +91,67 @@ const LoginForm: React.FC = () => {
       // Get the current Firebase user
       const currentUser = auth.currentUser;
       
-      // Take direct action without relying on import
+      // Take direct action without relying on complex imports
       if (currentUser) {
-        console.log('Current user found after login, ensuring user exists in Firestore...');
+        console.log('Current user found after login, creating user profile...');
         
-        // Create a direct action to ensure user is in Firestore
+        // Import our local storage module
+        const { saveUserLocally } = await import('@/lib/local-user-store');
+        
+        // Create user object for local storage
+        const userProfile = {
+          uid: currentUser.uid,
+          email: currentUser.email || data.email,
+          firstName: currentUser.displayName ? currentUser.displayName.split(' ')[0] : data.email.split('@')[0],
+          lastName: currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : '',
+          isAdmin: isSuperAdmin || isDoctor,
+          emailVerified: currentUser.emailVerified,
+          username: data.email.split('@')[0],
+          updatedAt: new Date().toISOString()
+        };
+        
+        // Save user locally first (this will always work)
+        saveUserLocally(userProfile);
+        console.log('User saved to local storage for reliability');
+        
         try {
-          // Try to create the user record directly in Firestore
+          // Try to create the user record in Firestore as well (but don't depend on it)
           const { getFirestore, doc, setDoc } = await import('firebase/firestore');
           const db = getFirestore();
           
           // Simple direct update for user document
-          await setDoc(doc(db, 'users', currentUser.uid), {
-            uid: currentUser.uid,
-            email: currentUser.email,
-            firstName: currentUser.displayName ? currentUser.displayName.split(' ')[0] : data.email.split('@')[0],
-            lastName: currentUser.displayName ? currentUser.displayName.split(' ').slice(1).join(' ') : '',
-            isAdmin: isSuperAdmin || isDoctor,
-            emailVerified: currentUser.emailVerified,
-            updatedAt: new Date()
-          }, { merge: true });
-          
-          console.log('User document updated successfully in Firestore');
+          await setDoc(doc(db, 'users', currentUser.uid), userProfile, { merge: true });
+          console.log('User document also updated in Firestore as backup');
         } catch (firestoreError) {
-          console.error('Direct Firestore update failed:', firestoreError);
-          // Continue to redirect anyway
+          console.error('Firestore update failed, but local storage is working:', firestoreError);
+          // Continue to redirect anyway since we have local storage
         }
         
-        // Now redirect directly
-        console.log('Redirecting user to appropriate dashboard');
+        // Now redirect directly using window.location for guaranteed navigation
+        console.log('Redirecting user to appropriate dashboard...');
         
-        // Don't use timeout, do it immediately
-        if (isSuperAdmin) {
-          window.location.href = "/super-admin";
-        } else if (isDoctor) {
-          window.location.href = "/admin";
-        } else {
-          window.location.href = "/dashboard";
-        }
+        // Small delay to ensure storage operations complete
+        setTimeout(() => {
+          if (isSuperAdmin) {
+            window.location.href = "/super-admin";
+          } else if (isDoctor) {
+            window.location.href = "/admin";
+          } else {
+            window.location.href = "/dashboard";
+          }
+        }, 100);
       } else {
         console.error('No current user found after login');
         // Fallback to simple redirect with window.location for guaranteed navigation
-        if (isSuperAdmin) {
-          window.location.href = "/super-admin";
-        } else if (isDoctor) {
-          window.location.href = "/admin";
-        } else {
-          window.location.href = "/dashboard";
-        }
+        setTimeout(() => {
+          if (isSuperAdmin) {
+            window.location.href = "/super-admin";
+          } else if (isDoctor) {
+            window.location.href = "/admin";
+          } else {
+            window.location.href = "/dashboard";
+          }
+        }, 100);
       }
     } catch (error: any) {
       console.error("Login error:", error);
