@@ -96,6 +96,45 @@ const NewLogin: React.FC = () => {
               </p>
             </div>
             
+            {/* Navigation Panel */}
+            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Navigation Panel</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Link href="/dashboard">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    User Dashboard
+                  </Button>
+                </Link>
+                <Link href="/admin">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Admin Dashboard
+                  </Button>
+                </Link>
+                <Link href="/super-admin">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    Super Admin Panel
+                  </Button>
+                </Link>
+                <Link href="/users-management">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    User Management
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
             {/* Force Logout button for debugging */}
             {import.meta.env.DEV && (
               <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
