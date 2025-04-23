@@ -12,7 +12,7 @@ import {
   enableIndexedDbPersistence,
   where
 } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase-service";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { Loader2, Database, RefreshCw, InfoIcon, FileWarning, Shield, LogIn, UserPlus, LogOut } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { collection, getDocs, doc, updateDoc, where, query, setDoc, getDoc } from "firebase/firestore";
 import { getAuth, User as FirebaseAuthUser } from "firebase/auth";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase-service";
 import { getFirebaseAdminApp, getFirebaseUsers, UserRecord } from "../lib/firebase-admin";
 import { useAuth } from "@/context/auth-context";
 import { useLocation, Link } from "wouter";

@@ -19,7 +19,7 @@ import { FirebaseUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 // Import Firebase components from our lib file
-import { auth, db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase-service";
 
 // Define AuthContext type
 interface AuthContextType {

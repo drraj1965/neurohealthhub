@@ -32,7 +32,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/auth-context";
-import { getUserQuestions, getAllDoctors } from "@/lib/firebase";
+import { getUserQuestions, getAllDoctors } from "@/lib/firebase-service";
 
 interface Question {
   id: string;

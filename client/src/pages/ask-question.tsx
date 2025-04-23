@@ -5,7 +5,7 @@ import AskQuestionForm from "@/components/questions/ask-question-form";
 import TodayQuestions from "@/components/questions/today-questions";
 import AppLayout from "@/components/layout/app-layout";
 import { useAuth } from "@/context/auth-context";
-import { getTodaysUserQuestions } from "@/lib/firebase";
+import { getTodaysUserQuestions } from "@/lib/firebase-service";
 import { Loader2 } from "lucide-react";
 
 const AskQuestion: React.FC = () => {

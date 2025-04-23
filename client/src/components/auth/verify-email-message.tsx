@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Mail, AlertCircle, RefreshCw } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-service";
 import { sendEmailVerification } from "firebase/auth";
 
 interface VerifyEmailMessageProps {

@@ -1,7 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/auth-context";
-import { getTodaysUserQuestions } from "@/lib/firebase";
+import { getTodaysUserQuestions } from "@/lib/firebase-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Inbox, Loader2 } from "lucide-react";
 import { format } from "date-fns";

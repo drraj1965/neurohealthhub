@@ -25,7 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { questionFormSchema, type QuestionFormData } from "@shared/schema";
 import SpeechToTextService from "@/lib/speech-to-text";
-import { submitQuestion, uploadFile, getAllDoctors } from "@/lib/firebase";
+import { submitQuestion, uploadFile, getAllDoctors } from "@/lib/firebase-service";
 import { sendEmailNotification, sendWhatsAppNotification } from "@/lib/notifications";
 import { useQuery } from "@tanstack/react-query";
 
