@@ -1,40 +1,112 @@
-// functions/src/index.ts
+import { config } from "dotenv";
+config();
+
 import { onRequest } from "firebase-functions/v2/https";
-import * as admin from "firebase-admin";
-import type { Request, Response } from "express";
-import path from "path";
-import { readFileSync } from "fs";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { setGlobalOptions } from "firebase-functions/v2/options";
+import { defineSecret } from "firebase-functions/params";
+import sendgrid from "@sendgrid/mail";
+import twilio from "twilio";
 
-// ✅ Point to your actual service account file
-const serviceAccountPath = path.resolve(__dirname, "../secrets/neurohealthhub-1965-firebase-adminsdk-fbsvc-b15474d7f4.json");
+import { db } from "./firebase-admin"; // ✅ Use shared db instance
+import { sendVerificationEmail } from "./send-verification"; // ✅ Callable export
+export { sendVerificationEmail };
 
-// ✅ Manually load credentials instead of relying on GOOGLE_APPLICATION_CREDENTIALS env
-const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf-8"));
+// ✅ Set global region
+setGlobalOptions({ region: "me-central1" });
 
-// ✅ Initialize Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+// ✅ Define secrets
+const SENDGRID_API_KEY = defineSecret("SENDGRID_API_KEY");
+const SENDGRID_SENDER = defineSecret("SENDGRID_SENDER");
+const TWILIO_SID = defineSecret("TWILIO_SID");
+const TWILIO_TOKEN = defineSecret("TWILIO_TOKEN");
+const TWILIO_WHATSAPP = defineSecret("TWILIO_WHATSAPP");
+
+// ✅ HTTP test function
+export const myFunction = onRequest(async (req, res) => {
+  try {
+    const timestamp = new Date().toISOString();
+    await db.collection("deployment_test").doc("lastDeploy").set({
+      status: "Function working",
+      timestamp,
+    });
+    res.send(`✅ Function deployed successfully at ${timestamp}`);
+  } catch (error) {
+    console.error("myFunction error:", error);
+    res.status(500).send("❌ Error writing to Firestore.");
+  }
 });
 
-const db = admin.firestore();
+// ✅ Firestore trigger to notify admin doctor when question is submitted
+export const notifyOnQuestion = onDocumentCreated(
+  {
+    document: "questions/{questionId}",
+    secrets: [
+      SENDGRID_API_KEY,
+      SENDGRID_SENDER,
+      TWILIO_SID,
+      TWILIO_TOKEN,
+      TWILIO_WHATSAPP,
+    ],
+  },
+  async (event) => {
+    const data = event.data?.data();
 
-// ✅ Cloud Function deployed in me-central1
-export const myFunction = onRequest(
-  { region: "me-central1" },
-  async (req: Request, res: Response) => {
+    if (!data?.uid || !data?.content) {
+      console.warn("Missing uid or content in document");
+      return;
+    }
+
+    const userUid = data.uid;
+    const message = data.content;
+
     try {
-      const timestamp = new Date().toISOString();
-      const testRef = db.collection("deployment_test").doc("lastDeploy");
+      const userSnap = await db.collection("users").doc(userUid).get();
+      if (!userSnap.exists) {
+        console.warn("User not found:", userUid);
+        return;
+      }
 
-      await testRef.set({
-        status: "Function working from me-central1",
-        timestamp,
-      });
+      const user = userSnap.data() as {
+        email?: string;
+        mobile?: string;
+        isAdmin?: boolean;
+      };
 
-      res.send(`✅ Hello from NeuroHealthHub! Function updated at ${timestamp}`);
+      if (!user.isAdmin) {
+        console.warn("User is not an admin:", userUid);
+        return;
+      }
+
+      // ✅ Send Email
+      if (user.email) {
+        sendgrid.setApiKey(process.env.SENDGRID_API_KEY!);
+        await sendgrid.send({
+          to: user.email,
+          from: process.env.SENDGRID_SENDER!,
+          subject: "💬 New Patient Question",
+          text: `You have a new question:\n\n${message}`,
+        });
+        console.log("Email sent to", user.email);
+      }
+
+      // ✅ Send WhatsApp
+      if (user.mobile) {
+        const client = twilio(
+          process.env.TWILIO_SID!,
+          process.env.TWILIO_TOKEN!
+        );
+        await client.messages.create({
+          body: `🫞 New patient question:\n\n${message}`,
+          from: `whatsapp:${process.env.TWILIO_WHATSAPP!}`,
+          to: `whatsapp:${user.mobile}`,
+        });
+        console.log("WhatsApp sent to", user.mobile);
+      }
+
+      console.log("✅ Notification sent to admin user:", userUid);
     } catch (error) {
-      console.error("Function error:", error);
-      res.status(500).send("❌ Error writing to Firestore.");
+      console.error("❌ Failed to send notifications:", error);
     }
   }
 );

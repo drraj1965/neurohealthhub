@@ -1,59 +1,96 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.myFunction = void 0;
-// functions/src/index.ts
+exports.notifyOnQuestion = exports.myFunction = exports.sendVerificationEmail = void 0;
+const dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
 const https_1 = require("firebase-functions/v2/https");
-const admin = __importStar(require("firebase-admin"));
-const path_1 = __importDefault(require("path"));
-const fs_1 = require("fs");
-// ✅ Point to your actual service account file
-const serviceAccountPath = path_1.default.resolve(__dirname, "../secrets/neurohealthhub-1965-firebase-adminsdk-fbsvc-b15474d7f4.json");
-// ✅ Manually load credentials instead of relying on GOOGLE_APPLICATION_CREDENTIALS env
-const serviceAccount = JSON.parse((0, fs_1.readFileSync)(serviceAccountPath, "utf-8"));
-// ✅ Initialize Admin SDK
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-});
-const db = admin.firestore();
-// ✅ Cloud Function deployed in me-central1
-exports.myFunction = (0, https_1.onRequest)({ region: "me-central1" }, async (req, res) => {
+const firestore_1 = require("firebase-functions/v2/firestore");
+const options_1 = require("firebase-functions/v2/options");
+const params_1 = require("firebase-functions/params");
+const mail_1 = __importDefault(require("@sendgrid/mail"));
+const twilio_1 = __importDefault(require("twilio"));
+const firebase_admin_1 = require("./firebase-admin"); // ✅ Use shared db instance
+const send_verification_1 = require("./send-verification"); // ✅ Callable export
+Object.defineProperty(exports, "sendVerificationEmail", { enumerable: true, get: function () { return send_verification_1.sendVerificationEmail; } });
+// ✅ Set global region
+(0, options_1.setGlobalOptions)({ region: "me-central1" });
+// ✅ Define secrets
+const SENDGRID_API_KEY = (0, params_1.defineSecret)("SENDGRID_API_KEY");
+const SENDGRID_SENDER = (0, params_1.defineSecret)("SENDGRID_SENDER");
+const TWILIO_SID = (0, params_1.defineSecret)("TWILIO_SID");
+const TWILIO_TOKEN = (0, params_1.defineSecret)("TWILIO_TOKEN");
+const TWILIO_WHATSAPP = (0, params_1.defineSecret)("TWILIO_WHATSAPP");
+// ✅ HTTP test function
+exports.myFunction = (0, https_1.onRequest)(async (req, res) => {
     try {
         const timestamp = new Date().toISOString();
-        const testRef = db.collection("deployment_test").doc("lastDeploy");
-        await testRef.set({
-            status: "Function working from me-central1",
+        await firebase_admin_1.db.collection("deployment_test").doc("lastDeploy").set({
+            status: "Function working",
             timestamp,
         });
-        res.send(`✅ Hello from NeuroHealthHub! Function updated at ${timestamp}`);
+        res.send(`✅ Function deployed successfully at ${timestamp}`);
     }
     catch (error) {
-        console.error("Function error:", error);
+        console.error("myFunction error:", error);
         res.status(500).send("❌ Error writing to Firestore.");
+    }
+});
+// ✅ Firestore trigger to notify admin doctor when question is submitted
+exports.notifyOnQuestion = (0, firestore_1.onDocumentCreated)({
+    document: "questions/{questionId}",
+    secrets: [
+        SENDGRID_API_KEY,
+        SENDGRID_SENDER,
+        TWILIO_SID,
+        TWILIO_TOKEN,
+        TWILIO_WHATSAPP,
+    ],
+}, async (event) => {
+    const data = event.data?.data();
+    if (!data?.uid || !data?.content) {
+        console.warn("Missing uid or content in document");
+        return;
+    }
+    const userUid = data.uid;
+    const message = data.content;
+    try {
+        const userSnap = await firebase_admin_1.db.collection("users").doc(userUid).get();
+        if (!userSnap.exists) {
+            console.warn("User not found:", userUid);
+            return;
+        }
+        const user = userSnap.data();
+        if (!user.isAdmin) {
+            console.warn("User is not an admin:", userUid);
+            return;
+        }
+        // ✅ Send Email
+        if (user.email) {
+            mail_1.default.setApiKey(process.env.SENDGRID_API_KEY);
+            await mail_1.default.send({
+                to: user.email,
+                from: process.env.SENDGRID_SENDER,
+                subject: "💬 New Patient Question",
+                text: `You have a new question:\n\n${message}`,
+            });
+            console.log("Email sent to", user.email);
+        }
+        // ✅ Send WhatsApp
+        if (user.mobile) {
+            const client = (0, twilio_1.default)(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+            await client.messages.create({
+                body: `🫞 New patient question:\n\n${message}`,
+                from: `whatsapp:${process.env.TWILIO_WHATSAPP}`,
+                to: `whatsapp:${user.mobile}`,
+            });
+            console.log("WhatsApp sent to", user.mobile);
+        }
+        console.log("✅ Notification sent to admin user:", userUid);
+    }
+    catch (error) {
+        console.error("❌ Failed to send notifications:", error);
     }
 });
