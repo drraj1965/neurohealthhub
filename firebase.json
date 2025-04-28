@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist",  // Points to the Vite build output directory
+    "public": "dist/public",  // Points to the Vite build output directory
     "ignore": [
       "firebase.json",
       "**/.*",
