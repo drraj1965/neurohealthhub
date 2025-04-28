@@ -1,27 +1,62 @@
 {
   "hosting": {
-    "public": "dist/public",
+    "public": "dist",  // Points to the Vite build output directory
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
+    "predeploy": [
+      "npm run build"  // Runs your custom build process before deploying
+    ],
+    "frameworksBackend": {
+      "region": "me-central1"  // Changed this to me-central1 to match Firestore region
+    },
     "rewrites": [
       {
-        "source": "**",
+        "source": "/**",
         "destination": "/index.html"
       }
     ]
   },
-  "functions": {
-    "source": "functions",
-    "region": "me-central1"
-  },
+  "functions": [
+    {
+      "source": "functions",
+      "region": "me-central1",
+      "codebase": "default"
+    },
+    {
+      "source": "nhh",
+      "codebase": "nhh",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "emulators": {
+    "dataconnect": {
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    }
+  },
+  "dataconnect": {
+    "source": "dataconnect"
+  },
+  "database": {
+    "rules": "database.rules.json"
   }
 }
