@@ -1,0 +1,20 @@
+In the ask-question page for users - the speech-to-text function has to work properly; implement a system of being able to see the text as it is converted in the space below the text box before it appears inside the text box
+In the articles page, when I try to log out - instead of being taken to the login page - I am getting this error: 
+[plugin:runtime-error-plugin] Cannot read properties of undefined (reading 'length')
+/home/runner/workspace/client/src/components/articles/ArticlesList.tsx:155:30
+153|  
+154|    // Show empty state
+155|    if (!data || data.articles.length === 0) {
+   |                               ^
+156|      return (
+157|        <Card className="p-6 text-center">
+Check the logout function in every page where it appears and make sure it works
+In the manage-questions page - (1) The user who has posted the question is not identified - currently it shows as 'Unknown' - we need the first_name and last_name; (2) The Unanswered filter does not fetch any questions - we have to make sure this filter works - check if the questions are being stored with that label - or if there is a change in label after it is answered - identify why this filter is not working and sort out the issue; (3) The logout button did not work - I got the success message but there was no redirect to the login page; 
+In the manage-questions page add a link for admin to go back to dashboard - and make it functional;
+In the ask-question page, the logout button is not working - there is no redirect to the login page;
+In the video view page the admins should be allowed to answer the comments / questions of users - implement this feature
+In the manage-questions page, the back-to-dashboard button leads to https://53babb82-3296-431b-bd14-6e41f2899d7c-00-2fks6z4vpnuoe.riker.replit.dev/admin-dashboard - this gives a 401 page - can we have the correct redirect to the admin-dashboard page implemented?
+In the manage-questions page - the Unanswered question filter still does not fetch any questions - carefully look at the database and check how questions are being stored - by default they should be labelled as 'Unanswered' and when answered, this label would change to 'Answered' - if this system is not implemented in the database, then make sure it is and then confirm that the filter for answered and unanswered questions is working correctly throughout the website
+
+
+In the dashboard for both users and Admins, we have to add one more card; this card will be about latest articles and videos posted by the Admins; this will inform the viewers (both users and Admins) of the articles and videos posted in the last 7 days; it will be attractive, colorful, positive and exciting; it will provide a summary of what articles or videos were posted, who posted them and the time / day of posting; this will update every time there is a new post; it will link to the article or video blog page and open the particular article or video the user or admin clicks; this card will be positioned in an appropriate eye-catching position in the page.

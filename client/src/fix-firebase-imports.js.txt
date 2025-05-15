@@ -1,0 +1,33 @@
+// fix-firebase-imports.js
+import fs from 'fs';
+import path from 'path';
+
+const targetDirectory = path.resolve('./client/src');
+const targetImport = `import app, { auth, db, storage } from "./firebase";`;
+const fixedImport = `import { app, auth, db, storage } from "./firebase";`;
+
+/**
+ * Recursively scans all files in a directory and applies the replacement.
+ */
+function processDirectory(directory) {
+  const files = fs.readdirSync(directory);
+  files.forEach(file => {
+    const fullPath = path.join(directory, file);
+    const stats = fs.statSync(fullPath);
+
+    if (stats.isDirectory()) {
+      processDirectory(fullPath);
+    } else if (stats.isFile() && file.endsWith('.ts')) {
+      const content = fs.readFileSync(fullPath, 'utf8');
+      if (content.includes(targetImport)) {
+        const updatedContent = content.replace(targetImport, fixedImport);
+        fs.writeFileSync(fullPath, updatedContent, 'utf8');
+        console.log(`✅ Fixed in: ${fullPath}`);
+      }
+    }
+  });
+}
+
+console.log(`🔍 Scanning directory: ${targetDirectory}`);
+processDirectory(targetDirectory);
+console.log('🎉 All matching imports have been updated.');

@@ -20,6 +20,7 @@ import EmailVerified from "@/pages/email-verified";
 import VerifyEmail from "@/pages/verify-email";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
+import VideoRecorderPage from './pages/VideoRecorderPage';
 
 // Super Admin email check function (consistent with other places)
 const isSuperAdminEmail = (email: string | null | undefined): boolean => {
@@ -108,6 +109,7 @@ function AppRoutes() {
       <Route path="/users-management">
         {() => <ProtectedRoute component={UsersManagement} superAdmin={true} />}
       </Route>
+      <Route path="/record-video" component={VideoRecorderPage} />
       <Route component={NotFound} />
     </Switch>
   );

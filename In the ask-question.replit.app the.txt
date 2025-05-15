@@ -1,0 +1,26 @@
+In the ask-question.replit.app the following changes are required:
+(1) Speech to text in the ask-question page has to be made functional in mobile phones and tablets
+(2) Add speech to text to the manage question / Admin Dashboard page
+(3) Remove the debug button in the production phase
+(4) make sure database has an 'admin' collection, and add the three admins to the database:
+in the following manner:
+doctor_id No. 1 = Dr. Rajshekher Garikapati, doctor_email=doctornerves@gmail.com, doctor_whatsapp=+971501802970
+doctor_id No. 2 = Dr. Ummul Kiram Zain Ul Abedin, doctor_email=dr.ukzain@gmail.com, doctor_whatsapp=+923002220302
+doctor_id No. 3 = Dr. Ponnu Sankaran Pillai, doctor_email=ponnusankar100@gmail.com, doctor_whatsapp=+918547035009
+
+(5)Check and debug the answer-question function
+(6) Notification to user by email when a question is answered
+(7) Make the dashboard button in the page functional so that the user is taken back to the respective dashboard on https://neurohealthhub.replit.app/ with an intact session 
+
+
+In the Neurohealthdashboard app:
+(1) In the database, make sure the doctors collection has all three: 
+doctor_id No. 1 = Dr. Rajshekher Garikapati, doctor_email=doctornerves@gmail.com, doctor_whatsapp=+971501802970
+doctor_id No. 2 = Dr. Ummul Kiram Zain Ul Abedin, doctor_email=dr.ukzain@gmail.com, doctor_whatsapp=+923002220302
+doctor_id No. 3 = Dr. Ponnu Sankaran Pillai, doctor_email=ponnusankar100@gmail.com, doctor_whatsapp=+918547035009
+(2) Set up an email verification set up to be active When a user first signs up (Registers) 
+(3) Allow password reset function
+(4) Add the link to the ArticleGen-AI app -https://article-gen-ai-drphaniraj1965.replit.app/; the admin is taken to the AI Article gen app using the link in the care - AI-assisted articles; when the app opens, use the authentication token to log the admin to that page
+(5) Set up the system that the articles published there are properly shareable and shared to the Articles page in https://neurohealthapp.replit.app
+(6) Make the 'Create Medical Content' card functional - create a page for this, a route for it, add a link, and set up an article generation page; provide it with all the rich text format functions and buttons (like in word documents) and add the function to add images (which can be resized, moved, cropped, deleted, and adjusted in other ways) - provided full functionality using TinyMCE, and I will provide you the API key from there (it exists in the ArticleGen-AI app and can be reused here).
+(7) Set it up so that after generating an article using either of the two methods - ArticleGen-AI or the 'Create Medical Content' method - so admins can publish and share these articles in the NeuroHealthApp home page (with title, summary, keywords, date published and name of author) and also set it up so that users can sign up to be informed when an article is published.

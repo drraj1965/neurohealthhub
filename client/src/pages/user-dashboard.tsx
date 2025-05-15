@@ -7,6 +7,8 @@ import { Loader2 } from "lucide-react";
 
 const UserDashboard: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const fullName = user?.displayName || user?.email || "User";
+
 
   if (isLoading) {
     return (
@@ -21,6 +23,7 @@ const UserDashboard: React.FC = () => {
       <Helmet>
         <title>Dashboard | NeuroHealthHub</title>
       </Helmet>
+      <h1 className="text-xl mb-4">Welcome, {fullName}</h1>
       <AppLayout>
         <UserDashboardContent />
       </AppLayout>

@@ -1,0 +1,59 @@
+The article management system:
+This allows admins to write articles, post them and share them.
+The page is accessed through the admin_dashboard page - hence, only admins can post articles - no further authentication is required
+The page has a Headline section, a summary section, the body section, and a keyword / tags section
+We will connect a flowise agent to this page which will assist the admin in composing the article in the following manner:
+
+The content of the article is entered in the body section by the admin
+After this the admin has the choice to click a 'Title' button; the flowise Agent proposes 3 - 5 suitable titles and the admin chooses one of them which is then stored as the title of the article.
+Next the admin asks for keywords using a 'keyword' button; the flowise agent goes through the text and suggest around 5 - 10 keywords from the text; the admin selects as many as he wants, with the option to add one or more of his own, and then finalizes the list and these then become the keywords / tags for the article
+Next the admin asks for a tagline / summary and the Flowise agent creates a summary of around 3 - 5 lines; the admin edits this before accepting it, which then becomes an executive summary of the article; when the admin shares the article (to the Home page) the title, tagwords and article summary are presented to anyone accessing the home page;
+Next the admin asks for images; the flowise agent uses the keywords / tag words to trawl the internet for suitable images (non-copyrighted) and presents around 10-15 images related to the article; it also generates 3 - 5 images of its own and adds these to the images that are displayed to the admin; the admin selects which images to use, and clicks 'Accept'; the flowise agent then composes the article with Headings, subheadings, selected images, and creates an aesthetic article out of it, with the images distributed between the text in an appealing and meaningful manner;
+The admin can then finalize this article and publish it - it gets published to a medical-blog page, and the title / summary / tag words are presented in the home page with link to this article.
+The article is stored in the firebase database system - it searches for the doctor_articles sub-collection for the admins document in the firebase database, and creates one if it does not already exist.
+
+Write a 1000-word article on vertigo for laymen, explaining the symptom and common causes; describe briefly the vestibular system, and how it integrates the different parts, including the semicircular canals, the sense organ, the vestibular nerve and the different vestibular nuclei; briefly touch upon the other inputs to the vestibular system. Then explain how the symptom of vertigo arises; explain about latency, decay, and habituation. Explain how peripheral vertigo differs from central vertigo. Touch upon the common causes of vertigo, and how they are diagnosed. Then add a few lines on medical treatment, and give details of different vestibular exercises, including Brandt-Daroff, the Dix-Hallpike maneuver, the Epley maneuver, etc. Provide prompts for images, including for the anatomy and physiology, as well as for the various causes, and the vestibular exercises. 
+
+
+chunk-WERSD76P.js?v=e0eb95c4:521 Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node
+    at ReactQuill2 (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…unner/workspace/node_modules/.vite/deps/react-quill.js?v=e0eb95c4:12915:30)
+    at div
+    at QuillEditor (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.dev/src/components/editor/quill-editor.tsx:21:39)
+    at div
+    at _c9 (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…unner/workspace/node_modules/.vite/deps/chunk-64P7DR4F.js?v=e0eb95c4:41:13
+    at Presence (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…nner/workspace/node_modules/.vite/deps/chunk-IA4I6MFM.js?v=e0eb95c4:115:11)
+    at https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…orkspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=e0eb95c4:168:13
+    at _c5 (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.dev/src/components/ui/tabs.tsx:72:12)
+    at div
+    at https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…unner/workspace/node_modules/.vite/deps/chunk-64P7DR4F.js?v=e0eb95c4:41:13
+    at Provider (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…unner/workspace/node_modules/.vite/deps/chunk-IA4I6MFM.js?v=e0eb95c4:35:15)
+    at https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=e0eb95c4:46:7
+    at div
+    at ArticleEditor (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.dev/src/pages/article-editor.tsx:43:18)
+    at Route (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e0eb95c4:280:16)
+    at Switch (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e0eb95c4:336:17)
+    at main
+    at div
+    at Router
+    at QueryClientProvider (https://494e29f9-69f0-4907-a065-ae51a6c494dd-00-1krleh75mhbo.kirk.replit.de…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=e0eb95c4:2844:3)
+    at App
+
+react-quill.js?v=e0eb95c4:5662 [Deprecation] Listener added for a 'DOMNodeInserted' mutation event. Support for this event type has been removed, and this event will no longer be fired. See https://chromestatus.com/feature/5083947249172480 for more information.
+react-quill.js?v=e0eb95c4:3487 quill:toolbar ignoring attaching to disabled format undo 
+
+A colored text box listing the common causes of vertigo, including Benign Paroxysmal Positional Vertigo (BPPV), Meniere's Disease, Vestibular Neuritis, Labyrinthitis: Inflammation within the inner ear.
+Image prompt: Visuals depicting the common causes of vertigo
+
+Facebook App Secret: 6248561d29f07cb97bb90b8fa15e9496
+Facebook App ID: 143357476265315
+Twitter client Id: cTZfYnpKclF3bTdKc2RleWlBZDc6MTpjaQ
+Twitter app secret: lbQB1qLooVkdqEIHxW3NDBMbXA3e5ZW3lGsMEsJpLZkHGQEFXw
+
+
+https://www.clinicalanatomy.ca/
+https://openi.nlm.nih.gov/
+https://lane.stanford.edu/biomed-resources/bassett/

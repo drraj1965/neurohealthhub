@@ -1,22 +1,22 @@
-import React from "react";
-import { Helmet } from "react-helmet";
-import AppLayout from "@/components/layout/app-layout";
-import AdminDashboardContent from "@/components/dashboard/admin-dashboard";
+import React, { useEffect, useState } from "react";
+import { fetchUserProfile } from "@/lib/fetchUserProfile";
 import { useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
-import { useLocation } from "wouter";
+import AdminDashboardComponent from "@/components/dashboard/admin-dashboard";
 
-const AdminDashboard: React.FC = () => {
-  const { user, isAdmin, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
+const AdminDashboardPage: React.FC = () => {
+  const { profile } = useAuth();
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
-    if (!isLoading && !isAdmin) {
-      setLocation("/login");
-    }
-  }, [isLoading, isAdmin, setLocation]);
+  if (!profile) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -24,20 +24,8 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  if (!isAdmin) {
-    return null;
-  }
+  return <AdminDashboardComponent userName={`${profile.firstName} ${profile.lastName}`} />;
 
-  return (
-    <>
-      <Helmet>
-        <title>Admin Dashboard | NeuroHealthHub</title>
-      </Helmet>
-      <AppLayout>
-        <AdminDashboardContent />
-      </AppLayout>
-    </>
-  );
 };
 
-export default AdminDashboard;
+export default AdminDashboardPage;

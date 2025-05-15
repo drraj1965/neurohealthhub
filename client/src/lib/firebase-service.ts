@@ -1,29 +1,41 @@
-import { auth, db, storage } from "./firebase";
+import { app, auth, db, storage } from "@/lib/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
   signOut,
-  sendEmailVerification
+  sendEmailVerification,
 } from "firebase/auth";
 import {
-  doc, setDoc, getDoc, collection, getDocs,
-  addDoc, updateDoc, query, where, orderBy, Timestamp
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-// Register user
-export async function registerUser(email: string, password: string, firstName: string, lastName: string, mobile?: string) {
+// ✅ User Registration
+export async function registerUser(
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string,
+  mobile?: string
+) {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
-  await updateProfile(user, {
-    displayName: `${firstName} ${lastName}`
-  });
 
-  const username = `${firstName.toLowerCase()}${lastName.toLowerCase()}`;
-  const baseUrl = window.location.origin;
+  await updateProfile(user, { displayName: `${firstName} ${lastName}` });
+
   await sendEmailVerification(user, {
-    url: `${baseUrl}/email-verified`,
+    url: `${window.location.origin}/email-verified`,
     handleCodeInApp: false,
   });
 
@@ -32,21 +44,20 @@ export async function registerUser(email: string, password: string, firstName: s
     firstName,
     lastName,
     mobile: mobile || "",
-    username
+    username: `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
   }));
 
   return { ...user, pendingVerification: true };
 }
 
-// Login user
+// ✅ User Login
 export async function loginUser(email: string, password: string) {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
   if (!user.emailVerified) {
-    const baseUrl = window.location.origin;
     await sendEmailVerification(user, {
-      url: `${baseUrl}/email-verified`,
+      url: `${window.location.origin}/email-verified`,
       handleCodeInApp: false,
     });
     return { ...user, needsVerification: true };
@@ -56,19 +67,25 @@ export async function loginUser(email: string, password: string) {
   return user;
 }
 
-// Logout user
+// ✅ User Logout
 export async function logoutUser() {
   await signOut(auth);
 }
 
-// Get all doctors
+// ✅ File Upload
+export async function uploadFile(file: File, path: string) {
+  const fileRef = ref(storage, path);
+  const snap = await uploadBytes(fileRef, file);
+  return await getDownloadURL(snap.ref);
+}
+
+// ✅ Get All Doctors
 export async function getAllDoctors() {
-  const doctorsRef = collection(db, "doctors");
-  const snapshot = await getDocs(doctorsRef);
+  const snapshot = await getDocs(collection(db, "doctors"));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// Submit question
+// ✅ Submit Question
 export async function submitQuestion(data: {
   userId: string;
   doctorId: string;
@@ -77,12 +94,12 @@ export async function submitQuestion(data: {
   questionType: string;
   attachments?: string[];
 }) {
-  const userRef = collection(db, "users", data.userId, "my_questions");
-  const userDoc = await addDoc(userRef, {
+  const userDocRef = collection(db, "users", data.userId, "my_questions");
+  const userDoc = await addDoc(userDocRef, {
     ...data,
     createdAt: new Date(),
     updatedAt: new Date(),
-    isPublic: false
+    isPublic: false,
   });
 
   const doctorRef = collection(db, "doctors", data.doctorId, "user_questions");
@@ -91,40 +108,34 @@ export async function submitQuestion(data: {
     questionId: userDoc.id,
     createdAt: new Date(),
     updatedAt: new Date(),
-    isPublic: false
+    isPublic: false,
   });
 
   return userDoc.id;
 }
 
-// Get user's questions
+// ✅ Get User's Questions
 export async function getUserQuestions(userId: string) {
-  const qRef = collection(db, "users", userId, "my_questions");
-  const q = query(qRef, orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
+  const snapshot = await getDocs(query(collection(db, "users", userId, "my_questions"), orderBy("createdAt", "desc")));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// Get today's questions for a user
+// ✅ Get Today's User Questions
 export async function getTodaysUserQuestions(userId: string) {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
-  const qRef = collection(db, "users", userId, "my_questions");
-  const q = query(qRef, where("createdAt", ">=", startOfDay), orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
+  const snapshot = await getDocs(query(collection(db, "users", userId, "my_questions"), where("createdAt", ">=", startOfDay), orderBy("createdAt", "desc")));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// Get questions assigned to a doctor
+// ✅ Get Doctor's Questions
 export async function getDoctorQuestions(doctorId: string) {
-  const qRef = collection(db, "doctors", doctorId, "user_questions");
-  const q = query(qRef, orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
+  const snapshot = await getDocs(query(collection(db, "doctors", doctorId, "user_questions"), orderBy("createdAt", "desc")));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// Submit answer to a question
+// ✅ Submit Answer to a Question
 export async function submitAnswer(answer: {
   questionId: string;
   userId: string;
@@ -134,35 +145,22 @@ export async function submitAnswer(answer: {
 }) {
   const qRef = doc(db, "users", answer.userId, "my_questions", answer.questionId);
   const snapshot = await getDoc(qRef);
+
   if (!snapshot.exists()) throw new Error("Question not found");
 
   const qData = snapshot.data();
   const answers = qData.answers || [];
   answers.push({ ...answer, createdAt: new Date() });
 
-  await updateDoc(qRef, {
-    answers,
-    updatedAt: new Date()
-  });
+  await updateDoc(qRef, { answers, updatedAt: new Date() });
 
-  // Mirror update in doctor's subcollection
-  const doctorRef = collection(db, "doctors", answer.doctorId, "user_questions");
-  const q = query(doctorRef, where("questionId", "==", answer.questionId));
-  const dSnapshot = await getDocs(q);
-  if (!dSnapshot.empty) {
-    await updateDoc(dSnapshot.docs[0].ref, {
-      answers,
-      updatedAt: new Date()
-    });
+  const doctorQSnapshot = await getDocs(query(collection(db, "doctors", answer.doctorId, "user_questions"), where("questionId", "==", answer.questionId)));
+  if (!doctorQSnapshot.empty) {
+    await updateDoc(doctorQSnapshot.docs[0].ref, { answers, updatedAt: new Date() });
   }
 
   return true;
 }
 
-// Upload file
-export async function uploadFile(file: File, path: string) {
-  const fileRef = ref(storage, path);
-  const snap = await uploadBytes(fileRef, file);
-  return await getDownloadURL(snap.ref);
-}
-export { auth, db, storage } from "./firebase";
+// ✅ Ensure Exports Are Available to Other Files
+export { auth, db, storage, app };

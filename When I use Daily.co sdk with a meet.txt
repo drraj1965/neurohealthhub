@@ -1,0 +1,106 @@
+When I use Daily.co sdk with a meeting room, the recording works in this way: When I click 'Start Video' the display appears in the central panel; when I click 'Start Recording', the central panel goes black and a second panel opens on the side and the video is displayed and is being recorded there; when I click 'Stop Recording' the recording saves - to the daily.co cloud, and then I get the message 'Failed to fetch the url from daily.co'; I want the recording to continue in the central panel; if I want to make a presentation with a slide or an animated cartoon, then with a different button, while recording continues, I would want my video to be on the side with the presentation in the center; and at the end I would want the video to be replayable for me so I can decide whether to keep it or discard and re-record.
+
+To achieve this with Daily.co SDK, you have to create a custom layout and event handling in the frontend using Daily’s video component APIs and recording options.
+
+Let’s break this down step by step:
+
+✅ My Goals
+  ✅ Record in central panel – Don't switch video to side panel when recording starts
+
+  ✅ Presentation mode – Show a slide/animation in the main panel, keep your camera feed smaller (like picture-in-picture)
+
+  ✅ Post-recording preview – Let user view, then decide to keep or discard the recording
+
+🛠️ How To Achieve This with Daily.co
+1. Custom Video Layouts Using DailyIframe
+Daily gives you full control via:
+
+createFrame() – Embed the call
+
+setLayout() – Set a custom layout (instead of default "grid" or "single" mode)
+
+setSubscribeToTracksAutomatically(false) – Control what you display
+
+You can set:
+
+js
+Copy
+Edit
+callFrame.setLayout({
+  layout: "custom",
+});
+Then manually attach your video feeds where you want:
+
+js
+Copy
+Edit
+const camVideoEl = document.getElementById('video-self');
+callFrame.setVideoElement(camVideoEl, dailyParticipantId);
+That gives you precise control to keep your feed in the center during recording, or move it to the side when showing a presentation.
+
+2. Keep Central Video During Recording
+This is a layout thing. You’ll:
+
+Keep the central <div> always showing the main video (your camera feed or screen share)
+
+Avoid letting Daily switch layouts automatically (don’t use startScreenShare() unless you reassign layout)
+
+ts
+Copy
+Edit
+callFrame.on('recording-started', () => {
+  // Don't change layout — just continue showing the same elements
+});
+3. Toggle Between Camera and Presentation View
+Add a button: “Show Slide” or “Show Animation”
+
+When clicked:
+
+Use CSS/JS to replace the central content area with a presentation
+
+Move your video feed to a small side container
+
+Keep recording running — Daily captures everything in the DOM video area
+
+Use your own animation, slide component, or HTML content.
+
+4. Post-Recording Playback & Review
+After you stop recording:
+
+ts
+Copy
+Edit
+callFrame.on("recording-stopped", async () => {
+  const session = await callFrame.getMeetingSession();
+  const { cloudRecording, recordings } = session;
+
+  const videoURL = recordings?.[0]?.download_url;
+
+  if (videoURL) {
+    setVideoForPreview(videoURL);
+  } else {
+    console.warn("Recording URL not available yet");
+  }
+});
+If you’re getting “Failed to fetch URL”, that means Daily is still processing. You can poll getMeetingSession() every few seconds to check again.
+
+Let user preview with <video controls src={videoURL} /> and offer:
+
+✅ Save (upload to Dropbox, Drive, YouTube)
+
+🔄 Re-record (reset the state)
+
+🧰 Optional Enhancements
+Add screen share + camera via Daily’s screen + cam support
+
+Add a canvas element if you want animated overlays or custom drawing (good for cartoon-like visuals)
+
+Customize how many tracks are being recorded using startRecording() options
+
+✅ Summary of What You’ll Build
+Feature	Tool/API Used
+Record in central panel	setLayout({ layout: 'custom' }) + manual video elements
+Add slide/animation	Custom HTML/CSS/JS switch in main panel
+Keep self-video visible	<video> element floated or pinned
+Recording	startRecording() + listen for recording-stopped
+Preview & re-record	Load final video URL, let user choose

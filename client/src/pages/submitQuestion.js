@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db } from '@/lib/firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 export async function submitQuestion(userId, doctorId, questionText, attachments = []) {

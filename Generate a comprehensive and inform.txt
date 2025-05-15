@@ -1,0 +1,19 @@
+"Generate a comprehensive and informative medical article on Multiple Sclerosis. Keep the language easy for laymen, but include some details about underlying pathology of demyelination and information on immune-mediation; add a section on the different types of MS, such as RRMS, PPMS, SPMS, as well as possible, probable and definite MS; add a section on the steps to diagnose the condition. Briefly outline how a relapse is treated, and then explain about Disease-Modifying Therapy; show the categories of highly-effective medications, provide a table of the medications, their role, their status in the clinic. Add some prompts for images, mostly for pathology and radiology; Include sections for introduction, background, clinical relevance, evidence-based approaches, and patient considerations."
+
+The articles published in article-gen-ai site = article-gen-ai-drphaniraj1965.replit.app - has to be displayed in the home page of our site - https://neuro-health-hub-1-drphaniraj1965.replit.app/; in that page the user can sort and filter by date, month, year, topic - and when clicked, takes user to the article; plus, new articles have to be added to this page when the admin / article creator shares to the site. So, basically, we need modifications to both the sites - add share button to the articles in the article list of the article-gen-ai page; when admin makes any changes / editing of an article, then he can share again to update the link in the home page of neurohealthhub - for this, Changes in Article-Gen-AI Project
+Add Share Button: Implement a share functionality for each article
+Create Share API: Develop the logic to send article data to the NeuroHealthHub site
+Update UI: Add visual indicators for shared articles
+Enable Re-sharing: Allow updating previously shared articles
+
+hf_...GmxU
+
+Random String Generator
+Here are your random strings:
+
+lz42ohfYzu6ss83JRwRl
+	
+4t6DNgOeILxeayu5TAGi
+i7ivC9tNsJ91eqrKZSAW
+PkH0eAqpaLmmWTo1l91e
+Timestamp: 2025-03-09 09:26:41 UTC

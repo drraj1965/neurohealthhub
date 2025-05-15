@@ -1,0 +1,24 @@
+Accessibility voice-over generator for video content
+
+One-click content translation for multilingual support
+Gamified knowledge retention quiz feature
+
+Interactive video annotation system for collaborative learning
+
+Personalized learning path recommendation engine
+
+Let's do these: (1) Expand vocabulary and conversational capabilities; (2) Improve translation accuracy through model fine-tuning; (3) Add text-to-speech capabilities for Sanskrit output; (4) Implement voice-to-text for Sanskrit input; (5) add capability for dictionary to provide grammar instructions such as vibhakti, sandhi, dhatu identification, etymological explanation of words
+
+OAuth client created
+The client ID and secret can always be accessed from Credentials in APIs & Services
+
+OAuth is limited to 100 sensitive scope logins  until the OAuth consent screen is verified. This may require a verification process that can take several days.
+Client ID
+1075723318920-439vp2mcoeqvlgap8lvr91m7ike0qe5l.apps.googleusercontent.com
+Client secret
+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
+Set the authorized redirect URI to https://neurohealthhub.replit.app/api/youtube/oauth2callback
+Creation date
+4 April 2025 at 07:15:39 GMT+4
+Status
+Enabled

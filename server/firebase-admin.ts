@@ -1,31 +1,55 @@
 import { initializeApp, App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { UserRecord } from 'firebase-admin/auth';
 import { cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import * as dotenv from 'dotenv';
 import { sendEmail } from './notifications';
+import * as path from 'path';
+import * as fs from 'fs';
+
+// Load environment variables from .env file
+dotenv.config();
+
+// Ensure proper path resolution for Windows OS
+const __filename = new URL(import.meta.url).pathname;
+const __dirname = path.dirname(__filename); // Resolve directory of current file
 
 let firebaseAdminApp: App | null = null;
 
 /**
  * Initialize the Firebase Admin SDK from environment variables
  */
-export function initializeFirebaseAdmin() {
+export async function initializeFirebaseAdmin() {
   if (firebaseAdminApp) {
     return firebaseAdminApp;
   }
 
   try {
-    // Parse the admin credentials from environment variable
-    const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_CONFIG || '{}');
+    // Debugging the directory and path
+    console.log('Resolved __dirname:', __dirname); // Debugging __dirname
     
+    // Fix the service account file path resolution
+    const serviceAccountPath = path.normalize(process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '');
+    console.log('Resolved serviceAccountPath:', serviceAccountPath); // Debugging the path to the service account file
+    
+    // Ensure the service account file exists at the resolved path
+    if (!fs.existsSync(serviceAccountPath)) {
+      throw new Error(`Service account file not found at path: ${serviceAccountPath}`);
+    }
+
+    // Convert the file path to a file URL
+    const serviceAccountUrl = new URL(`file://${serviceAccountPath.replace(/\\/g, '/')}`);
+    
+    // Dynamically import the service account file
+    const serviceAccount = await import(serviceAccountUrl.href);
+    console.log('Service Account Data:', serviceAccount); // Debugging the imported service account
+
     console.log('Initializing Firebase Admin SDK with project:', serviceAccount.project_id);
-    
-    // Initialize the app using the imported initializeApp function
+
+    // Initialize Firebase Admin SDK using the service account credentials
     firebaseAdminApp = initializeApp({
-      credential: cert(serviceAccount)
+      credential: cert(serviceAccount),
     });
-    
+
     console.log('Firebase Admin SDK initialized successfully');
     
     return firebaseAdminApp;
@@ -36,14 +60,66 @@ export function initializeFirebaseAdmin() {
 }
 
 /**
+ * Update a Firebase Auth user
+ */
+export async function updateFirebaseAuthUser(uid: string, userData: {
+  email?: string;
+  password?: string;
+  displayName?: string;
+  phoneNumber?: string;
+  disabled?: boolean;
+}): Promise<any> {
+  try {
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
+    const auth = getAuth();
+    
+    const userRecord = await auth.updateUser(uid, userData);  // Update user by UID
+    console.log('Successfully updated user:', userRecord.uid);
+    return userRecord;
+  } catch (error) {
+    console.error('Error updating Firebase Auth user:', error);
+    return null;
+  }
+}
+
+/**
+ * Get Firebase Auth user by UID
+ */
+export async function getFirebaseAuthUserByUid(uid: string): Promise<any> {
+  try {
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
+    const auth = getAuth();
+    const userRecord = await auth.getUser(uid);  // Fetch user by UID
+    return userRecord;
+  } catch (error) {
+    console.error('Error fetching Firebase Auth user by UID:', error);
+    return null;
+  }
+}
+
+/**
+ * Get Firebase Auth user by email
+ */
+export async function getFirebaseAuthUserByEmail(email: string): Promise<any> {
+  try {
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
+
+    const auth = getAuth();
+    
+    const userRecord = await auth.getUserByEmail(email);
+    return userRecord;
+  } catch (error) {
+    console.error('Error fetching Firebase Auth user by email:', error);
+    return null;
+  }
+}
+
+/**
  * Get all Firebase Auth users (with pagination)
  */
-export async function getFirebaseAuthUsers(maxResults = 1000): Promise<UserRecord[]> {
+export async function getFirebaseAuthUsers(maxResults = 1000): Promise<any[]> {
   try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
     const auth = getAuth();
     
     console.log('Fetching Firebase Auth users...');
@@ -61,44 +137,6 @@ export async function getFirebaseAuthUsers(maxResults = 1000): Promise<UserRecor
 }
 
 /**
- * Get a specific Firebase Auth user by UID
- */
-export async function getFirebaseAuthUserByUid(uid: string): Promise<UserRecord | null> {
-  try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
-    const auth = getAuth();
-    
-    const userRecord = await auth.getUser(uid);
-    return userRecord;
-  } catch (error) {
-    console.error('Error fetching Firebase Auth user by UID:', error);
-    return null;
-  }
-}
-
-/**
- * Get a specific Firebase Auth user by email
- */
-export async function getFirebaseAuthUserByEmail(email: string): Promise<UserRecord | null> {
-  try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
-    const auth = getAuth();
-    
-    const userRecord = await auth.getUserByEmail(email);
-    return userRecord;
-  } catch (error) {
-    console.error('Error fetching Firebase Auth user by email:', error);
-    return null;
-  }
-}
-
-/**
  * Create a new Firebase Auth user
  */
 export async function createFirebaseAuthUser(userData: {
@@ -106,12 +144,9 @@ export async function createFirebaseAuthUser(userData: {
   password: string;
   displayName?: string;
   phoneNumber?: string;
-}): Promise<UserRecord | null> {
+}): Promise<any> {
   try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
     const auth = getAuth();
     
     const userRecord = await auth.createUser({
@@ -130,41 +165,11 @@ export async function createFirebaseAuthUser(userData: {
 }
 
 /**
- * Update a Firebase Auth user
- */
-export async function updateFirebaseAuthUser(uid: string, userData: {
-  email?: string;
-  password?: string;
-  displayName?: string;
-  phoneNumber?: string;
-  disabled?: boolean;
-}): Promise<UserRecord | null> {
-  try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
-    const auth = getAuth();
-    
-    const userRecord = await auth.updateUser(uid, userData);
-    
-    console.log('Successfully updated user:', userRecord.uid);
-    return userRecord;
-  } catch (error) {
-    console.error('Error updating Firebase Auth user:', error);
-    return null;
-  }
-}
-
-/**
  * Delete a Firebase Auth user
  */
 export async function deleteFirebaseAuthUser(uid: string): Promise<boolean> {
   try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
     const auth = getAuth();
     
     await auth.deleteUser(uid);
@@ -178,96 +183,13 @@ export async function deleteFirebaseAuthUser(uid: string): Promise<boolean> {
 }
 
 /**
- * Generate a verification email link
- * 
- * This creates a custom verification link that bypasses Firebase's domain restrictions
- */
-export async function generateEmailVerificationLink(uid: string): Promise<string | null> {
-  try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
-    const auth = getAuth();
-    
-    // Get the user record first to check if they exist
-    const userRecord = await auth.getUser(uid);
-    
-    if (!userRecord) {
-      throw new Error(`User with UID ${uid} not found`);
-    }
-    
-    if (!userRecord.email) {
-      throw new Error(`User with UID ${uid} does not have an email address`);
-    }
-    
-    // Generate a Firebase verification link using the Admin SDK
-    try {
-      // Get the current Replit URL for the redirect
-      const replitUrl = process.env.REPLIT_SLUG 
-        ? `https://${process.env.REPLIT_SLUG}.${process.env.REPLIT_OWNER}.repl.co/email-verified`
-        : 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified';
-      
-      console.log('Using verification redirect URL:', replitUrl);
-      
-      // Generate an action code (verification link) for the user
-      const actionCodeSettings = {
-        url: replitUrl,
-        handleCodeInApp: false,
-      };
-      
-      // Get a verification link for the user
-      const link = await auth.generateEmailVerificationLink(
-        userRecord.email,
-        actionCodeSettings
-      );
-      
-      console.log(`Generated Firebase verification link for user ${uid} with email ${userRecord.email}`);
-      return link;
-    } catch (firebaseError) {
-      console.error('Firebase error generating verification link:', firebaseError);
-      
-      // Fallback to custom token if Firebase link generation fails
-      const tokenData = {
-        uid: uid,
-        email: userRecord.email,
-        timestamp: Date.now(),
-        // Add an expiration time (24 hours from now)
-        expires: Date.now() + (24 * 60 * 60 * 1000)
-      };
-      
-      // Create a secure token by encoding the data
-      const token = Buffer.from(JSON.stringify(tokenData)).toString('base64');
-      
-      // Use the same Replit URL for our custom fallback
-      const replitUrl = process.env.REPLIT_SLUG 
-        ? `https://${process.env.REPLIT_SLUG}.${process.env.REPLIT_OWNER}.repl.co/email-verified`
-        : 'https://4e143170-16d8-4096-a115-0695954d385d-00-3d558dqtzajfp.janeway.replit.dev/email-verified';
-      
-      // Create our custom verification URL with the token
-      const customVerificationUrl = `${replitUrl}?token=${token}`;
-      
-      console.log(`Generated fallback custom verification link for user ${uid}`);
-      return customVerificationUrl;
-    }
-  } catch (error) {
-    console.error('Error generating email verification link:', error);
-    return null;
-  }
-}
-
-/**
  * Send a verification email to a user
  */
 export async function sendVerificationEmail(uid: string): Promise<boolean> {
   try {
-    // Initialize the app
-    initializeFirebaseAdmin();
-    
-    // Get Auth instance using the imported getAuth function
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
     const auth = getAuth();
     
-    // Get the user record first to check if they exist
     const userRecord = await auth.getUser(uid);
     
     if (!userRecord) {
@@ -278,56 +200,66 @@ export async function sendVerificationEmail(uid: string): Promise<boolean> {
       throw new Error(`User with UID ${uid} does not have an email address`);
     }
     
-    // Generate the verification link
     const link = await generateEmailVerificationLink(uid);
     
     if (!link) {
       throw new Error('Failed to generate verification link');
     }
-    
-    // Log the verification link for debugging purposes
+
     console.log(`Verification link generated for user ${uid}: ${link}`);
     
-    // Send the verification email using the imported sendEmail function
     try {
-      // Format a nice HTML email with the verification link
-      const userDisplayName = userRecord.displayName || userRecord.email.split('@')[0];
-      const emailHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #4a5568;">NeuroHealthHub Email Verification</h2>
-          <p>Hello ${userDisplayName},</p>
-          <p>Thank you for registering with NeuroHealthHub. Please verify your email address by clicking the button below:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${link}" style="background-color: #3182ce; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify My Email</a>
-          </div>
-          <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
-          <p style="word-break: break-all; color: #4a5568;"><a href="${link}">${link}</a></p>
-          <p>This link will expire in 24 hours.</p>
-          <p>If you did not create an account with NeuroHealthHub, you can safely ignore this email.</p>
-          <p>Best regards,<br>The NeuroHealthHub Team</p>
-        </div>
-      `;
-      
-      // Send the email
+      const emailHtml = `...`; // Your email HTML template here
       await sendEmail({
         to: userRecord.email,
         subject: 'Verify Your NeuroHealthHub Email Address',
-        text: `Hello ${userDisplayName}, please verify your email by clicking this link: ${link}`,
+        text: `Hello ${userRecord.displayName || userRecord.email.split('@')[0]}, please verify your email by clicking this link: ${link}`,
         html: emailHtml
       });
-      
+
       console.log(`Verification email sent to ${userRecord.email}`);
     } catch (emailError) {
       console.error('Error sending verification email:', emailError);
-      // Even if email sending fails, we'll still log the link
       console.log('VERIFICATION LINK FOR USER:', link);
       console.log('Email sending failed, but verification link was generated successfully');
     }
     
-    // Return true indicating success since we generated the link successfully
     return true;
   } catch (error) {
     console.error('Error sending verification email:', error);
     return false;
+  }
+}
+
+/**
+ * Generate an email verification link
+ */
+export async function generateEmailVerificationLink(uid: string): Promise<string | null> {
+  try {
+    initializeFirebaseAdmin();  // Ensure Firebase is initialized
+    const auth = getAuth();
+    
+    const userRecord = await auth.getUser(uid);
+    
+    if (!userRecord) {
+      throw new Error(`User with UID ${uid} not found`);
+    }
+    
+    if (!userRecord.email) {
+      throw new Error(`User with UID ${uid} does not have an email address`);
+    }
+    
+    const actionCodeSettings = {
+      url: 'https://your-redirect-url.com/email-verified', // Replace with your actual redirect URL
+      handleCodeInApp: false,
+    };
+
+    const link = await auth.generateEmailVerificationLink(userRecord.email, actionCodeSettings);
+    
+    console.log(`Generated Firebase verification link for user ${uid} with email ${userRecord.email}`);
+    return link;
+  } catch (error) {
+    console.error('Error generating email verification link:', error);
+    return null;
   }
 }

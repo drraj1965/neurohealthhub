@@ -1,4 +1,6 @@
-import { initializeApp } from "firebase/app";
+// client/src/lib/firebase.ts
+
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import {
   initializeFirestore,
@@ -16,11 +18,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Log Firebase config for debugging (without sensitive values)
-console.log("Firebase initialized with project:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Singleton Initialization
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Updated Firestore initialization using the newer SDK cache setup
@@ -31,7 +30,8 @@ const db = initializeFirestore(app, {
   })
 });
 
-console.log("Connecting to Firebase Firestore database with persistentLocalCache()");
+console.log("Firebase initialized with project:", firebaseConfig.projectId);
+console.log("Connected to Firestore with persistentLocalCache()");
 
 const storage = getStorage(app);
 
